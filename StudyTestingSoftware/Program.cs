@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using StudyTestingSoftware.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
