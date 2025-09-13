@@ -1,6 +1,6 @@
-@StudyTestingSoftware_HostAddress = http://localhost:5151
+@host = http://localhost:5151
 
-GET {{StudyTestingSoftware_HostAddress}}/weatherforecast/
+GET {{host}}/weatherforecast/
 Accept: application/json
 
 ###
