@@ -6,6 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.Configure<UserDataOptions>(builder.Configuration.GetSection("UserDataOptions"));
+
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
@@ -95,8 +97,14 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapGroup("auth")
-    .MapIdentityApi<AppUser>();
+    .MapCustomIdentityApi();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await DbSeeder.SeedAsync(services);
+}
 
 app.Run();
