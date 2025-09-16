@@ -121,3 +121,227 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* src/app/globals.css */
+
+/* Додайте до існуючих стилів Tailwind */
+
+@keyframes float {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+    border-radius: 0;
+  }
+  100% {
+    transform: translateY(-1000px) rotate(720deg);
+    opacity: 0.2;
+    border-radius: 50%;
+  }
+}
+
+.shape {
+  position: absolute;
+  bottom: -150px; /* Звідки починається анімація */
+  animation: float 25s linear infinite; /* Тривалість і тип анімації */
+  background: #cbd5e1; /* gray-300 */
+}
+
+.shape-1 {
+  width: 48px;
+  height: 48px;
+  left: 31%;
+  animation-duration: 21s;
+  animation-delay: 2s;
+}
+
+.shape-2 {
+  width: 25px;
+  height: 25px;
+  left: 64%;
+  animation-duration: 18s;
+  animation-delay: 4s;
+}
+
+.shape-3 {
+  width: 49px;
+  height: 49px;
+  left: 17%;
+  animation-duration: 24s;
+  animation-delay: 1s;
+  background: #94a3b8; /* gray-400 */
+}
+
+.shape-4 {
+  width: 40px;
+  height: 40px;
+  left: 55%;
+  animation-duration: 16s;
+  animation-delay: 0s;
+}
+
+.shape-5 {
+  width: 32px;
+  height: 32px;
+  left: 88%;
+  animation-duration: 23s;
+  animation-delay: 3s;
+  background: #e2e8f0; /* gray-200 */
+}
+
+.shape-6 {
+  width: 38px;
+  height: 38px;
+  left: 5%;
+  animation-duration: 19s;
+  animation-delay: 1s;
+}
+
+.shape-7 {
+  width: 21px;
+  height: 21px;
+  left: 45%;
+  animation-duration: 20s;
+  animation-delay: 5s;
+  background: #64748b; /* gray-500 */
+}
+
+.shape-8 {
+  width: 44px;
+  height: 44px;
+  left: 79%;
+  animation-duration: 17s;
+  animation-delay: 2s;
+}
+
+.shape-9 {
+  width: 29px;
+  height: 29px;
+  left: 22%;
+  animation-duration: 25s;
+  animation-delay: 0s;
+  background: #94a3b8; /* gray-400 */
+}
+
+.shape-10 {
+  width: 53px;
+  height: 53px;
+  left: 59%;
+  animation-duration: 22s;
+  animation-delay: 4s;
+}
+
+.shape-11 {
+  width: 36px;
+  height: 36px;
+  left: 11%;
+  animation-duration: 15s;
+  animation-delay: 3s;
+}
+
+.shape-12 {
+  width: 50px;
+  height: 50px;
+  left: 92%;
+  animation-duration: 19s;
+  animation-delay: 1s;
+}
+
+.shape-13 {
+  width: 27px;
+  height: 27px;
+  left: 73%;
+  animation-duration: 20s;
+  animation-delay: 2s;
+}
+
+.shape-14 {
+  width: 41px;
+  height: 41px;
+  left: 38%;
+  animation-duration: 24s;
+  animation-delay: 5s;
+}
+
+.shape-15 {
+  width: 35px;
+  height: 35px;
+  left: 6%;
+  animation-duration: 17s;
+  animation-delay: 0s;
+  background: #e2e8f0; /* gray-200 */
+}
+
+.shape-16 {
+  width: 51px;
+  height: 51px;
+  left: 81%;
+  animation-duration: 23s;
+  animation-delay: 3s;
+}
+
+.shape-17 {
+  width: 24px;
+  height: 24px;
+  left: 29%;
+  animation-duration: 20s;
+  animation-delay: 1s;
+}
+
+.shape-18 {
+  width: 47px;
+  height: 47px;
+  left: 66%;
+  animation-duration: 18s;
+  animation-delay: 4s;
+  background: #94a3b8; /* gray-400 */
+}
+
+.shape-19 {
+  width: 33px;
+  height: 33px;
+  left: 14%;
+  animation-duration: 16s;
+  animation-delay: 2s;
+}
+
+.shape-20 {
+  width: 55px;
+  height: 55px;
+  left: 49%;
+  animation-duration: 25s;
+  animation-delay: 0s;
+}
+
+.shape-21 {
+  width: 26px;
+  height: 26px;
+  left: 85%;
+  animation-duration: 22s;
+  animation-delay: 3s;
+  background: #64748b; /* gray-500 */
+}
+
+.shape-22 {
+  width: 39px;
+  height: 39px;
+  left: 70%;
+  animation-duration: 19s;
+  animation-delay: 1s;
+}
+
+.shape-23 {
+  width: 52px;
+  height: 52px;
+  left: 20%;
+  animation-duration: 24s;
+  animation-delay: 4s;
+}
+
+.shape-24 {
+  width: 30px;
+  height: 30px;
+  left: 90%;
+  animation-duration: 17s;
+  animation-delay: 2s;
+}
+

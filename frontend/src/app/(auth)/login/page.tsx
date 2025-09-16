@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { AuthTokens } from '@/types';
 import { LoginForm } from '@/components/shared/LoginForm';
 import Link from 'next/link';
+import FloatingShapesBackground from '@/components/shared/FloatingShapesBackground';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -43,8 +44,8 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
+    <main className="flex -z-10 relative items-center justify-center min-h-screen bg-gray-100 p-4">
+      <div className=" relative z-10 w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Вхід</h2>
         <LoginForm onSubmit={handleLogin} error={error} />
         <p className="mt-4 text-center text-gray-600">

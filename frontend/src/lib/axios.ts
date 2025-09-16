@@ -2,9 +2,9 @@ import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'ax
 
 import Cookies from 'js-cookie';
 
-import { AuthTokens, RegisterFormData } from '../types';
+import { AuthTokens } from '../types';
 
-const token = localStorage.getItem('accessToken');
+const token = Cookies.get('accessToken');
 
 const api = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_API_URL}`,

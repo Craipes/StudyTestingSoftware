@@ -1,10 +1,13 @@
+// src/app/page.tsx
 
 import Link from 'next/link';
+import FloatingShapesBackground from '@/components/shared/FloatingShapesBackground';
 
 export default function HomePage() {
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+    <main className="relative flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4 overflow-hidden">
+      <FloatingShapesBackground />
+      <div className="relative z-10 bg-white p-8 rounded-lg shadow-lg text-center">
         <h1 className="text-4xl font-bold text-gray-800 mb-4">Ласкаво просимо!</h1>
         <p className="text-lg text-gray-600 mb-8">
           Це застосунок для тестування. Будь ласка, увійдіть або зареєструйтеся, щоб продовжити.
