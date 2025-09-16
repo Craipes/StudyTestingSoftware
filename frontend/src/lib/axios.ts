@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'ax
 
 import Cookies from 'js-cookie';
 
-import { AuthTokens } from '../types';
+import { AuthTokens, RegisterFormData } from '../types';
 
 const token = localStorage.getItem('accessToken');
 

@@ -1,19 +1,18 @@
+
 export interface AuthTokens {
   tokenType: string;
   accessToken: string;
   expiresIn: number;
   refreshToken: string;
-  errors: error[] | null;
 }
-
-export interface error{
-  error: string| null;
-}
-
-export interface AuthPayload {
+export interface RegisterFormData {
   email: string;
   password?: string;
-  refreshToken?: string;
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  isTeacher: boolean;
+  isStudent: boolean;
 }
 
 export interface ApiError {
