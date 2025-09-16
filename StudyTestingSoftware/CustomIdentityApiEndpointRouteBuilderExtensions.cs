@@ -71,15 +71,15 @@ public static class CustomIdentityApiEndpointRouteBuilderExtensions
                 return CreateValidationProblem(IdentityResult.Failed(userManager.ErrorDescriber.InvalidEmail(email)));
             }
 
-            registration.FirstName = NameValidationHelper.FormatName(registration.FirstName);
-            if (!NameValidationHelper.ValidateName(registration.FirstName, userOptions))
+            var firstName = NameValidationHelper.FormatName(registration.FirstName);
+            if (!NameValidationHelper.ValidateName(firstName, userOptions))
             {
                 return CreateValidationProblem("InvalidFirstName",
                     $"The first name is required and must be between {userOptions.MinNameLength} and {userOptions.MaxNameLength} characters. Only letters, spaces, hyphens, and apostrophes are allowed.");
             }
 
-            registration.LastName = NameValidationHelper.FormatName(registration.LastName);
-            if (!NameValidationHelper.ValidateName(registration.LastName, userOptions))
+            var lastName = NameValidationHelper.FormatName(registration.LastName);
+            if (!NameValidationHelper.ValidateName(lastName, userOptions))
             {
                 return CreateValidationProblem("InvalidLastName",
                     $"The last name is required and must be between {userOptions.MinNameLength} and {userOptions.MaxNameLength} characters. Only letters, spaces, hyphens, and apostrophes are allowed.");
@@ -87,8 +87,8 @@ public static class CustomIdentityApiEndpointRouteBuilderExtensions
 
             if (!string.IsNullOrEmpty(registration.MiddleName))
             {
-                registration.MiddleName = NameValidationHelper.FormatName(registration.MiddleName);
-                if (!NameValidationHelper.ValidateName(registration.MiddleName, userOptions))
+                var middleName = NameValidationHelper.FormatName(registration.MiddleName);
+                if (!NameValidationHelper.ValidateName(middleName, userOptions))
                 {
                     return CreateValidationProblem("InvalidMiddleName",
                         $"The middle name must be between {userOptions.MinNameLength} and {userOptions.MaxNameLength} characters if specified. Only letters, spaces, hyphens, and apostrophes are allowed.");

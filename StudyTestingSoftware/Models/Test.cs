@@ -15,5 +15,7 @@ public class Test : BaseEntity
     public required AppUser? Author { get; set; }
     public Guid? AuthorId { get; set; }
 
+    public List<Question> Questions { get; set; } = [];
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
