@@ -4,7 +4,7 @@ namespace StudyTestingSoftware.Models;
 
 public class Test : BaseEntity
 {
-    [MinLength(1), MaxLength(128)] public required string Name { get; set; }
+    [MinLength(1), MaxLength(128)] public string Name { get; set; } = string.Empty;
     [MaxLength(4096)] public string? Description { get; set; }
     [Range(0, 100000)] public int MaxExperience { get; set; }
     public TestAccessMode AccessMode { get; set; } = TestAccessMode.Private;

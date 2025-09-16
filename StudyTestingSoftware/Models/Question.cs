@@ -4,7 +4,7 @@ namespace StudyTestingSoftware.Models;
 
 public class Question : BaseEntity
 {
-    public required string Text { get; set; }
+    public string Text { get; set; } = string.Empty;
     public int Order { get; set; }
     [Range(0, 100)] public int Points { get; set; }
     public QuestionType QuestionType { get; set; }
