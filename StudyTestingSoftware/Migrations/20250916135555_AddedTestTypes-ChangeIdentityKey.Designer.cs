@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StudyTestingSoftware.Models;
 
@@ -11,9 +12,11 @@ using StudyTestingSoftware.Models;
 namespace StudyTestingSoftware.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250916135555_AddedTestTypes-ChangeIdentityKey")]
+    partial class AddedTestTypesChangeIdentityKey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -320,9 +323,6 @@ namespace StudyTestingSoftware.Migrations
                     b.Property<byte>("QuestionType")
                         .HasColumnType("tinyint");
 
-                    b.Property<bool>("ShuffleAnswers")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("TargetBoolValue")
                         .HasColumnType("bit");
 
@@ -470,7 +470,7 @@ namespace StudyTestingSoftware.Migrations
             modelBuilder.Entity("StudyTestingSoftware.Models.Question", b =>
                 {
                     b.HasOne("StudyTestingSoftware.Models.Test", "Test")
-                        .WithMany("Questions")
+                        .WithMany()
                         .HasForeignKey("TestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -501,11 +501,6 @@ namespace StudyTestingSoftware.Migrations
             modelBuilder.Entity("StudyTestingSoftware.Models.Question", b =>
                 {
                     b.Navigation("AnswerRows");
-                });
-
-            modelBuilder.Entity("StudyTestingSoftware.Models.Test", b =>
-                {
-                    b.Navigation("Questions");
                 });
 #pragma warning restore 612, 618
         }
