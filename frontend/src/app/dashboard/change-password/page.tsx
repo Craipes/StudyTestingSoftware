@@ -58,8 +58,8 @@ export default function ChangePasswordPage() {
 
   return (
     <div className="flex-1 p-8 flex items-center justify-center">
-      <div className="w-full max-w-md bg-white mt-[20vh] p-8 rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">Зміна пароля</h1>
+      <div className="w-full max-w-md bg-white dark:bg-slate-950 mt-[20vh] p-8 rounded-lg shadow-lg">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 text-center">Зміна пароля</h1>
         <ChangePasswordForm onSubmit={handleChangePassword} loading={loading} error={error} />
       </div>
     </div>

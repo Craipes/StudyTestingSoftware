@@ -8,9 +8,15 @@ const config: Config = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    colors: {
+      'gray':{
+        900:'#16213a',
+      }
+    },
     extend: {},
   },
   plugins: [],
+  darkMode: 'class',
 }
 
 export default config

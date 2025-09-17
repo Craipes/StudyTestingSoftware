@@ -43,7 +43,7 @@ export function ChangePasswordForm({ onSubmit, loading, error }: ChangePasswordF
         </div>
       )}
       <div>
-        <label htmlFor="oldPassword" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="oldPassword" className="block dark:text-gray-400 text-sm font-medium text-gray-700 mb-1">
           Старий пароль:
         </label>
         <input
@@ -58,7 +58,7 @@ export function ChangePasswordForm({ onSubmit, loading, error }: ChangePasswordF
         )}
       </div>
       <div>
-        <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="newPassword" className="dark:text-gray-400 block text-sm font-medium text-gray-700 mb-1">
           Новий пароль:
         </label>
         <input
@@ -73,7 +73,7 @@ export function ChangePasswordForm({ onSubmit, loading, error }: ChangePasswordF
         )}
       </div>
       <div>
-        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="confirmPassword" className="dark:text-gray-400 block text-sm font-medium text-gray-700 mb-1">
           Підтвердження нового пароля:
         </label>
         <input
@@ -89,7 +89,7 @@ export function ChangePasswordForm({ onSubmit, loading, error }: ChangePasswordF
       </div>
       <button
         type="submit"
-        className="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors duration-300 flex items-center justify-center"
+        className="w-full px-4 py-2 bg-blue-500  text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors duration-300 flex items-center justify-center"
         disabled={loading}
       >
         {loading ? <Loader className="animate-spin" size={20} /> : 'Змінити пароль'}

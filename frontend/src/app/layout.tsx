@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import {Toaster} from "react-hot-toast";
-import NextTopLoader from "nextjs-toploader";
-import FloatingShapesBackground from "@/components/shared/FloatingShapesBackground";
+import { Providers } from "./providers";
+
+
 
 
 const geistSans = Geist({
@@ -27,13 +27,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Toaster />
-        <NextTopLoader />
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

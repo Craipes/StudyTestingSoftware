@@ -8,6 +8,7 @@ import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 
 import { Lock,SquarePlus,Layers,NotebookPen,BookOpen,DoorOpen  } from 'lucide-react';
+import ThemeSwitcher from './ThemeSwitcher';
 
 
 interface UserInfo {
@@ -57,7 +58,7 @@ export function Sidebar({ userInfo }: SidebarProps) {
   };
 
   return (
-    <aside className="w-70 bg-gray-800 text-white p-4 flex flex-col justify-between">
+    <aside className="w-70 bg-gray-800 dark:bg-slate-950 text-white p-4 flex flex-col justify-between">
       <div>
         {/* Блок з інформацією про користувача */}
         <div className="flex flex-col items-center border-b border-gray-700 pb-4 mb-4">

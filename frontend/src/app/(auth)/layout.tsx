@@ -8,7 +8,6 @@ export default function AuthLayout({
 }) {
   return (
     <div className="">
-      <FloatingShapesBackground />
       <div className="bg-transparent relative z-10">
       {children}
       </div>
