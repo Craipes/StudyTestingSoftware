@@ -7,8 +7,8 @@ import Link from 'next/link';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 
-import { Lock,SquarePlus,Layers,NotebookPen,BookOpen,DoorOpen  } from 'lucide-react';
-import ThemeSwitcher from './ThemeSwitcher';
+import { Lock,SquarePlus,Layers,NotebookPen,BookOpen,DoorOpen,Menu,X  } from 'lucide-react';
+
 
 
 interface UserInfo {
@@ -25,6 +25,7 @@ interface SidebarProps {
 export function Sidebar({ userInfo }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({
     student: true,
     teacher: true,
@@ -58,7 +59,24 @@ export function Sidebar({ userInfo }: SidebarProps) {
   };
 
   return (
-    <aside className="w-70 bg-gray-800 dark:bg-slate-950 text-white p-4 flex flex-col justify-between">
+    <>
+    {  !isSidebarOpen && (
+      <button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="cursor-pointer fixed top-4 left-4 z-50 md:hidden p-2 rounded-md bg-gray-800 text-white dark:bg-slate-950"
+      >
+         <Menu size={24} />
+      </button>
+    )}
+
+      {isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)} 
+          className="fixed inset-0  bg-opacity-100 z-30 md:hidden"
+        />
+      )}
+
+    <aside className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out w-[60%] md:w-70 bg-gray-800 dark:bg-slate-950 text-white p-4 flex flex-col justify-between z-40`}>
       <div>
         {/* Блок з інформацією про користувача */}
         <div className="flex flex-col items-center border-b border-gray-700 pb-4 mb-4">
@@ -127,7 +145,7 @@ export function Sidebar({ userInfo }: SidebarProps) {
            {/* Кнопка "Вийти" */}
             <button
                 onClick={handleLogout}
-                className="w-full text-left py-2 px-4 rounded hover:bg-gray-700 font-bold"
+                className="w-full text-left py-2 px-4 cursor-pointer rounded hover:bg-gray-700 font-bold"
             >
                 <DoorOpen className="inline mr-2" />
                 Вийти
@@ -135,5 +153,6 @@ export function Sidebar({ userInfo }: SidebarProps) {
         </nav>
       </div>
     </aside>
+    </>
   );
 }
