@@ -20,7 +20,9 @@ public record QuestionTeacherDTO
     // Check
     bool TargetBoolValue,
 
-    List<AnswerRowTeacherDTO> AnswerRows
+    List<QuestionMatrixRowTeacherDTO> QuestionRows,
+    List<QuestionMatrixColumnTeacherDTO> QuestionColumns,
+    List<QuestionChoiceOptionTeacherDTO> ChoiceOptions
 ) : IDTORepresentation<Question, QuestionTeacherDTO>
 {
     public void UpdateEntity(Question question)
@@ -52,7 +54,9 @@ public record QuestionTeacherDTO
             question.NumberValueStep,
             question.TargetNumberValue,
             question.TargetBoolValue,
-            question.AnswerRows.Select(AnswerRowTeacherDTO.CreateDTO).ToList()
+            question.QuestionRows.Select(QuestionMatrixRowTeacherDTO.CreateDTO).OrderBy(q => q.Order).ToList(),
+            question.QuestionColumns.Select(QuestionMatrixColumnTeacherDTO.CreateDTO).OrderBy(q => q.Order).ToList(),
+            question.ChoiceOptions.Select(QuestionChoiceOptionTeacherDTO.CreateDTO).OrderBy(q => q.Order).ToList()
         );
     }
 }
