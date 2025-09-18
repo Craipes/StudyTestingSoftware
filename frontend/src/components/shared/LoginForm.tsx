@@ -35,7 +35,7 @@ export function LoginForm({ onSubmit, error }: LoginFormProps) {
         </div>
       )}
       <div>
-        <label htmlFor="email" className="block text-sm  font-medium text-gray-700 mb-1">
+        <label htmlFor="email" className="block text-sm dark:text-gray-400 font-medium text-gray-700 mb-1">
           Email:
         </label>
         <input
@@ -49,7 +49,7 @@ export function LoginForm({ onSubmit, error }: LoginFormProps) {
         )}
       </div>
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="password" className="block text-sm dark:text-gray-400 font-medium text-gray-700 mb-1">
           Пароль:
         </label>
         <input

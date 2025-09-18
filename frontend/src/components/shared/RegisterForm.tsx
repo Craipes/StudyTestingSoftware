@@ -48,7 +48,7 @@ export function RegisterForm({ onSubmit, error }: RegisterFormProps) {
       )}
       
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Ім’я:</label>
+        <label className="block text-sm dark:text-gray-400 font-medium text-gray-700 mb-1">Ім’я:</label>
         <input
           {...form.register('firstName')}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
@@ -57,7 +57,7 @@ export function RegisterForm({ onSubmit, error }: RegisterFormProps) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Прізвище:</label>
+        <label className="block text-sm dark:text-gray-400 font-medium text-gray-700 mb-1">Прізвище:</label>
         <input
           {...form.register('lastName')}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
@@ -69,22 +69,22 @@ export function RegisterForm({ onSubmit, error }: RegisterFormProps) {
         <label className="block text-sm font-medium text-gray-700 mb-1">По батькові:</label>
         <input
           {...form.register('middleName')}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          className="w-full  px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Email:</label>
+        <label className="block text-sm dark:text-gray-400 font-medium text-gray-700 mb-1">Email:</label>
         <input
           type="email"
           {...form.register('email')}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          className="w-full 0 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
         />
         {form.formState.errors.email && <p className="mt-1 text-sm text-red-600">{form.formState.errors.email.message}</p>}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Пароль:</label>
+        <label className="block text-sm dark:text-gray-400 font-medium text-gray-700 mb-1">Пароль:</label>
         <input
           type="password"
           {...form.register('password')}
@@ -94,7 +94,7 @@ export function RegisterForm({ onSubmit, error }: RegisterFormProps) {
       </div>
       
       <div className="flex flex-col space-y-2">
-        <p className="block text-sm font-medium text-gray-700">Оберіть роль або ролі:</p>
+        <p className="block text-sm dark:text-gray-400 font-medium text-gray-700">Оберіть роль або ролі:</p>
         <div className="flex justify-center space-x-4">
           <div className="flex items-center">
             <input
@@ -103,7 +103,7 @@ export function RegisterForm({ onSubmit, error }: RegisterFormProps) {
               {...form.register('isStudent')}
               className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
             />
-            <label htmlFor="isStudent" className="ml-2 text-sm font-medium text-gray-900">Студент</label>
+            <label htmlFor="isStudent" className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-400">Студент</label>
           </div>
           <div className="flex items-center">
             <input
@@ -112,7 +112,7 @@ export function RegisterForm({ onSubmit, error }: RegisterFormProps) {
               {...form.register('isTeacher')}
               className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
             />
-            <label htmlFor="isTeacher" className="ml-2 text-sm font-medium text-gray-900">Викладач</label>
+            <label htmlFor="isTeacher" className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-400">Викладач</label>
           </div>
         </div>
         {form.formState.errors.isStudent && !form.formState.errors.isTeacher && (
