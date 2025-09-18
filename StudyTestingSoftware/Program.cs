@@ -77,6 +77,8 @@ builder.Services.AddAuthentication(options =>
 })
     .AddBearerToken(IdentityConstants.BearerScheme);
 
+builder.Services.AddScoped<TestManagement>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
