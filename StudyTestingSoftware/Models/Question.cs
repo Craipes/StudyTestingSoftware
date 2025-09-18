@@ -22,5 +22,10 @@ public class Question : BaseEntity
     public required Test Test { get; set; }
     public Guid TestId { get; set; }
 
-    public List<AnswerRow> AnswerRows { get; set; } = [];
+    // Single choice / Multiple choice
+    public List<QuestionChoiceOption> ChoiceOptions { get; set; } = [];
+
+    // Table choice / Ordering
+    public List<QuestionMatrixRow> QuestionRows { get; set; } = [];
+    public List<QuestionMatrixColumn> QuestionColumns { get; set; } = [];
 }

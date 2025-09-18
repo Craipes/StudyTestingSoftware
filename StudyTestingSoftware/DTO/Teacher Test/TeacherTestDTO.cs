@@ -40,7 +40,7 @@ public record TeacherTestDTO
             test.ShuffleQuestions,
             test.IsPublished,
             test.AuthorId,
-            test.Questions.Select(QuestionTeacherDTO.CreateDTO).ToList()
+            test.Questions.Select(QuestionTeacherDTO.CreateDTO).OrderBy(q => q.Order).ToList()
         );
     }
 }

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace StudyTestingSoftware.Models;
@@ -8,8 +7,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
 {
     public DbSet<Test> Tests { get; set; } = null!;
     public DbSet<Question> Questions { get; set; } = null!;
-    public DbSet<AnswerRow> AnswerRows { get; set; } = null!;
-    public DbSet<AnswerOption> AnswerOptions { get; set; } = null!;
+    public DbSet<QuestionMatrixRow> QuestionMatrixRows { get; set; } = null!;
+    public DbSet<QuestionMatrixColumn> QuestionMatrixColumns { get; set; } = null!;
+    public DbSet<QuestionChoiceOption> QuestionChoices { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -21,10 +21,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
             .HasForeignKey(t => t.AuthorId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        builder.Entity<AnswerOption>()
-            .HasOne(ao => ao.Question)
+        builder.Entity<QuestionMatrixRow>()
+            .HasOne(qmc => qmc.CorrectMatrixColumn)
             .WithMany()
-            .HasForeignKey(ao => ao.QuestionId)
+            .HasForeignKey(qmc => qmc.CorrectMatrixColumnId)
             .OnDelete(DeleteBehavior.NoAction);
     }
 }

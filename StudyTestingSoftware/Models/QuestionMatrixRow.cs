@@ -1,6 +1,6 @@
 ﻿namespace StudyTestingSoftware.Models;
 
-public class AnswerRow : BaseEntity
+public class QuestionMatrixRow : BaseEntity
 {
     public string Text { get; set; } = string.Empty;
     public int Order { get; set; }
@@ -8,5 +8,6 @@ public class AnswerRow : BaseEntity
     public required Question Question { get; set; }
     public Guid QuestionId { get; set; }
 
-    public List<AnswerOption> AnswerOptions { get; set; } = [];
+    public Guid CorrectMatrixColumnId { get; set; }
+    public required QuestionMatrixColumn CorrectMatrixColumn { get; set; }
 }
