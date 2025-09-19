@@ -10,7 +10,9 @@ public record TeacherTestDTO
     [Range(0, 100000)] int MaxExperience,
     TestAccessMode AccessMode,
     int DurationInMinutes,
+    int AttemptsLimit,
     bool ShuffleQuestions,
+    bool ShuffleAnswers,
     bool IsPublished,
     bool IsOpened,
     bool HasCloseTime,
@@ -26,7 +28,9 @@ public record TeacherTestDTO
         test.MaxExperience = MaxExperience;
         test.AccessMode = AccessMode;
         test.DurationInMinutes = DurationInMinutes;
+        test.AttemptsLimit = AttemptsLimit;
         test.ShuffleQuestions = ShuffleQuestions;
+        test.ShuffleAnswers = ShuffleAnswers;
         test.IsPublished = IsPublished;
         test.HasCloseTime = HasCloseTime;
         test.CloseAt = CloseAt;
@@ -48,7 +52,9 @@ public record TeacherTestDTO
             test.MaxExperience,
             test.AccessMode,
             test.DurationInMinutes,
+            test.AttemptsLimit,
             test.ShuffleQuestions,
+            test.ShuffleAnswers,
             test.IsPublished,
             test.IsOpened,
             test.HasCloseTime,

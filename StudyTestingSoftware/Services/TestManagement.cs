@@ -189,7 +189,7 @@ public class TestManagement
     }
 
     private List<Type> SyncCollection<Type, DTO>(ICollection<Type> originalCollection, ICollection<DTO> dtoCollection,
-        Func<Type?, DTO, Type?> process) 
+        Func<Type?, DTO, Type?> process)
         where Type : BaseEntity where DTO : IDTORepresentation<Type, DTO>
     {
         var existingTypesById = originalCollection.ToDictionary(c => c.Id, c => c);
@@ -292,6 +292,17 @@ public class TestManagement
                 }
             }
         }
+
+        if (test.HasCloseTime && (test.CloseAt == null || test.CloseAt < DateTime.UtcNow))
+        {
+            modelState.AddModelError((Test t) => t.CloseAt, $"Test has a close time set but it is either null or in the past.");
+        }
+
+        if (test.Questions.Count == 0)
+        {
+            modelState.AddModelError((Test t) => t.Questions, "Test has no questions.");
+        }
+
         return modelState;
     }
 }
