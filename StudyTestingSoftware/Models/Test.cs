@@ -11,6 +11,10 @@ public class Test : BaseEntity
     [Range(0, 360)] public int DurationInMinutes { get; set; } = 0; // 0 means no time limit
     public bool ShuffleQuestions { get; set; } = false;
     public bool IsPublished { get; set; } = false;
+    public bool IsOpened { get; set; } = false;
+    public bool HasCloseTime { get; set; } = false;
+    public DateTime CloseAt { get; set; } = DateTime.MaxValue;
+    public DateTime? OpenedAt { get; set; } = null;
 
     public required AppUser? Author { get; set; }
     public Guid? AuthorId { get; set; }
