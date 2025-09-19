@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace StudyTestingSoftware.Controllers;
 
@@ -9,13 +8,11 @@ namespace StudyTestingSoftware.Controllers;
 public class TeacherController : Controller
 {
     private readonly UserManager<AppUser> userManager;
-    private readonly AppDbContext dbContext;
-    private readonly TestManagement testManagement;
+    private readonly TestManager testManagement;
 
-    public TeacherController(UserManager<AppUser> userManager, AppDbContext dbContext, TestManagement testManagement)
+    public TeacherController(UserManager<AppUser> userManager, TestManager testManagement)
     {
         this.userManager = userManager;
-        this.dbContext = dbContext;
         this.testManagement = testManagement;
     }
 
@@ -28,12 +25,22 @@ public class TeacherController : Controller
             return Unauthorized();
         }
 
-        var testIds = await dbContext.Tests
-            .Where(t => t.AuthorId == user.Id)
-            .Select(t => t.Id)
-            .ToListAsync();
+        var testIds = await testManagement.ListTestIdsByAuthorAsync(user.Id);
 
         return testIds;
+    }
+
+    [HttpGet("tests/list-previews")]
+    public async Task<ActionResult<List<TeacherTestPreviewDTO>>> GetTestPreviews()
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var testsPreviews = await testManagement.ListTestPreviewsByAuthorAsync(user.Id);
+        return testsPreviews;
     }
 
     [HttpPost("tests/create")]
@@ -84,14 +91,21 @@ public class TeacherController : Controller
         {
             return Unauthorized();
         }
-        var test = await testManagement.LoadTestAsync(id, false);
+
+        var test = await testManagement.LoadTestAsync(id, true);
         if (test == null)
         {
             return NotFound();
         }
-        (var updatedTest, var testValidation) = await testManagement.TryToUpdateTestAsync(data, id);
+
+        if (test.AuthorId != user.Id)
+        {
+            return Forbid();
+        }
+
+        var testValidation = await testManagement.TryToUpdateTestAsync(data, test);
         ModelState.Merge(testValidation);
-        if (!ModelState.IsValid || updatedTest == null)
+        if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }

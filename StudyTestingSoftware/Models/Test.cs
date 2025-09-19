@@ -9,7 +9,9 @@ public class Test : BaseEntity
     [Range(0, 100000)] public int MaxExperience { get; set; }
     public TestAccessMode AccessMode { get; set; } = TestAccessMode.Private;
     [Range(0, 360)] public int DurationInMinutes { get; set; } = 0; // 0 means no time limit
+    [Range(0, int.MaxValue)] public int AttemptsLimit { get; set; } = 0; // 0 means unlimited attempts
     public bool ShuffleQuestions { get; set; } = false;
+    public bool ShuffleAnswers { get; set; } = false;
     public bool IsPublished { get; set; } = false;
     public bool IsOpened { get; set; } = false;
     public bool HasCloseTime { get; set; } = false;
