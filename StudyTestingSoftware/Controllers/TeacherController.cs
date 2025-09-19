@@ -30,6 +30,19 @@ public class TeacherController : Controller
         return testIds;
     }
 
+    [HttpGet("tests/list-previews")]
+    public async Task<ActionResult<List<TeacherTestPreviewDTO>>> GetTestPreviews()
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var testsPreviews = await testManagement.ListTestPreviewsByAuthorAsync(user.Id);
+        return testsPreviews;
+    }
+
     [HttpPost("tests/create")]
     public async Task<ActionResult<Guid>> CreateTest([FromBody] TeacherTestDTO data)
     {

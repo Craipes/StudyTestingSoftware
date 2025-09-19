@@ -6,7 +6,7 @@ public record QuestionMatrixRowTeacherDTO
     string Text,
     int Order,
     int ValidColumnOrder
-) : IDTORepresentation<QuestionMatrixRow, QuestionMatrixRowTeacherDTO>
+) : IDTOEditRepresentation<QuestionMatrixRow, QuestionMatrixRowTeacherDTO>
 {
     public void UpdateEntity(QuestionMatrixRow matrixRow)
     {

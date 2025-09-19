@@ -22,7 +22,7 @@ public record QuestionTeacherDTO
     List<QuestionMatrixRowTeacherDTO> QuestionRows,
     List<QuestionMatrixColumnTeacherDTO> QuestionColumns,
     List<QuestionChoiceOptionTeacherDTO> ChoiceOptions
-) : IDTORepresentation<Question, QuestionTeacherDTO>
+) : IDTOEditRepresentation<Question, QuestionTeacherDTO>
 {
     public void UpdateEntity(Question question)
     {

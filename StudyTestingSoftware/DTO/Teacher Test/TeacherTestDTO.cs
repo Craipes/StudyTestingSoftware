@@ -19,7 +19,7 @@ public record TeacherTestDTO
     DateTime? CloseAt,
     Guid? AuthorId,
     List<QuestionTeacherDTO> Questions
-) : IDTORepresentation<Test, TeacherTestDTO>
+) : IDTOEditRepresentation<Test, TeacherTestDTO>
 {
     public void UpdateEntity(Test test)
     {

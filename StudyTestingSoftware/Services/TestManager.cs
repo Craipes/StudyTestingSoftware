@@ -20,6 +20,26 @@ public class TestManager
             .ToListAsync();
     }
 
+    public async Task<List<TeacherTestPreviewDTO>> ListTestPreviewsByAuthorAsync(Guid authorId)
+    {
+        return await dbContext.Tests
+            .AsNoTracking()
+            .Where(t => t.AuthorId == authorId)
+            .OrderByDescending(t => t.IsOpened)
+            .ThenByDescending(t => t.CreatedAt)
+            .Select(t => new TeacherTestPreviewDTO(
+                t.Id,
+                t.Name,
+                t.AccessMode,
+                t.IsPublished,
+                t.IsOpened,
+                t.HasCloseTime,
+                t.CloseAt,
+                t.Questions.Count
+            ))
+            .ToListAsync();
+    }
+
     public async Task<Test?> LoadTestAsync(Guid id, bool track)
     {
         IQueryable<Test> query = dbContext.Tests
@@ -201,7 +221,7 @@ public class TestManager
 
     private List<Type> SyncCollection<Type, DTO>(ICollection<Type> originalCollection, ICollection<DTO> dtoCollection,
         Func<Type?, DTO, Type?> process)
-        where Type : BaseEntity where DTO : IDTORepresentation<Type, DTO>
+        where Type : BaseEntity where DTO : IDTOEditRepresentation<Type, DTO>
     {
         var existingTypesById = originalCollection.ToDictionary(c => c.Id, c => c);
         var updatedCollectionInDtoOrder = new List<Type>();
