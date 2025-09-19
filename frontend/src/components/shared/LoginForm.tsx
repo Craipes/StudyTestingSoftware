@@ -64,7 +64,7 @@ export function LoginForm({ onSubmit, error }: LoginFormProps) {
       </div>
       <button
         type="submit"
-        className="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors duration-300"
+        className="btn-primary"
       >
         Увійти
       </button>
