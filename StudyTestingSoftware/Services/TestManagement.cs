@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
 
 namespace StudyTestingSoftware.Services;
 
@@ -9,6 +10,21 @@ public class TestManagement
     public TestManagement(AppDbContext dbContext)
     {
         this.dbContext = dbContext;
+    }
+
+    public async Task<Test?> LoadTestAsync(Guid id, bool track)
+    {
+        IQueryable<Test> query = dbContext.Tests
+            .Where(t => t.Id == id)
+            .Include(t => t.Questions)
+                .ThenInclude(q => q.QuestionRows)
+                    .ThenInclude(r => r.CorrectMatrixColumn)
+            .Include(t => t.Questions)
+                .ThenInclude(q => q.QuestionColumns)
+            .Include(t => t.Questions)
+                .ThenInclude(q => q.ChoiceOptions);
+        if (!track) query = query.AsNoTracking();
+        return await query.FirstOrDefaultAsync();
     }
 
     public async Task<(Test?, ModelStateDictionary)> TryToCreateTestAsync(TeacherTestDTO data, AppUser teacher)
@@ -85,20 +101,138 @@ public class TestManagement
         return (test, modelState);
     }
 
-    public async Task<(Test?, ModelStateDictionary)> TryToUpdateTestAsync(TeacherTestDTO data, Test test)
+    public async Task<(Test?, ModelStateDictionary)> TryToUpdateTestAsync(TeacherTestDTO data, Guid testGuid)
     {
         ModelStateDictionary modelState = new();
+
+        var test = await LoadTestAsync(testGuid, true);
+        if (test == null)
+        {
+            modelState.AddModelError(string.Empty, "Test not found.");
+            return (null, modelState);
+        }
+
         data.UpdateEntity(test);
-        dbContext.Tests.Update(test);
-        
 
+        List<Question> resultingQuestionsInDtoOrder = SyncCollection(test.Questions, data.Questions,
+            (question, questionDTO) =>
+            {
+                question ??= new Question { Test = test };
 
+                // ====== Choice options sync ======
+                var updatedChoicesInDtoOrder = SyncCollection(question.ChoiceOptions, questionDTO.ChoiceOptions,
+                    (t, dto) => t ?? new QuestionChoiceOption { Question = question });
+
+                // ====== Columns sync ======
+                var updatedColumnsInDtoOrder = SyncCollection(question.QuestionColumns, questionDTO.QuestionColumns,
+                    (t, dto) => t ?? new QuestionMatrixColumn { Question = question });
+
+                // ====== Rows sync ======
+                var updatedRowsInDtoOrder = SyncCollection(question.QuestionRows, questionDTO.QuestionRows,
+                    (t, dto) =>
+                    {
+                        if (dto.ValidColumnOrder < 0 || dto.ValidColumnOrder >= updatedColumnsInDtoOrder.Count)
+                        {
+                            int qi = data.Questions.IndexOf(questionDTO);
+                            modelState.AddModelError((Test t) => t.Questions[qi],
+                                $"Question's matrix row has invalid ValidColumnOrder {dto.ValidColumnOrder}.");
+                            return null;
+                        }
+
+                        var correctColumn = updatedColumnsInDtoOrder[dto.ValidColumnOrder];
+
+                        if (t == null)
+                        {
+                            return new QuestionMatrixRow
+                            {
+                                Question = question,
+                                CorrectMatrixColumn = correctColumn
+                            };
+                        }
+                        else
+                        {
+                            t.CorrectMatrixColumn = correctColumn;
+                            return t;
+                        }
+                    });
+
+                RemoveDeletedItems(question.ChoiceOptions, updatedChoicesInDtoOrder);
+                RemoveDeletedItems(question.QuestionRows, updatedRowsInDtoOrder);
+                RemoveDeletedItems(question.QuestionColumns, updatedColumnsInDtoOrder);
+
+                // Finally set ordered lists
+                question.ChoiceOptions = updatedChoicesInDtoOrder;
+                question.QuestionRows = updatedRowsInDtoOrder;
+                question.QuestionColumns = updatedColumnsInDtoOrder;
+
+                return question;
+            });
+
+        RemoveDeletedItems(test.Questions, resultingQuestionsInDtoOrder, q =>
+        {
+            // Explicit child removal to avoid severed required relationships
+            dbContext.QuestionChoices.RemoveRange(q.ChoiceOptions);
+            dbContext.QuestionMatrixRows.RemoveRange(q.QuestionRows);
+            dbContext.QuestionMatrixColumns.RemoveRange(q.QuestionColumns);
+        });
+
+        test.Questions = resultingQuestionsInDtoOrder;
+
+        modelState.Merge(ValidateTest(test));
         if (!modelState.IsValid)
         {
             return (null, modelState);
         }
+
         await dbContext.SaveChangesAsync();
         return (test, modelState);
+    }
+
+    private List<Type> SyncCollection<Type, DTO>(ICollection<Type> originalCollection, ICollection<DTO> dtoCollection,
+        Func<Type?, DTO, Type?> process) 
+        where Type : BaseEntity where DTO : IDTORepresentation<Type, DTO>
+    {
+        var existingTypesById = originalCollection.ToDictionary(c => c.Id, c => c);
+        var updatedCollectionInDtoOrder = new List<Type>();
+
+        foreach (var dto in dtoCollection)
+        {
+            Type? type = null;
+            if (dto.Id is Guid idValue && existingTypesById.TryGetValue(idValue, out var existingType))
+            {
+                type = existingType;
+            }
+
+            bool typeWasNotFound = type == null;
+            type = process.Invoke(type, dto);
+
+            if (type == null) continue;
+
+            if (typeWasNotFound)
+            {
+                originalCollection.Add(type);
+                dbContext.Add(type);
+            }
+
+            dto.UpdateEntity(type);
+            updatedCollectionInDtoOrder.Add(type);
+        }
+
+        return updatedCollectionInDtoOrder;
+    }
+
+    private void RemoveDeletedItems<Type>(ICollection<Type> originalCollection, ICollection<Type> updatedCollection, Action<Type>? onRemove = null) where Type : BaseEntity
+    {
+        var toRemove = originalCollection
+                       .Where(o => !updatedCollection.Contains(o))
+                       .ToList();
+
+        foreach (var item in toRemove)
+        {
+            onRemove?.Invoke(item);
+            originalCollection.Remove(item);
+            dbContext.Remove(item);
+        }
     }
 
     private static ModelStateDictionary ValidateTest(Test test)

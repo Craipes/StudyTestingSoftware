@@ -65,17 +65,7 @@ public class TeacherController : Controller
             return Unauthorized();
         }
 
-        var test = await dbContext.Tests
-            .Where(t => t.Id == id)
-            .Include(t => t.Questions)
-                .ThenInclude(q => q.QuestionRows)
-                    .ThenInclude(r => r.CorrectMatrixColumn)
-            .Include(t => t.Questions)
-                .ThenInclude(q => q.QuestionColumns)
-            .Include(t => t.Questions)
-                .ThenInclude(q => q.ChoiceOptions)
-            .AsNoTracking()
-            .FirstOrDefaultAsync();
+        var test = await testManagement.LoadTestAsync(id, false);
 
         if (test == null)
         {
@@ -84,5 +74,27 @@ public class TeacherController : Controller
 
         var testDTO = TeacherTestDTO.CreateDTO(test);
         return testDTO;
+    }
+
+    [HttpPost("tests/edit/{id:guid}")]
+    public async Task<ActionResult<Guid>> EditTest([FromRoute] Guid id, [FromBody] TeacherTestDTO data)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        var test = await testManagement.LoadTestAsync(id, false);
+        if (test == null)
+        {
+            return NotFound();
+        }
+        (var updatedTest, var testValidation) = await testManagement.TryToUpdateTestAsync(data, id);
+        ModelState.Merge(testValidation);
+        if (!ModelState.IsValid || updatedTest == null)
+        {
+            return BadRequest(ModelState);
+        }
+        return Ok(test.Id);
     }
 }
