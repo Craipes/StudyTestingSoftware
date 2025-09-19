@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StudyTestingSoftware.Models;
 
@@ -11,9 +12,11 @@ using StudyTestingSoftware.Models;
 namespace StudyTestingSoftware.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250919132248_AdditionalFieldsForTest")]
+    partial class AdditionalFieldsForTest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -378,7 +381,7 @@ namespace StudyTestingSoftware.Migrations
                     b.Property<Guid?>("AuthorId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("CloseAt")
+                    b.Property<DateTime>("CloseAt")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("CreatedAt")

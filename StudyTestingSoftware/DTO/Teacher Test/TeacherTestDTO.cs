@@ -12,6 +12,9 @@ public record TeacherTestDTO
     int DurationInMinutes,
     bool ShuffleQuestions,
     bool IsPublished,
+    bool IsOpened,
+    bool HasCloseTime,
+    DateTime? CloseAt,
     Guid? AuthorId,
     List<QuestionTeacherDTO> Questions
 ) : IDTORepresentation<Test, TeacherTestDTO>
@@ -25,6 +28,14 @@ public record TeacherTestDTO
         test.DurationInMinutes = DurationInMinutes;
         test.ShuffleQuestions = ShuffleQuestions;
         test.IsPublished = IsPublished;
+        test.HasCloseTime = HasCloseTime;
+        test.CloseAt = CloseAt;
+
+        if (!test.IsOpened && IsOpened)
+        {
+            test.OpenedAt = DateTime.UtcNow;
+        }
+        test.IsOpened = IsOpened;
     }
 
     public static TeacherTestDTO CreateDTO(Test test)
@@ -39,6 +50,9 @@ public record TeacherTestDTO
             test.DurationInMinutes,
             test.ShuffleQuestions,
             test.IsPublished,
+            test.IsOpened,
+            test.HasCloseTime,
+            test.CloseAt,
             test.AuthorId,
             test.Questions.Select(QuestionTeacherDTO.CreateDTO).OrderBy(q => q.Order).ToList()
         );
