@@ -13,7 +13,7 @@ public class Test : BaseEntity
     public bool IsPublished { get; set; } = false;
     public bool IsOpened { get; set; } = false;
     public bool HasCloseTime { get; set; } = false;
-    public DateTime CloseAt { get; set; } = DateTime.MaxValue;
+    public DateTime? CloseAt { get; set; } = null;
     public DateTime? OpenedAt { get; set; } = null;
 
     public required AppUser? Author { get; set; }

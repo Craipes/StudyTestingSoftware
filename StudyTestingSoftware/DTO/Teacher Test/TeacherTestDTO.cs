@@ -14,7 +14,7 @@ public record TeacherTestDTO
     bool IsPublished,
     bool IsOpened,
     bool HasCloseTime,
-    DateTime CloseAt,
+    DateTime? CloseAt,
     Guid? AuthorId,
     List<QuestionTeacherDTO> Questions
 ) : IDTORepresentation<Test, TeacherTestDTO>
