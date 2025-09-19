@@ -77,7 +77,7 @@ builder.Services.AddAuthentication(options =>
 })
     .AddBearerToken(IdentityConstants.BearerScheme);
 
-builder.Services.AddScoped<TestManagement>();
+builder.Services.AddScoped<TestManager>();
 
 var app = builder.Build();
 

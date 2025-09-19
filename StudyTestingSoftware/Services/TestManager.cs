@@ -3,13 +3,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace StudyTestingSoftware.Services;
 
-public class TestManagement
+public class TestManager
 {
     private readonly AppDbContext dbContext;
 
-    public TestManagement(AppDbContext dbContext)
+    public TestManager(AppDbContext dbContext)
     {
         this.dbContext = dbContext;
+    }
+
+    public async Task<List<Guid>> ListTestIdsByAuthorAsync(Guid authorId)
+    {
+        return await dbContext.Tests
+            .Where(t => t.AuthorId == authorId)
+            .Select(t => t.Id)
+            .ToListAsync();
     }
 
     public async Task<Test?> LoadTestAsync(Guid id, bool track)
@@ -29,6 +37,8 @@ public class TestManagement
 
     public async Task<(Test?, ModelStateDictionary)> TryToCreateTestAsync(TeacherTestDTO data, AppUser teacher)
     {
+        PreprocessTeacherTestDto(data);
+
         ModelStateDictionary modelState = new();
         Test test = new()
         {
@@ -101,16 +111,17 @@ public class TestManagement
         return (test, modelState);
     }
 
-    public async Task<(Test?, ModelStateDictionary)> TryToUpdateTestAsync(TeacherTestDTO data, Guid testGuid)
+    /// <summary>
+    /// Tries to update the given test with the provided data. The provided test MUST be tracked by the DbContext.
+    /// </summary>
+    /// <param name="data">DTO of the updated test</param>
+    /// <param name="test">Test to update. MUST be tracked by the DbContext.</param>
+    /// <returns></returns>
+    public async Task<ModelStateDictionary> TryToUpdateTestAsync(TeacherTestDTO data, Test test)
     {
-        ModelStateDictionary modelState = new();
+        PreprocessTeacherTestDto(data);
 
-        var test = await LoadTestAsync(testGuid, true);
-        if (test == null)
-        {
-            modelState.AddModelError(string.Empty, "Test not found.");
-            return (null, modelState);
-        }
+        ModelStateDictionary modelState = new();
 
         data.UpdateEntity(test);
 
@@ -181,11 +192,11 @@ public class TestManagement
         modelState.Merge(ValidateTest(test));
         if (!modelState.IsValid)
         {
-            return (null, modelState);
+            return modelState;
         }
 
         await dbContext.SaveChangesAsync();
-        return (test, modelState);
+        return modelState;
     }
 
     private List<Type> SyncCollection<Type, DTO>(ICollection<Type> originalCollection, ICollection<DTO> dtoCollection,
@@ -232,6 +243,22 @@ public class TestManagement
             onRemove?.Invoke(item);
             originalCollection.Remove(item);
             dbContext.Remove(item);
+        }
+    }
+
+    private static void PreprocessTeacherTestDto(TeacherTestDTO dto)
+    {
+        foreach (var question in dto.Questions)
+        {
+            if (question.QuestionType != QuestionType.TableSingleChoice && question.QuestionType != QuestionType.Ordering)
+            {
+                question.QuestionRows.Clear();
+                question.QuestionColumns.Clear();
+            }
+            if (question.QuestionType != QuestionType.MultipleChoice && question.QuestionType != QuestionType.SingleChoice)
+            {
+                question.ChoiceOptions.Clear();
+            }
         }
     }
 
