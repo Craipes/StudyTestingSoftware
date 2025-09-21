@@ -92,7 +92,7 @@ public class TeacherController : Controller
             return Unauthorized();
         }
 
-        var test = await testManagement.LoadTestAsync(id, true);
+        var test = await testManagement.LoadTestDefinitionAsync(id);
         if (test == null)
         {
             return NotFound();
@@ -103,12 +103,34 @@ public class TeacherController : Controller
             return Forbid();
         }
 
-        var testValidation = await testManagement.TryToUpdateTestAsync(data, test);
+        var testValidation = await testManagement.TryToUpdateTestAsync(data, id);
         ModelState.Merge(testValidation);
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
         return Ok(test.Id);
+    }
+
+    [HttpDelete("tests/delete/{id:guid}")]
+    public async Task<ActionResult> DeleteTest([FromRoute] Guid id)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        var test = await testManagement.LoadTestDefinitionAsync(id);
+        if (test == null)
+        {
+            return NotFound();
+        }
+        if (test.AuthorId != user.Id)
+        {
+            return Forbid();
+        }
+
+        await testManagement.DeleteTestAsync(id);
+        return Ok();
     }
 }
