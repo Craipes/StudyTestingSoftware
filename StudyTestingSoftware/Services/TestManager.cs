@@ -126,6 +126,8 @@ public class TestManager
             return (null, modelState);
         }
 
+        UpdateTestMaxScore(test);
+
         await dbContext.SaveChangesAsync();
 
         return (test, modelState);
@@ -215,6 +217,8 @@ public class TestManager
             return modelState;
         }
 
+        UpdateTestMaxScore(test);
+
         await dbContext.SaveChangesAsync();
         return modelState;
     }
@@ -280,6 +284,11 @@ public class TestManager
                 question.ChoiceOptions.Clear();
             }
         }
+    }
+
+    private static void UpdateTestMaxScore(Test test)
+    {
+        test.MaxScore = test.Questions.Sum(q => q.Points);
     }
 
     private static ModelStateDictionary ValidateTest(Test test)
