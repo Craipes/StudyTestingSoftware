@@ -20,6 +20,17 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     {
         base.OnModelCreating(builder);
 
+        builder.Entity<AppUser>(entity =>
+        {
+            entity.HasMany(au => au.OwnedStudentGroups)
+                .WithOne(sg => sg.Owner)
+                .HasForeignKey(sg => sg.OwnerId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasMany(au => au.StudentGroups)
+                .WithMany(sg => sg.Students);
+        });
+
         builder.Entity<Test>()
             .HasOne(t => t.Author)
             .WithMany(u => u.AuthoredTests)

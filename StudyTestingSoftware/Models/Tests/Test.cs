@@ -27,4 +27,6 @@ public class Test : BaseEntity
     public List<Question> Questions { get; set; } = [];
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public List<StudentGroup> OpenedToGroups { get; set; } = [];
 }

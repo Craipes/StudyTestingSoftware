@@ -15,4 +15,7 @@ public class AppUser : IdentityUser<Guid>
     public int Coins { get; set; }
 
     public List<Test> AuthoredTests { get; set; } = [];
+    public List<TestSession> TestSessions { get; set; } = [];
+    public List<StudentGroup> OwnedStudentGroups { get; set; } = [];
+    public List<StudentGroup> StudentGroups { get; set; } = [];
 }
