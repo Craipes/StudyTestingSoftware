@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace StudyTestingSoftware.Controllers;
 
@@ -9,11 +10,13 @@ public class TeacherGroupsController : Controller
 {
     private readonly UserManager<AppUser> userManager;
     private readonly GroupManager groupManager;
+    private readonly TestManager testManager;
 
-    public TeacherGroupsController(UserManager<AppUser> userManager, GroupManager groupManager)
+    public TeacherGroupsController(UserManager<AppUser> userManager, GroupManager groupManager, TestManager testManager)
     {
         this.userManager = userManager;
         this.groupManager = groupManager;
+        this.testManager = testManager;
     }
 
     [HttpGet("list-ids")]
@@ -202,5 +205,67 @@ public class TeacherGroupsController : Controller
             }
             return await groupManager.RemoveUserFromGroupByIdAsync(groupId, userId.Value);
         }
+    }
+
+    [HttpPost("add-test/{groupId:guid}")]
+    public async Task<ActionResult> AddTest([FromRoute] Guid groupId, [FromQuery, Required] Guid testId)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        var group = await groupManager.GetGroupByIdAsync(groupId);
+        if (group == null)
+        {
+            return NotFound();
+        }
+        if (group.OwnerId != user.Id)
+        {
+            return Forbid();
+        }
+
+        var test = await testManager.LoadTestDefinitionAsync(testId);
+        if (test == null)
+        {
+            return NotFound();
+        }
+        if (test.AuthorId != user.Id)
+        {
+            return Forbid();
+        }
+
+        return await groupManager.AddTestToGroupAsync(groupId, testId);
+    }
+
+    [HttpDelete("remove-test/{groupId:guid}")]
+    public async Task<ActionResult> RemoveTest([FromRoute] Guid groupId, [FromQuery, Required] Guid testId)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        var group = await groupManager.GetGroupByIdAsync(groupId);
+        if (group == null)
+        {
+            return NotFound();
+        }
+        if (group.OwnerId != user.Id)
+        {
+            return Forbid();
+        }
+
+        var test = await testManager.LoadTestDefinitionAsync(testId);
+        if (test == null)
+        {
+            return NotFound();
+        }
+        if (test.AuthorId != user.Id)
+        {
+            return Forbid();
+        }
+
+        return await groupManager.RemoveTestFromGroupAsync(groupId, testId);
     }
 }

@@ -150,4 +150,45 @@ public class GroupManager
         await dbContext.SaveChangesAsync();
         return new OkResult();
     }
+
+    public async Task<ActionResult> AddTestToGroupAsync(Guid groupId, Guid testId)
+    {
+        var group = await dbContext.StudentGroups
+            .Include(g => g.OpenedTests)
+            .FirstOrDefaultAsync(g => g.Id == groupId);
+        if (group == null)
+        {
+            return new NotFoundResult();
+        }
+        if (group.OpenedTests.Any(t => t.Id == testId))
+        {
+            return new ConflictResult();
+        }
+        var test = await dbContext.Tests.FindAsync(testId);
+        if (test == null)
+        {
+            return new NotFoundResult();
+        }
+        group.OpenedTests.Add(test);
+        await dbContext.SaveChangesAsync();
+        return new OkResult();
+    }
+
+    public async Task<ActionResult> RemoveTestFromGroupAsync(Guid groupId, Guid testId)
+    {
+        var group = await dbContext.StudentGroups
+            .Include(g => g.OpenedTests)
+            .FirstOrDefaultAsync(g => g.Id == groupId);
+        if (group == null)
+        {
+            return new NotFoundResult();
+        }
+        if (group.OpenedTests.All(t => t.Id != testId))
+        {
+            return new NotFoundResult();
+        }
+        group.OpenedTests.RemoveAll(t => t.Id == testId);
+        await dbContext.SaveChangesAsync();
+        return new OkResult();
+    }
 }
