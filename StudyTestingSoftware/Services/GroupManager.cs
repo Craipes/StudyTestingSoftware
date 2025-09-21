@@ -1,13 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace StudyTestingSoftware.Services;
 
 public class GroupManager
 {
+    private readonly UserManager<AppUser> userManager;
     private readonly AppDbContext dbContext;
 
-    public GroupManager(AppDbContext dbContext)
+    public GroupManager(UserManager<AppUser> userManager, AppDbContext dbContext)
     {
+        this.userManager = userManager;
         this.dbContext = dbContext;
     }
 
@@ -16,6 +19,22 @@ public class GroupManager
         return await dbContext.StudentGroups
             .Where(g => g.OwnerId == authorId)
             .Select(g => g.Id)
+            .ToListAsync();
+    }
+
+    public async Task<List<TeacherGroupPreviewDTO>> GetAuthorPreviews(Guid authorId)
+    {
+        return await dbContext.StudentGroups
+            .Where(g => g.OwnerId == authorId)
+            .Select(g => new TeacherGroupPreviewDTO
+            (
+                g.Id,
+                g.Name,
+                g.Description,
+                g.Students.Count,
+                g.OpenedTests.Count
+            ))
+            .AsNoTracking()
             .ToListAsync();
     }
 
@@ -54,5 +73,81 @@ public class GroupManager
         group.Description = dto.Description;
         await dbContext.SaveChangesAsync();
         return group;
+    }
+
+    public async Task<ActionResult> AddUserToGroupByIdAsync(Guid groupId, Guid userId)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+        {
+            return new NotFoundResult();
+        }
+        return await AddUserToGroupAsync(groupId, user);
+    }
+
+    public async Task<ActionResult> AddUserToGroupByEmailAsync(Guid groupId, string email)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            return new NotFoundResult();
+        }
+        return await AddUserToGroupAsync(groupId, user);
+    }
+
+    private async Task<ActionResult> AddUserToGroupAsync(Guid groupId, AppUser appUser)
+    {
+        var group = await dbContext.StudentGroups
+            .Include(g => g.Students)
+            .FirstOrDefaultAsync(g => g.Id == groupId);
+        if (group == null)
+        {
+            return new NotFoundResult();
+        }
+        if (group.Students.Any(s => s.Id == appUser.Id))
+        {
+            return new ConflictResult();
+        }
+        group.Students.Add(appUser);
+        await dbContext.SaveChangesAsync();
+        return new OkResult();
+    }
+
+    public async Task<ActionResult> RemoveUserFromGroupByIdAsync(Guid groupId, Guid userId)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+        {
+            return new NotFoundResult();
+        }
+        return await RemoveUserFromGroupAsync(groupId, user);
+    }
+
+    public async Task<ActionResult> RemoveUserFromGroupByEmailAsync(Guid groupId, string email)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            return new NotFoundResult();
+        }
+        return await RemoveUserFromGroupAsync(groupId, user);
+    }
+
+    private async Task<ActionResult> RemoveUserFromGroupAsync(Guid groupId, AppUser appUser)
+    {
+        var group = await dbContext.StudentGroups
+            .Include(g => g.Students)
+            .FirstOrDefaultAsync(g => g.Id == groupId);
+        if (group == null)
+        {
+            return new NotFoundResult();
+        }
+        if (group.Students.All(s => s.Id != appUser.Id))
+        {
+            return new NotFoundResult();
+        }
+        group.Students.RemoveAll(s => s.Id == appUser.Id);
+        await dbContext.SaveChangesAsync();
+        return new OkResult();
     }
 }
