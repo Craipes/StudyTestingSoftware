@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using StudyTestingSoftware.DTO.TeacherTest;
 
 namespace StudyTestingSoftware.Services;
 
@@ -40,6 +41,14 @@ public class TestManager
             .ToListAsync();
     }
 
+    public async Task<Test?> LoadTestDefinitionAsync(Guid id)
+    {
+        return await dbContext.Tests
+            .Where(t => t.Id == id)
+            .AsNoTracking()
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<Test?> LoadTestAsync(Guid id, bool track)
     {
         IQueryable<Test> query = dbContext.Tests
@@ -53,6 +62,12 @@ public class TestManager
                 .ThenInclude(q => q.ChoiceOptions);
         if (!track) query = query.AsNoTracking();
         return await query.FirstOrDefaultAsync();
+    }
+
+    public async Task DeleteTestAsync(Guid id)
+    {
+        dbContext.Tests.Remove(new Test { Id = id, Author = null });
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task<(Test?, ModelStateDictionary)> TryToCreateTestAsync(TeacherTestDTO data, AppUser teacher)
@@ -126,22 +141,32 @@ public class TestManager
             return (null, modelState);
         }
 
+        UpdateTestMaxScore(test);
+
         await dbContext.SaveChangesAsync();
 
         return (test, modelState);
     }
 
     /// <summary>
-    /// Tries to update the given test with the provided data. The provided test MUST be tracked by the DbContext.
+    /// Tries to update the test with Id <see cref="testId"/> with the provided data. The provided test MUST be tracked by the DbContext.
     /// </summary>
     /// <param name="data">DTO of the updated test</param>
-    /// <param name="test">Test to update. MUST be tracked by the DbContext.</param>
+    /// <param name="testId">Id of the test to update</param>
     /// <returns></returns>
-    public async Task<ModelStateDictionary> TryToUpdateTestAsync(TeacherTestDTO data, Test test)
+    public async Task<ModelStateDictionary> TryToUpdateTestAsync(TeacherTestDTO data, Guid testId)
     {
-        PreprocessTeacherTestDto(data);
-
         ModelStateDictionary modelState = new();
+
+        var test = await LoadTestAsync(testId, true);
+
+        if (test == null)
+        {
+            modelState.AddModelError(string.Empty, "Test not found.");
+            return modelState;
+        }
+
+        PreprocessTeacherTestDto(data);
 
         data.UpdateEntity(test);
 
@@ -215,6 +240,8 @@ public class TestManager
             return modelState;
         }
 
+        UpdateTestMaxScore(test);
+
         await dbContext.SaveChangesAsync();
         return modelState;
     }
@@ -280,6 +307,11 @@ public class TestManager
                 question.ChoiceOptions.Clear();
             }
         }
+    }
+
+    private static void UpdateTestMaxScore(Test test)
+    {
+        test.MaxScore = test.Questions.Sum(q => q.Points);
     }
 
     private static ModelStateDictionary ValidateTest(Test test)

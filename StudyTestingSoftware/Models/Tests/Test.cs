@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace StudyTestingSoftware.Models;
+namespace StudyTestingSoftware.Models.Tests;
 
 public class Test : BaseEntity
 {
@@ -18,10 +18,15 @@ public class Test : BaseEntity
     public DateTime? CloseAt { get; set; } = null;
     public DateTime? OpenedAt { get; set; } = null;
 
+    // This field is automatically calculated based on the sum of all question points
+    public int MaxScore { get; set; }
+
     public required AppUser? Author { get; set; }
     public Guid? AuthorId { get; set; }
 
     public List<Question> Questions { get; set; } = [];
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public List<StudentGroup> OpenedToGroups { get; set; } = [];
 }

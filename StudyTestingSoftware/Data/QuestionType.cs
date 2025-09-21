@@ -1,4 +1,4 @@
-﻿namespace StudyTestingSoftware.Models;
+﻿namespace StudyTestingSoftware.Data;
 
 public enum QuestionType : byte
 {

@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using StudyTestingSoftware.Data;
+using System.ComponentModel.DataAnnotations;
 
-namespace StudyTestingSoftware.DTO;
+namespace StudyTestingSoftware.DTO.TeacherTest;
 
 public record TeacherTestPreviewDTO
 (

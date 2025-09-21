@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using StudyTestingSoftware.Models;
+using StudyTestingSoftware.Data;
 
 #nullable disable
 
@@ -21,6 +21,21 @@ namespace StudyTestingSoftware.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("AppUserStudentGroup", b =>
+                {
+                    b.Property<Guid>("StudentGroupsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("StudentsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("StudentGroupsId", "StudentsId");
+
+                    b.HasIndex("StudentsId");
+
+                    b.ToTable("AppUserStudentGroup");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
@@ -123,6 +138,21 @@ namespace StudyTestingSoftware.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("StudentGroupTest", b =>
+                {
+                    b.Property<Guid>("OpenedTestsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OpenedToGroupsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("OpenedTestsId", "OpenedToGroupsId");
+
+                    b.HasIndex("OpenedToGroupsId");
+
+                    b.ToTable("StudentGroupTest");
                 });
 
             modelBuilder.Entity("StudyTestingSoftware.Models.AppRole", b =>
@@ -242,7 +272,113 @@ namespace StudyTestingSoftware.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("StudyTestingSoftware.Models.Question", b =>
+            modelBuilder.Entity("StudyTestingSoftware.Models.StudentGroup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(4096)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<Guid?>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("StudentGroups");
+                });
+
+            modelBuilder.Entity("StudyTestingSoftware.Models.TestSessions.TestSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("AutoFinishAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FinishedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<double>("Score")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("TestId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TestId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TestSessions");
+                });
+
+            modelBuilder.Entity("StudyTestingSoftware.Models.TestSessions.TestUserAnswer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool?>("BoolValue")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("bit");
+
+                    b.Property<double?>("NumberValue")
+                        .HasColumnType("float");
+
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SelectedChoiceOptionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SelectedMatrixColumnId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SelectedMatrixRowId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TestSessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("SelectedChoiceOptionId");
+
+                    b.HasIndex("SelectedMatrixColumnId");
+
+                    b.HasIndex("SelectedMatrixRowId");
+
+                    b.HasIndex("TestSessionId");
+
+                    b.ToTable("TestUserAnswers");
+                });
+
+            modelBuilder.Entity("StudyTestingSoftware.Models.Tests.Question", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -286,7 +422,7 @@ namespace StudyTestingSoftware.Migrations
                     b.ToTable("Questions");
                 });
 
-            modelBuilder.Entity("StudyTestingSoftware.Models.QuestionChoiceOption", b =>
+            modelBuilder.Entity("StudyTestingSoftware.Models.Tests.QuestionChoiceOption", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -312,7 +448,7 @@ namespace StudyTestingSoftware.Migrations
                     b.ToTable("QuestionChoices");
                 });
 
-            modelBuilder.Entity("StudyTestingSoftware.Models.QuestionMatrixColumn", b =>
+            modelBuilder.Entity("StudyTestingSoftware.Models.Tests.QuestionMatrixColumn", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -335,7 +471,7 @@ namespace StudyTestingSoftware.Migrations
                     b.ToTable("QuestionMatrixColumns");
                 });
 
-            modelBuilder.Entity("StudyTestingSoftware.Models.QuestionMatrixRow", b =>
+            modelBuilder.Entity("StudyTestingSoftware.Models.Tests.QuestionMatrixRow", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -363,7 +499,7 @@ namespace StudyTestingSoftware.Migrations
                     b.ToTable("QuestionMatrixRows");
                 });
 
-            modelBuilder.Entity("StudyTestingSoftware.Models.Test", b =>
+            modelBuilder.Entity("StudyTestingSoftware.Models.Tests.Test", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -403,6 +539,9 @@ namespace StudyTestingSoftware.Migrations
                     b.Property<int>("MaxExperience")
                         .HasColumnType("int");
 
+                    b.Property<int>("MaxScore")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -422,6 +561,21 @@ namespace StudyTestingSoftware.Migrations
                     b.HasIndex("AuthorId");
 
                     b.ToTable("Tests");
+                });
+
+            modelBuilder.Entity("AppUserStudentGroup", b =>
+                {
+                    b.HasOne("StudyTestingSoftware.Models.StudentGroup", null)
+                        .WithMany()
+                        .HasForeignKey("StudentGroupsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("StudyTestingSoftware.Models.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("StudentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -475,9 +629,90 @@ namespace StudyTestingSoftware.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("StudyTestingSoftware.Models.Question", b =>
+            modelBuilder.Entity("StudentGroupTest", b =>
                 {
-                    b.HasOne("StudyTestingSoftware.Models.Test", "Test")
+                    b.HasOne("StudyTestingSoftware.Models.Tests.Test", null)
+                        .WithMany()
+                        .HasForeignKey("OpenedTestsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("StudyTestingSoftware.Models.StudentGroup", null)
+                        .WithMany()
+                        .HasForeignKey("OpenedToGroupsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StudyTestingSoftware.Models.StudentGroup", b =>
+                {
+                    b.HasOne("StudyTestingSoftware.Models.AppUser", "Owner")
+                        .WithMany("OwnedStudentGroups")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("StudyTestingSoftware.Models.TestSessions.TestSession", b =>
+                {
+                    b.HasOne("StudyTestingSoftware.Models.Tests.Test", "Test")
+                        .WithMany()
+                        .HasForeignKey("TestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("StudyTestingSoftware.Models.AppUser", "User")
+                        .WithMany("TestSessions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Test");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("StudyTestingSoftware.Models.TestSessions.TestUserAnswer", b =>
+                {
+                    b.HasOne("StudyTestingSoftware.Models.Tests.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("StudyTestingSoftware.Models.Tests.QuestionChoiceOption", "SelectedChoiceOption")
+                        .WithMany()
+                        .HasForeignKey("SelectedChoiceOptionId");
+
+                    b.HasOne("StudyTestingSoftware.Models.Tests.QuestionMatrixColumn", "SelectedMatrixColumn")
+                        .WithMany()
+                        .HasForeignKey("SelectedMatrixColumnId");
+
+                    b.HasOne("StudyTestingSoftware.Models.Tests.QuestionMatrixRow", "SelectedMatrixRow")
+                        .WithMany()
+                        .HasForeignKey("SelectedMatrixRowId");
+
+                    b.HasOne("StudyTestingSoftware.Models.TestSessions.TestSession", "TestSession")
+                        .WithMany()
+                        .HasForeignKey("TestSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+
+                    b.Navigation("SelectedChoiceOption");
+
+                    b.Navigation("SelectedMatrixColumn");
+
+                    b.Navigation("SelectedMatrixRow");
+
+                    b.Navigation("TestSession");
+                });
+
+            modelBuilder.Entity("StudyTestingSoftware.Models.Tests.Question", b =>
+                {
+                    b.HasOne("StudyTestingSoftware.Models.Tests.Test", "Test")
                         .WithMany("Questions")
                         .HasForeignKey("TestId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -486,9 +721,9 @@ namespace StudyTestingSoftware.Migrations
                     b.Navigation("Test");
                 });
 
-            modelBuilder.Entity("StudyTestingSoftware.Models.QuestionChoiceOption", b =>
+            modelBuilder.Entity("StudyTestingSoftware.Models.Tests.QuestionChoiceOption", b =>
                 {
-                    b.HasOne("StudyTestingSoftware.Models.Question", "Question")
+                    b.HasOne("StudyTestingSoftware.Models.Tests.Question", "Question")
                         .WithMany("ChoiceOptions")
                         .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -497,9 +732,9 @@ namespace StudyTestingSoftware.Migrations
                     b.Navigation("Question");
                 });
 
-            modelBuilder.Entity("StudyTestingSoftware.Models.QuestionMatrixColumn", b =>
+            modelBuilder.Entity("StudyTestingSoftware.Models.Tests.QuestionMatrixColumn", b =>
                 {
-                    b.HasOne("StudyTestingSoftware.Models.Question", "Question")
+                    b.HasOne("StudyTestingSoftware.Models.Tests.Question", "Question")
                         .WithMany("QuestionColumns")
                         .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -508,15 +743,15 @@ namespace StudyTestingSoftware.Migrations
                     b.Navigation("Question");
                 });
 
-            modelBuilder.Entity("StudyTestingSoftware.Models.QuestionMatrixRow", b =>
+            modelBuilder.Entity("StudyTestingSoftware.Models.Tests.QuestionMatrixRow", b =>
                 {
-                    b.HasOne("StudyTestingSoftware.Models.QuestionMatrixColumn", "CorrectMatrixColumn")
+                    b.HasOne("StudyTestingSoftware.Models.Tests.QuestionMatrixColumn", "CorrectMatrixColumn")
                         .WithMany()
                         .HasForeignKey("CorrectMatrixColumnId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("StudyTestingSoftware.Models.Question", "Question")
+                    b.HasOne("StudyTestingSoftware.Models.Tests.Question", "Question")
                         .WithMany("QuestionRows")
                         .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -527,7 +762,7 @@ namespace StudyTestingSoftware.Migrations
                     b.Navigation("Question");
                 });
 
-            modelBuilder.Entity("StudyTestingSoftware.Models.Test", b =>
+            modelBuilder.Entity("StudyTestingSoftware.Models.Tests.Test", b =>
                 {
                     b.HasOne("StudyTestingSoftware.Models.AppUser", "Author")
                         .WithMany("AuthoredTests")
@@ -540,9 +775,13 @@ namespace StudyTestingSoftware.Migrations
             modelBuilder.Entity("StudyTestingSoftware.Models.AppUser", b =>
                 {
                     b.Navigation("AuthoredTests");
+
+                    b.Navigation("OwnedStudentGroups");
+
+                    b.Navigation("TestSessions");
                 });
 
-            modelBuilder.Entity("StudyTestingSoftware.Models.Question", b =>
+            modelBuilder.Entity("StudyTestingSoftware.Models.Tests.Question", b =>
                 {
                     b.Navigation("ChoiceOptions");
 
@@ -551,7 +790,7 @@ namespace StudyTestingSoftware.Migrations
                     b.Navigation("QuestionRows");
                 });
 
-            modelBuilder.Entity("StudyTestingSoftware.Models.Test", b =>
+            modelBuilder.Entity("StudyTestingSoftware.Models.Tests.Test", b =>
                 {
                     b.Navigation("Questions");
                 });

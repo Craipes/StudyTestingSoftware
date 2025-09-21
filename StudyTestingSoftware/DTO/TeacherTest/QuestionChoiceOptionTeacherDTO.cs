@@ -1,4 +1,4 @@
-﻿namespace StudyTestingSoftware.DTO;
+﻿namespace StudyTestingSoftware.DTO.TeacherTest;
 
 public record QuestionChoiceOptionTeacherDTO
 (

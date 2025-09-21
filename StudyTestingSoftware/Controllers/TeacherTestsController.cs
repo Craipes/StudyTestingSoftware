@@ -1,22 +1,23 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using StudyTestingSoftware.DTO.TeacherTest;
 
 namespace StudyTestingSoftware.Controllers;
 
 [ApiController]
 [Authorize(Roles = AppRolesConstants.TeacherRole)]
-[Route("teacher")]
-public class TeacherController : Controller
+[Route("teacher/tests")]
+public class TeacherTestsController : Controller
 {
     private readonly UserManager<AppUser> userManager;
     private readonly TestManager testManagement;
 
-    public TeacherController(UserManager<AppUser> userManager, TestManager testManagement)
+    public TeacherTestsController(UserManager<AppUser> userManager, TestManager testManagement)
     {
         this.userManager = userManager;
         this.testManagement = testManagement;
     }
 
-    [HttpGet("tests/list-ids")]
+    [HttpGet("list-ids")]
     public async Task<ActionResult<List<Guid>>> GetTestIds()
     {
         var user = await userManager.GetUserAsync(User);
@@ -30,7 +31,7 @@ public class TeacherController : Controller
         return testIds;
     }
 
-    [HttpGet("tests/list-previews")]
+    [HttpGet("list-previews")]
     public async Task<ActionResult<List<TeacherTestPreviewDTO>>> GetTestPreviews()
     {
         var user = await userManager.GetUserAsync(User);
@@ -43,7 +44,7 @@ public class TeacherController : Controller
         return testsPreviews;
     }
 
-    [HttpPost("tests/create")]
+    [HttpPost("create")]
     public async Task<ActionResult<Guid>> CreateTest([FromBody] TeacherTestDTO data)
     {
         var user = await userManager.GetUserAsync(User);
@@ -63,7 +64,7 @@ public class TeacherController : Controller
         return Ok(test.Id);
     }
 
-    [HttpGet("tests/edit/{id:guid}")]
+    [HttpGet("edit/{id:guid}")]
     public async Task<ActionResult<TeacherTestDTO>> EditTest([FromRoute] Guid id)
     {
         var user = await userManager.GetUserAsync(User);
@@ -83,7 +84,7 @@ public class TeacherController : Controller
         return testDTO;
     }
 
-    [HttpPost("tests/edit/{id:guid}")]
+    [HttpPut("edit/{id:guid}")]
     public async Task<ActionResult<Guid>> EditTest([FromRoute] Guid id, [FromBody] TeacherTestDTO data)
     {
         var user = await userManager.GetUserAsync(User);
@@ -92,7 +93,7 @@ public class TeacherController : Controller
             return Unauthorized();
         }
 
-        var test = await testManagement.LoadTestAsync(id, true);
+        var test = await testManagement.LoadTestDefinitionAsync(id);
         if (test == null)
         {
             return NotFound();
@@ -103,12 +104,34 @@ public class TeacherController : Controller
             return Forbid();
         }
 
-        var testValidation = await testManagement.TryToUpdateTestAsync(data, test);
+        var testValidation = await testManagement.TryToUpdateTestAsync(data, id);
         ModelState.Merge(testValidation);
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
         return Ok(test.Id);
+    }
+
+    [HttpDelete("delete/{id:guid}")]
+    public async Task<ActionResult> DeleteTest([FromRoute] Guid id)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        var test = await testManagement.LoadTestDefinitionAsync(id);
+        if (test == null)
+        {
+            return NotFound();
+        }
+        if (test.AuthorId != user.Id)
+        {
+            return Forbid();
+        }
+
+        await testManagement.DeleteTestAsync(id);
+        return Ok();
     }
 }

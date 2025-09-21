@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace StudyTestingSoftware.Models;
+namespace StudyTestingSoftware.Models.Tests;
 
 public class Question : BaseEntity
 {
