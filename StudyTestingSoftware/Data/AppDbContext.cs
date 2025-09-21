@@ -16,6 +16,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<TestSession> TestSessions { get; set; } = null!;
     public DbSet<TestUserAnswer> TestUserAnswers { get; set; } = null!;
 
+    // Student groups
+    public DbSet<StudentGroup> StudentGroups { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

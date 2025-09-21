@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using StudyTestingSoftware.DTO.TeacherTest;
 
 namespace StudyTestingSoftware.Services;
 
@@ -65,24 +66,6 @@ public class TestManager
 
     public async Task DeleteTestAsync(Guid id)
     {
-        //var test = await dbContext.Tests
-        //    .Where(t => t.Id == id)
-        //    .Include(t => t.Questions)
-        //        .ThenInclude(q => q.QuestionRows)
-        //    .Include(t => t.Questions)
-        //        .ThenInclude(q => q.QuestionColumns)
-        //    .Include(t => t.Questions)
-        //        .ThenInclude(q => q.ChoiceOptions)
-        //    .FirstOrDefaultAsync();
-        //if (test == null) return false;
-        //// Explicit child removal to avoid severed required relationships
-        //foreach (var question in test.Questions)
-        //{
-        //    dbContext.QuestionChoices.RemoveRange(question.ChoiceOptions);
-        //    dbContext.QuestionMatrixRows.RemoveRange(question.QuestionRows);
-        //    dbContext.QuestionMatrixColumns.RemoveRange(question.QuestionColumns);
-        //}
-        //dbContext.Questions.RemoveRange(test.Questions);
         dbContext.Tests.Remove(new Test { Id = id, Author = null });
         await dbContext.SaveChangesAsync();
     }
