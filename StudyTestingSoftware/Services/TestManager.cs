@@ -1,15 +1,52 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using StudyTestingSoftware.DTO.TeacherTest;
 
 namespace StudyTestingSoftware.Services;
 
-public class TestManagement
+public class TestManager
 {
     private readonly AppDbContext dbContext;
 
-    public TestManagement(AppDbContext dbContext)
+    public TestManager(AppDbContext dbContext)
     {
         this.dbContext = dbContext;
+    }
+
+    public async Task<List<Guid>> ListTestIdsByAuthorAsync(Guid authorId)
+    {
+        return await dbContext.Tests
+            .Where(t => t.AuthorId == authorId)
+            .Select(t => t.Id)
+            .ToListAsync();
+    }
+
+    public async Task<List<TeacherTestPreviewDTO>> ListTestPreviewsByAuthorAsync(Guid authorId)
+    {
+        return await dbContext.Tests
+            .AsNoTracking()
+            .Where(t => t.AuthorId == authorId)
+            .OrderByDescending(t => t.IsOpened)
+            .ThenByDescending(t => t.CreatedAt)
+            .Select(t => new TeacherTestPreviewDTO(
+                t.Id,
+                t.Name,
+                t.AccessMode,
+                t.IsPublished,
+                t.IsOpened,
+                t.HasCloseTime,
+                t.CloseAt,
+                t.Questions.Count
+            ))
+            .ToListAsync();
+    }
+
+    public async Task<Test?> LoadTestDefinitionAsync(Guid id)
+    {
+        return await dbContext.Tests
+            .Where(t => t.Id == id)
+            .AsNoTracking()
+            .FirstOrDefaultAsync();
     }
 
     public async Task<Test?> LoadTestAsync(Guid id, bool track)
@@ -27,8 +64,16 @@ public class TestManagement
         return await query.FirstOrDefaultAsync();
     }
 
+    public async Task DeleteTestAsync(Guid id)
+    {
+        dbContext.Tests.Remove(new Test { Id = id, Author = null });
+        await dbContext.SaveChangesAsync();
+    }
+
     public async Task<(Test?, ModelStateDictionary)> TryToCreateTestAsync(TeacherTestDTO data, AppUser teacher)
     {
+        PreprocessTeacherTestDto(data);
+
         ModelStateDictionary modelState = new();
         Test test = new()
         {
@@ -96,21 +141,32 @@ public class TestManagement
             return (null, modelState);
         }
 
+        UpdateTestMaxScore(test);
+
         await dbContext.SaveChangesAsync();
 
         return (test, modelState);
     }
 
-    public async Task<(Test?, ModelStateDictionary)> TryToUpdateTestAsync(TeacherTestDTO data, Guid testGuid)
+    /// <summary>
+    /// Tries to update the test with Id <see cref="testId"/> with the provided data. The provided test MUST be tracked by the DbContext.
+    /// </summary>
+    /// <param name="data">DTO of the updated test</param>
+    /// <param name="testId">Id of the test to update</param>
+    /// <returns></returns>
+    public async Task<ModelStateDictionary> TryToUpdateTestAsync(TeacherTestDTO data, Guid testId)
     {
         ModelStateDictionary modelState = new();
 
-        var test = await LoadTestAsync(testGuid, true);
+        var test = await LoadTestAsync(testId, true);
+
         if (test == null)
         {
             modelState.AddModelError(string.Empty, "Test not found.");
-            return (null, modelState);
+            return modelState;
         }
+
+        PreprocessTeacherTestDto(data);
 
         data.UpdateEntity(test);
 
@@ -181,16 +237,18 @@ public class TestManagement
         modelState.Merge(ValidateTest(test));
         if (!modelState.IsValid)
         {
-            return (null, modelState);
+            return modelState;
         }
 
+        UpdateTestMaxScore(test);
+
         await dbContext.SaveChangesAsync();
-        return (test, modelState);
+        return modelState;
     }
 
     private List<Type> SyncCollection<Type, DTO>(ICollection<Type> originalCollection, ICollection<DTO> dtoCollection,
-        Func<Type?, DTO, Type?> process) 
-        where Type : BaseEntity where DTO : IDTORepresentation<Type, DTO>
+        Func<Type?, DTO, Type?> process)
+        where Type : BaseEntity where DTO : IDTOEditRepresentation<Type, DTO>
     {
         var existingTypesById = originalCollection.ToDictionary(c => c.Id, c => c);
         var updatedCollectionInDtoOrder = new List<Type>();
@@ -233,6 +291,27 @@ public class TestManagement
             originalCollection.Remove(item);
             dbContext.Remove(item);
         }
+    }
+
+    private static void PreprocessTeacherTestDto(TeacherTestDTO dto)
+    {
+        foreach (var question in dto.Questions)
+        {
+            if (question.QuestionType != QuestionType.TableSingleChoice && question.QuestionType != QuestionType.Ordering)
+            {
+                question.QuestionRows.Clear();
+                question.QuestionColumns.Clear();
+            }
+            if (question.QuestionType != QuestionType.MultipleChoice && question.QuestionType != QuestionType.SingleChoice)
+            {
+                question.ChoiceOptions.Clear();
+            }
+        }
+    }
+
+    private static void UpdateTestMaxScore(Test test)
+    {
+        test.MaxScore = test.Questions.Sum(q => q.Points);
     }
 
     private static ModelStateDictionary ValidateTest(Test test)
@@ -292,6 +371,17 @@ public class TestManagement
                 }
             }
         }
+
+        if (test.HasCloseTime && (test.CloseAt == null || test.CloseAt < DateTime.UtcNow))
+        {
+            modelState.AddModelError((Test t) => t.CloseAt, $"Test has a close time set but it is either null or in the past.");
+        }
+
+        if (test.Questions.Count == 0)
+        {
+            modelState.AddModelError((Test t) => t.Questions, "Test has no questions.");
+        }
+
         return modelState;
     }
 }

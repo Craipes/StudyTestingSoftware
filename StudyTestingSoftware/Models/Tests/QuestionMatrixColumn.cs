@@ -1,4 +1,4 @@
-﻿namespace StudyTestingSoftware.Models;
+﻿namespace StudyTestingSoftware.Models.Tests;
 
 public class QuestionMatrixColumn : BaseEntity
 {

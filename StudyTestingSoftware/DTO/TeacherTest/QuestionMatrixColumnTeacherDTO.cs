@@ -1,11 +1,11 @@
-﻿namespace StudyTestingSoftware.DTO;
+﻿namespace StudyTestingSoftware.DTO.TeacherTest;
 
 public record QuestionMatrixColumnTeacherDTO
 (
     Guid? Id,
     string Text,
     int Order
-) : IDTORepresentation<QuestionMatrixColumn, QuestionMatrixColumnTeacherDTO>
+) : IDTOEditRepresentation<QuestionMatrixColumn, QuestionMatrixColumnTeacherDTO>
 {
     public void UpdateEntity(QuestionMatrixColumn matrixColumn)
     {

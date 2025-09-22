@@ -1,4 +1,4 @@
-﻿namespace StudyTestingSoftware.DTO;
+﻿namespace StudyTestingSoftware.DTO.TeacherTest;
 
 public record QuestionChoiceOptionTeacherDTO
 (
@@ -6,7 +6,7 @@ public record QuestionChoiceOptionTeacherDTO
     string Text,
     int Order,
     bool IsCorrect
-) : IDTORepresentation<QuestionChoiceOption, QuestionChoiceOptionTeacherDTO>
+) : IDTOEditRepresentation<QuestionChoiceOption, QuestionChoiceOptionTeacherDTO>
 {
     public void UpdateEntity(QuestionChoiceOption choiceOption)
     {

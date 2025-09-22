@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace StudyTestingSoftware.Models;
+namespace StudyTestingSoftware.Models.Tests;
 
 public class Question : BaseEntity
 {
@@ -8,7 +8,6 @@ public class Question : BaseEntity
     public int Order { get; set; }
     [Range(0, 100)] public int Points { get; set; }
     public QuestionType QuestionType { get; set; }
-    public bool ShuffleAnswers { get; set; }
 
     // Slider
     public double MinNumberValue { get; set; }

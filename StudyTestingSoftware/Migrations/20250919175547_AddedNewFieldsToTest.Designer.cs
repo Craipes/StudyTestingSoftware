@@ -13,8 +13,8 @@ using StudyTestingSoftware.Data;
 namespace StudyTestingSoftware.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250919132248_AdditionalFieldsForTest")]
-    partial class AdditionalFieldsForTest
+    [Migration("20250919175547_AddedNewFieldsToTest")]
+    partial class AddedNewFieldsToTest
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -270,9 +270,6 @@ namespace StudyTestingSoftware.Migrations
                     b.Property<byte>("QuestionType")
                         .HasColumnType("tinyint");
 
-                    b.Property<bool>("ShuffleAnswers")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("TargetBoolValue")
                         .HasColumnType("bit");
 
@@ -379,10 +376,13 @@ namespace StudyTestingSoftware.Migrations
                     b.Property<byte>("AccessMode")
                         .HasColumnType("tinyint");
 
+                    b.Property<int>("AttemptsLimit")
+                        .HasColumnType("int");
+
                     b.Property<Guid?>("AuthorId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CloseAt")
+                    b.Property<DateTime?>("CloseAt")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("CreatedAt")
@@ -414,6 +414,9 @@ namespace StudyTestingSoftware.Migrations
 
                     b.Property<DateTime?>("OpenedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("ShuffleAnswers")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("ShuffleQuestions")
                         .HasColumnType("bit");

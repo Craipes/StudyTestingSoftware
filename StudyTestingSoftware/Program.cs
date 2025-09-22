@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using StudyTestingSoftware.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -77,7 +78,8 @@ builder.Services.AddAuthentication(options =>
 })
     .AddBearerToken(IdentityConstants.BearerScheme);
 
-builder.Services.AddScoped<TestManagement>();
+builder.Services.AddScoped<TestManager>();
+builder.Services.AddScoped<GroupManager>();
 
 var app = builder.Build();
 

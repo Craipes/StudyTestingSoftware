@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using StudyTestingSoftware.Data;
+using System.ComponentModel.DataAnnotations;
 
-namespace StudyTestingSoftware.DTO;
+namespace StudyTestingSoftware.DTO.TeacherTest;
 
 public record QuestionTeacherDTO
 (
@@ -9,7 +10,6 @@ public record QuestionTeacherDTO
     int Order,
     [Range(0, 100)] int Points,
     QuestionType QuestionType,
-    bool ShuffleAnswers,
 
     // Slider
     double MinNumberValue,
@@ -23,7 +23,7 @@ public record QuestionTeacherDTO
     List<QuestionMatrixRowTeacherDTO> QuestionRows,
     List<QuestionMatrixColumnTeacherDTO> QuestionColumns,
     List<QuestionChoiceOptionTeacherDTO> ChoiceOptions
-) : IDTORepresentation<Question, QuestionTeacherDTO>
+) : IDTOEditRepresentation<Question, QuestionTeacherDTO>
 {
     public void UpdateEntity(Question question)
     {
@@ -31,7 +31,6 @@ public record QuestionTeacherDTO
         question.Order = Order;
         question.Points = Points;
         question.QuestionType = QuestionType;
-        question.ShuffleAnswers = ShuffleAnswers;
         question.MinNumberValue = MinNumberValue;
         question.MaxNumberValue = MaxNumberValue;
         question.NumberValueStep = NumberValueStep;
@@ -48,7 +47,6 @@ public record QuestionTeacherDTO
             question.Order,
             question.Points,
             question.QuestionType,
-            question.ShuffleAnswers,
             question.MinNumberValue,
             question.MaxNumberValue,
             question.NumberValueStep,
