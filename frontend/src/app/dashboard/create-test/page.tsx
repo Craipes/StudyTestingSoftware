@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { Loader, Trash2, PlusCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
+import { isValid } from 'zod/v3';
 
 // === Enum для числових значень ===
 enum QuestionType {
@@ -49,7 +50,6 @@ const QuestionSchema = z.object({
     order: z.number().int().min(0),
     points: z.number().int().min(1).max(5, 'Бали повинні бути від 1 до 5.'),
     questionType: z.nativeEnum(QuestionType),
-    shuffleAnswers: z.boolean(),
     minNumberValue: z.number().int().optional(),
     maxNumberValue: z.number().int().optional(),
     numberValueStep: z.number().int().optional(),
@@ -67,6 +67,8 @@ const CreateTestFormSchema = z.object({
     accessMode: z.nativeEnum(AccessMode),
     durationInMinutes: z.number().int().min(0),
     shuffleQuestions: z.boolean(),
+    shuffleAnswers:z.boolean(),
+    attemptsLimit:z.number().int(),
     isPublished: z.boolean(),
     isOpened: z.boolean().optional(),
     hasCloseTime: z.boolean().optional(),
@@ -98,7 +100,7 @@ const ChoiceOptionsEditor = ({ type, options, onAdd, onRemove, onUpdate, onToggl
         <div className="space-y-2">
             <h3 className="font-semibold mt-4">Варіанти відповідей</h3>
             {options.map((option, index) => (
-                <div key={index} className="flex items-center gap-2">
+                <div key={index} className="flex sm:flex-row items-center gap-2">
                     <input
                         type={type === QuestionType.MultipleChoice ? 'checkbox' : 'radio'}
                         checked={option.isCorrect}
@@ -109,12 +111,12 @@ const ChoiceOptionsEditor = ({ type, options, onAdd, onRemove, onUpdate, onToggl
                         type="text"
                         value={option.text}
                         onChange={(e) => onUpdate(index, e.target.value)}
-                        className="flex-1 px-2 py-1 border rounded"
+                        className="flex-1 w-full sm:w-auto px-2 py-1 border rounded"
                     />
                     <button
                         type="button"
                         onClick={() => onRemove(index)}
-                        className="text-red-500 hover:text-red-700"
+                        className="text-red-500 hover:text-red-700 p-1 self-start sm:self-center"
                     >
                         <Trash2 size={20} />
                     </button>
@@ -159,28 +161,22 @@ const TableEditor = ({
     return (
         <div className="space-y-4 mt-4">
             <h3 className="font-semibold">Таблиця: Рядки та Стовпці</h3>
-            <div className="flex gap-4">
-                <div className="flex-1 space-y-2 border p-4 rounded">
+            <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 space-y-2 border p-2 sm:p-4 rounded">
                     <h4 className="font-medium">Рядки (Питання)</h4>
                     {rows.map((row, index) => (
-                        <div key={index} className="flex items-center gap-2">
+                        <div key={index} className="flex-row sm:flex items-center gap-2">
                             <input
                                 type="text"
                                 value={row.text}
                                 onChange={(e) => onUpdateRowText(index, e.target.value)}
-                                className="flex-1 px-2 py-1 border rounded"
+                                className="flex-1 w-full px-2 py-1 border rounded"
                             />
-                            <button
-                                type="button"
-                                onClick={() => onRemoveRow(index)}
-                                className="text-red-500 hover:text-red-700"
-                            >
-                                <Trash2 size={20} />
-                            </button>
-                            <select
+                            <div className='flex gap-2'>
+                                <select
                                 value={row.validColumnOrder}
                                 onChange={(e) => onUpdateCorrectColumn(index, parseInt(e.target.value))}
-                                className="px-2 py-1 border rounded"
+                                className="px-2 mt-2 sm:mt-0 w-full sm:w-auto py-1 border rounded dark:bg-slate-800"
                             >
                                 <option value="">Оберіть відповідь</option>
                                 {columns.map((col, colIndex) => (
@@ -189,6 +185,14 @@ const TableEditor = ({
                                     </option>
                                 ))}
                             </select>
+                            <button
+                                type="button"
+                                onClick={() => onRemoveRow(index)}
+                                className="text-red-500 hover:text-red-700"
+                            >
+                                <Trash2 size={20} />
+                            </button>
+                            </div>
                         </div>
                     ))}
                     <button
@@ -199,7 +203,7 @@ const TableEditor = ({
                         <PlusCircle size={20} className="mr-1" /> Додати рядок
                     </button>
                 </div>
-                <div className="flex-1 space-y-2 border p-4 rounded">
+                <div className="flex-1 space-y-2 border p-2 sm:p-4 rounded">
                     <h4 className="font-medium">Стовпці (Варіанти)</h4>
                     {columns.map((col, index) => (
                         <div key={index} className="flex items-center gap-2">
@@ -247,25 +251,25 @@ const OrderingEditor = ({ rows, columns, onAdd, onRemove, onUpdateRowText, onUpd
         <div className="space-y-4 mt-4">
             <h3 className="font-semibold">Співставлення: Питання та Відповіді</h3>
             {rows.map((row, index) => (
-                <div key={index} className="flex items-center gap-2">
-                    <label className="text-sm font-medium">Питання:</label>
+                <div key={index} className="flex-wrap sm:p-3 sm:flex items-center gap-2">
+                    <label className="text-sm font-medium whitespace-nowrap">Питання:</label>
                     <input
                         type="text"
                         value={row.text}
                         onChange={(e) => onUpdateRowText(index, e.target.value)}
-                        className="flex-1 px-2 py-1 border rounded"
+                        className="flex-1 px-2 w-full py-1 border rounded"
                     />
                     <label className="text-sm font-medium">Відповідь:</label>
                     <input
                         type="text"
                         value={columns[index]?.text || ''}
                         onChange={(e) => onUpdateColumnText(index, e.target.value)}
-                        className="flex-1 px-2 py-1 border rounded"
+                        className="flex-1 px-2 w-full py-1 border rounded"
                     />
                     <button
                         type="button"
                         onClick={() => onRemove(index)}
-                        className="text-red-500 hover:text-red-700"
+                        className="text-red-500 p-2 sm:p-0 hover:text-red-700"
                     >
                         <Trash2 size={20} />
                     </button>
@@ -274,7 +278,7 @@ const OrderingEditor = ({ rows, columns, onAdd, onRemove, onUpdateRowText, onUpd
             <button
                 type="button"
                 onClick={onAdd}
-                className="flex items-center text-blue-500 hover:text-blue-700 mt-2"
+                className="flex items-center text-blue-500 hover:text-blue-700 sm:mt-2 mt-0"
             >
                 <PlusCircle size={20} className="mr-1" /> Додати пару
             </button>
@@ -297,6 +301,7 @@ export default function CreateTestPage() {
             accessMode: AccessMode.Private,
             durationInMinutes: 0,
             shuffleQuestions: true,
+            shuffleAnswers: true,
             isPublished: false,
             isOpened: true,
             hasCloseTime: false,
@@ -342,13 +347,12 @@ export default function CreateTestPage() {
                 order: fields.length,
                 points: 1,
                 questionType: type,
-                shuffleAnswers: true,
             };
 
             if (type === QuestionType.SingleChoice || type === QuestionType.MultipleChoice) {
                 newQuestion.choiceOptions = [{ text: '', isCorrect: true, order: 0 }];
             } else if (type === QuestionType.TableSingleChoice || type === QuestionType.Ordering) {
-                newQuestion.questionRows = [{ text: '', order: 0, validColumnOrder: -1 }];
+                newQuestion.questionRows = [{ text: '', order: 0, validColumnOrder: 1 }];
                 newQuestion.questionColumns = [{ text: '', order: 0 }];
             } else if (type === QuestionType.Slider) {
                 newQuestion.minNumberValue = 0;
@@ -376,10 +380,10 @@ export default function CreateTestPage() {
     };
 
     return (
-        <div className="flex-1 p-8">
+        <div className="flex-1 pt-6 sm:p-8">
             <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">Створити новий тест</h1>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg space-y-4">
+                <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg space-y-4">
                     <h2 className="text-xl font-semibold">Загальні параметри</h2>
                     <div>
                         <label className="block text-sm font-medium">Назва тесту</label>
@@ -396,6 +400,10 @@ export default function CreateTestPage() {
                             <input type="number" {...form.register('durationInMinutes', { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
                         </div>
                         <div>
+                            <label className="block text-sm font-medium">Кількість спроб (0 - без обмежень)</label>
+                            <input type="number" {...form.register('attemptsLimit', { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                        </div>
+                        <div>
                             <label className="block text-sm font-medium">Макс. досвід</label>
                             <input type="number" {...form.register('maxExperience', { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
                         </div>
@@ -408,10 +416,14 @@ export default function CreateTestPage() {
                             </select>
                         </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-wrap items-center gap-4">
                         <label className="flex items-center">
                             <input type="checkbox" {...form.register('shuffleQuestions')} className="form-checkbox" />
                             <span className="ml-2 text-sm">Перемішувати запитання</span>
+                        </label>
+                        <label className="flex items-center">
+                            <input type="checkbox" {...form.register('shuffleAnswers')} className="form-checkbox" />
+                            <span className="ml-2 text-sm">Перемішувати відповіді</span>
                         </label>
                         <label className="flex items-center">
                             <input type="checkbox" {...form.register('isPublished')} className="form-checkbox" />
@@ -429,7 +441,7 @@ export default function CreateTestPage() {
                             <input
                             type="datetime-local"
                             {...form.register("closeAt")}
-                            className="border rounded px-2 py-1"
+                            className="border rounded px-2 py-1 w-full sm:w-auto"
                             />
                         )}
 
@@ -438,7 +450,7 @@ export default function CreateTestPage() {
 
                 <div className="space-y-6">
                     {fields.map((field, index) => (
-                        <div key={field.id} className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg relative">
+                        <div key={field.id} className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg relative">
                             <h3 className="font-semibold text-lg mb-4">Запитання #{index + 1}</h3>
                             <button
                                 type="button"
@@ -651,7 +663,7 @@ export default function CreateTestPage() {
                     ))}
                 </div>
 
-                <div className="items-center w-full justify-between">
+                <div className="flex flex-col justify-end sm:gap-4 mt-6">
                     <div className="flex w-full items-center gap-4">
                         <select
                             id="newQuestionType"
@@ -660,7 +672,7 @@ export default function CreateTestPage() {
                             const type = parseInt(e.target.value) as QuestionType;
                             if (!isNaN(type)) {
                                 addQuestion(type);
-                                e.currentTarget.value = ""; // скинути вибір після додавання
+                                e.currentTarget.value = ""; 
                             }
                             }}
                             defaultValue=""
@@ -682,6 +694,12 @@ export default function CreateTestPage() {
                         {loading ? <Loader size={20} className="animate-spin mr-2" /> : null}
                         Зберегти тест
                     </button>
+
+                    {!isValid && (
+                        <p className="text-red-500 text-sm mt-2">
+                            Помилка у формі. Будь ласка, перевірте всі поля.
+                        </p>
+                    )}
                 </div>
             </form>
         </div>

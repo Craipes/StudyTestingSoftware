@@ -7,7 +7,7 @@ import Link from 'next/link';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 
-import { Lock,SquarePlus,Layers,NotebookPen,BookOpen,DoorOpen,Menu,X  } from 'lucide-react';
+import { Lock,SquarePlus,Layers,NotebookPen,BookOpen,DoorOpen,Menu,X, Users  } from 'lucide-react';
 
 
 
@@ -119,6 +119,7 @@ export function Sidebar({ userInfo }: SidebarProps) {
                 <div className="flex flex-col pl-6 mt-1 space-y-1">
                   <Link href="/dashboard/create-test" className={`py-1 px-2  flex items-center gap-2 rounded hover:bg-gray-700 transition-colors ${pathname === '/dashboard/create-test' ? 'bg-gray-700 font-bold' : ''}`}><SquarePlus /> Створити тест</Link>
                   <Link href="/dashboard/manage-tests" className={`py-1 px-2  flex items-center gap-2 rounded hover:bg-gray-700 transition-colors ${pathname === '/dashboard/manage-tests' ? 'bg-gray-700 font-bold' : ''}`}><Layers /> Керування тестами</Link>
+                  <Link href="/dashboard/manage-groups" className={`py-1 px-2  flex items-center gap-2 rounded hover:bg-gray-700 transition-colors ${pathname === '/dashboard/manage-groups' ? 'bg-gray-700 font-bold' : ''}`}><Users /> Керування групами</Link>
                 </div>
               )}
             </div>
