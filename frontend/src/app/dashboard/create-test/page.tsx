@@ -9,6 +9,12 @@ import { Loader, Trash2, PlusCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import { isValid } from 'zod/v3';
+import Breadcrumbs from '@/components/shared/BreadCrumbs';
+
+  const breadcrumbItems = [
+    { name: 'Дашборд', href: '/dashboard' },
+    { name: 'Cтворити тест'}
+  ];
 
 // === Enum для числових значень ===
 enum QuestionType {
@@ -381,7 +387,10 @@ export default function CreateTestPage() {
 
     return (
         <div className="flex-1 pt-6 sm:p-8">
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">Створити новий тест</h1>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">
+                Створити новий тест
+                <Breadcrumbs items={breadcrumbItems} />
+                </h1>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg space-y-4">
                     <h2 className="text-xl font-semibold">Загальні параметри</h2>
