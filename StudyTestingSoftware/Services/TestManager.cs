@@ -21,11 +21,32 @@ public class TestManager
             .ToListAsync();
     }
 
-    public async Task<List<TeacherTestPreviewDTO>> ListTestPreviewsByAuthorAsync(Guid authorId)
+    public async Task<List<TeacherTestPreviewDTO>> ListTeacherTestPreviewsByAuthorAsync(Guid authorId)
     {
         return await dbContext.Tests
             .AsNoTracking()
             .Where(t => t.AuthorId == authorId)
+            .OrderByDescending(t => t.IsOpened)
+            .ThenByDescending(t => t.CreatedAt)
+            .Select(t => new TeacherTestPreviewDTO(
+                t.Id,
+                t.Name,
+                t.AccessMode,
+                t.IsPublished,
+                t.IsOpened,
+                t.HasCloseTime,
+                t.CloseAt,
+                t.Questions.Count
+            ))
+            .ToListAsync();
+    }
+
+    public async Task<List<TeacherTestPreviewDTO>> ListTeacherTestPreviewsByGroupAsync(Guid groupId, Guid? authorId)
+    {
+        return await dbContext.Tests
+            .AsNoTracking()
+            .Where(t => t.AuthorId == authorId || (t.IsPublished && t.AccessMode != TestAccessMode.Private))
+            .Where(t => t.OpenedToGroups.Any(g => g.Id == groupId))
             .OrderByDescending(t => t.IsOpened)
             .ThenByDescending(t => t.CreatedAt)
             .Select(t => new TeacherTestPreviewDTO(

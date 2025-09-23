@@ -5,7 +5,7 @@ namespace StudyTestingSoftware.DTO.TeacherTest;
 
 public record TeacherTestPreviewDTO
 (
-    Guid? Id,
+    Guid Id,
     [MinLength(1), MaxLength(128)] string Name,
     TestAccessMode AccessMode,
     bool IsPublished,

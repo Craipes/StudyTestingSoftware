@@ -40,7 +40,7 @@ public class TeacherTestsController : Controller
             return Unauthorized();
         }
 
-        var testsPreviews = await testManagement.ListTestPreviewsByAuthorAsync(user.Id);
+        var testsPreviews = await testManagement.ListTeacherTestPreviewsByAuthorAsync(user.Id);
         return testsPreviews;
     }
 

@@ -2,6 +2,7 @@
 
 public record UserInfoDTO
 (
+    Guid Id,
     string FirstName, 
     string LastName, 
     string? MiddleName, 

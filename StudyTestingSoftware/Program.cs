@@ -80,6 +80,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddScoped<TestManager>();
 builder.Services.AddScoped<GroupManager>();
+builder.Services.AddScoped<CustomUserManager>();
 
 var app = builder.Build();
 
@@ -102,6 +103,16 @@ app.UseAuthorization();
 
 app.MapGroup("auth")
     .MapCustomIdentityApi();
+
+app.MapGet("/find-user", async (UserManager<AppUser> userManager, string email) =>
+{
+    var user = await userManager.FindByEmailAsync(email);
+    if (user == null)
+    {
+        return Results.NotFound();
+    }
+    return Results.Ok(new { user.Id, user.UserName, user.Email });
+});
 
 app.MapControllers();
 

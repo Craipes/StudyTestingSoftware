@@ -11,12 +11,14 @@ public class TeacherGroupsController : Controller
     private readonly UserManager<AppUser> userManager;
     private readonly GroupManager groupManager;
     private readonly TestManager testManager;
+    private readonly CustomUserManager customUserManager;
 
-    public TeacherGroupsController(UserManager<AppUser> userManager, GroupManager groupManager, TestManager testManager)
+    public TeacherGroupsController(UserManager<AppUser> userManager, GroupManager groupManager, TestManager testManager, CustomUserManager customUserManager)
     {
         this.userManager = userManager;
         this.groupManager = groupManager;
         this.testManager = testManager;
+        this.customUserManager = customUserManager;
     }
 
     [HttpGet("list-ids")]
@@ -267,5 +269,48 @@ public class TeacherGroupsController : Controller
         }
 
         return await groupManager.RemoveTestFromGroupAsync(groupId, testId);
+    }
+
+    [HttpGet("list-tests/{groupId:guid}")]
+    public async Task<ActionResult<List<TeacherTestPreviewDTO>>> ListGroupTests([FromRoute] Guid groupId)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        var group = await groupManager.GetGroupByIdAsync(groupId);
+        if (group == null)
+        {
+            return NotFound();
+        }
+        if (group.OwnerId != user.Id)
+        {
+            return Forbid();
+        }
+        var tests = await testManager.ListTeacherTestPreviewsByGroupAsync(groupId, user.Id);
+        return tests;
+    }
+
+    [HttpGet("list-students/{groupId:guid}")]
+    public async Task<ActionResult<List<UserInfoDTO>>> ListGroupStudents([FromRoute] Guid groupId)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        var group = await groupManager.GetGroupByIdAsync(groupId);
+        if (group == null)
+        {
+            return NotFound();
+        }
+        if (group.OwnerId != user.Id)
+        {
+            return Forbid();
+        }
+
+        var students = await customUserManager.GetUsersInfoInGroup(groupId);
+        return Ok(students);
     }
 }
