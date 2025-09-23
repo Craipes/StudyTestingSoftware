@@ -73,19 +73,31 @@ const ManageTestsPage = () => {
     return test.isPublished ? 'Опубліковано' : 'Не опубліковано';
   };
 
+  const getAccessModeText = (mode: number) => {
+    switch (mode) {
+      case 0:
+        return 'Публічний';
+      case 1:
+        return 'Приватний';
+      default:
+        return 'Невідомий';
+    }
+  };
+
   return (
     <div>
       {loading ? (
         <div>Завантаження тестів...</div>
       ) : (
         <div className='flex-1 pt-6 sm:p-8'>
-          <h1 className='text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6'>
-            Керування тестами
-            <Breadcrumbs items={breadcrumbItems} />
-          </h1>
-
-          <div className='border border-blue-600 hover:bg-blue-700 transition-colors duration-300 text-blue-600 hover:text-white rounded-lg px-4 py-2 mb-6 w-fit'>
-            <Link href="/dashboard/create-test" className="text-sm font-medium ">
+          <div className="sm:flex flex-row justify-between items-center mb-6">
+            <h1 className='text-3xl font-bold text-gray-800 dark:text-gray-200 mb-4 sm:mb-0'>Керування тестами
+        <Breadcrumbs items={breadcrumbItems} />
+            </h1>
+            <Link
+            href={'/dashboard/create-test'}
+              className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300"
+            >
               Створити тест
             </Link>
           </div>
@@ -93,10 +105,11 @@ const ManageTestsPage = () => {
           {tests.length > 0 ? (
             <div className="space-y-4 sm:space-y-0 sm:grid-cols-2 sm:grid sm:gap-4">
               {tests.map((test) => (
-                <div key={test.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <div key={test.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6 flex flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4">
                   <div className="flex-grow">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{test.name}</h2>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Питань: {test.questionsCount}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Режим доступу: {test.accessMode === 0 ? 'Публічний' : 'Приватний'}</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Статус: {getStatusText(test)}</p>
                     {test.hasCloseTime && (
                       <p className="text-sm text-gray-600 dark:text-gray-400">Закриття: {new Date(test.closeAt!).toLocaleString()}</p>

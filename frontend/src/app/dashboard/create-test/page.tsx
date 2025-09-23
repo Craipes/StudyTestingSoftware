@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import { isValid } from 'zod/v3';
 import Breadcrumbs from '@/components/shared/BreadCrumbs';
+import Link from 'next/link';
 
   const breadcrumbItems = [
     { name: 'Дашборд', href: '/dashboard' },
@@ -387,10 +388,18 @@ export default function CreateTestPage() {
 
     return (
         <div className="flex-1 pt-6 sm:p-8">
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">
+            <div className='flex-row sm:flex justify-between items-center mb-6'>
+                <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-4 sm:mb-0">
                 Створити новий тест
                 <Breadcrumbs items={breadcrumbItems} />
                 </h1>
+            <Link
+            href={'/dashboard/create-test'}
+              className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300"
+            >
+              Всі тести
+            </Link>
+            </div>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg space-y-4">
                     <h2 className="text-xl font-semibold">Загальні параметри</h2>
