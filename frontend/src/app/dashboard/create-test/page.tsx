@@ -685,7 +685,7 @@ export default function CreateTestPage() {
                     <div className="flex w-full items-center gap-4">
                         <select
                             id="newQuestionType"
-                            className="p-2 border w-full rounded dark:bg-slate-800"
+                            className="p-2 bg-white shadow-lg border w-full rounded-lg dark:bg-slate-800"
                             onChange={(e) => {
                             const type = parseInt(e.target.value) as QuestionType;
                             if (!isNaN(type)) {

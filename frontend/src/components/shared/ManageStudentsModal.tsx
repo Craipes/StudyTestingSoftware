@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -9,14 +10,13 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
+
 import { Button } from '@/components/ui/button';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import { z } from 'zod';
-import { useForm } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Label } from '@/components/ui/label';
 import { Trash } from 'lucide-react';
 import {
   AlertDialog,
@@ -29,6 +29,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { AutoSuggestInput } from './AutoSuggestInput';
+import { Label } from '../ui/label';
 
 
 interface Student {
@@ -48,15 +50,16 @@ const studentSchema = z.object({
 
 type StudentFormValues = z.infer<typeof studentSchema>;
 
-const ManageStudentsModal: React.FC<ManageStudentsModalProps> = ({ groupId, onClose}) => {
+const ManageStudentsModal: React.FC<ManageStudentsModalProps> = ({ groupId, onClose }) => {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
-  const form = useForm<StudentFormValues>({
+  
+  const methods = useForm<StudentFormValues>({
     resolver: zodResolver(studentSchema),
     defaultValues: { email: '' },
   });
 
-  const { register, handleSubmit, reset, formState: { errors } } = form;
+  const { handleSubmit, reset, formState: { errors } } = methods;
 
   const fetchStudents = async () => {
     try {
@@ -80,7 +83,7 @@ const ManageStudentsModal: React.FC<ManageStudentsModalProps> = ({ groupId, onCl
         params: { useEmail: true, userEmail: data.email },
       });
       toast.success('Студента успішно додано.');
-      await fetchStudents(); 
+      await fetchStudents();
       reset();
     } catch (err) {
       toast.error('Помилка при додаванні студента. Можливо, користувач не існує.');
@@ -93,7 +96,7 @@ const ManageStudentsModal: React.FC<ManageStudentsModalProps> = ({ groupId, onCl
         params: { userId },
       });
       toast.success('Студента успішно видалено.');
-      await fetchStudents(); 
+      await fetchStudents();
     } catch (err) {
       toast.error('Помилка при видаленні студента.');
     }
@@ -106,23 +109,23 @@ const ManageStudentsModal: React.FC<ManageStudentsModalProps> = ({ groupId, onCl
           <DialogTitle>Керування студентами</DialogTitle>
           <DialogDescription>Додавайте або видаляйте студентів з цієї групи.</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(handleAddStudent)} className="space-y-4 mb-4 flex gap-2 items-center">
-          <div className="flex-1">
-            <Label className='mb-2' htmlFor="email">Email студента</Label>
-            <div className='flex gap-2'>
-              <Input
-              id="email"
-              type="email"
-              placeholder="Введіть email студента"
-              {...register('email')}
-            />
-              <Button type="submit" className="mt-auto">Додати</Button>
+        <FormProvider {...methods}>
+          <form onSubmit={handleSubmit(handleAddStudent)} className="space-y-4 mb-4">
+            <div className="flex gap-2 items-center">
+              <div className='flex-1'>
+                 <AutoSuggestInput
+                  name="email"
+                  placeholder="Введіть email студента"
+                  label="Email студента"
+                />
+                 {errors.email && (
+                  <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+                )}
+              </div>
+              <Button type="submit">Додати</Button>
             </div>
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
-            )}
-          </div>
-        </form>
+          </form>
+        </FormProvider>
 
         {loading ? (
           <p>Завантаження списку студентів...</p>
@@ -131,7 +134,7 @@ const ManageStudentsModal: React.FC<ManageStudentsModalProps> = ({ groupId, onCl
             <h3 className="font-semibold text-gray-700 dark:text-gray-300">Студенти групи:</h3>
             {students.map((student) => (
               <div key={student.id} className="flex items-center justify-between p-3 border rounded-md dark:bg-input/30 ">
-                <span className="text-gray-900  dark:text-gray-100">{student.firstName} {student.lastName}</span>
+                <span className="text-gray-900 dark:text-gray-100">{student.firstName} {student.lastName}</span>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="ghost" className="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-gray-700">
