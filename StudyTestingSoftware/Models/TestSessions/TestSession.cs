@@ -13,4 +13,6 @@ public class TestSession : BaseEntity
 
     public double Score { get; set; } = 0d;
     public bool IsCompleted { get; set; } = false;
+
+    public List<TestUserAnswer> UserAnswers { get; set; } = [];
 }

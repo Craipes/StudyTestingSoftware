@@ -51,5 +51,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
             .WithMany()
             .HasForeignKey(a => a.QuestionId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        // Index to speed up periodic scans for expired sessions
+        builder.Entity<TestSession>()
+            .HasIndex(ts => new { ts.IsCompleted, ts.AutoFinishAt });
     }
 }

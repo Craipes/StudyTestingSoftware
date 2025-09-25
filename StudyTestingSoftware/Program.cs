@@ -82,6 +82,9 @@ builder.Services.AddScoped<TestManager>();
 builder.Services.AddScoped<GroupManager>();
 builder.Services.AddScoped<CustomUserManager>();
 
+builder.Services.AddScoped<TestSessionManager>();
+builder.Services.AddHostedService<TestSessionAutoFinalizer>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
