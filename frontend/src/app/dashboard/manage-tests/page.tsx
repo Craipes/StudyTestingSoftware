@@ -116,11 +116,12 @@ const ManageTestsPage = () => {
                     )}
                   </div>
                   <div className="flex space-x-2">
-                    <button
+                    <Link
+                      href={`/dashboard/edit-test/${test.id}`}
                       className="p-2 rounded-md text-blue-500 hover:bg-blue-100 dark:hover:bg-gray-700"
                     >
                       <Edit size={20} />
-                    </button>
+                    </Link>
                     
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
