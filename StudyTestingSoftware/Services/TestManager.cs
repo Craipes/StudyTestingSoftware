@@ -1,16 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
-using StudyTestingSoftware.DTO.TeacherTest;
 
 namespace StudyTestingSoftware.Services;
 
 public class TestManager
 {
     private readonly AppDbContext dbContext;
+    private readonly TestSessionManager testSessionManager;
 
-    public TestManager(AppDbContext dbContext)
+    public TestManager(AppDbContext dbContext, TestSessionManager testSessionManager)
     {
         this.dbContext = dbContext;
+        this.testSessionManager = testSessionManager;
     }
 
     public async Task<List<Guid>> ListTestIdsByAuthorAsync(Guid authorId)
@@ -264,6 +265,9 @@ public class TestManager
         UpdateTestMaxScore(test);
 
         await dbContext.SaveChangesAsync();
+
+        await testSessionManager.UpdateScoreForTestSessionsAsync(test);
+
         return modelState;
     }
 

@@ -146,6 +146,20 @@ public class TestSessionManager
         session.Score = totalScore;
     }
 
+    public async Task UpdateScoreForTestSessionsAsync(Test test)
+    {
+        var sessions = await dbContext.TestSessions
+            .Where(s => s.TestId == test.Id && s.IsCompleted)
+            .ToListAsync();
+        if (sessions.Count == 0) return;
+
+        foreach (var session in sessions)
+        {
+            UpdateScoreInMemory(session, test);
+        }
+        await dbContext.SaveChangesAsync();
+    }
+
     public async Task<bool> TryFinalizeSessionByIdAsync(Guid sessionId)
     {
         var session = await dbContext.TestSessions.FirstOrDefaultAsync(s => s.Id == sessionId);
