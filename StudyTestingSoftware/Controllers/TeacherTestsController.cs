@@ -9,12 +9,14 @@ namespace StudyTestingSoftware.Controllers;
 public class TeacherTestsController : Controller
 {
     private readonly UserManager<AppUser> userManager;
-    private readonly TestManager testManagement;
+    private readonly TestReadManager testReadManager;
+    private readonly TestWriteManager testWriteManager;
 
-    public TeacherTestsController(UserManager<AppUser> userManager, TestManager testManagement)
+    public TeacherTestsController(UserManager<AppUser> userManager, TestReadManager testReadManager, TestWriteManager testWriteManager)
     {
         this.userManager = userManager;
-        this.testManagement = testManagement;
+        this.testReadManager = testReadManager;
+        this.testWriteManager = testWriteManager;
     }
 
     [HttpGet("list-ids")]
@@ -26,7 +28,7 @@ public class TeacherTestsController : Controller
             return Unauthorized();
         }
 
-        var testIds = await testManagement.ListTestIdsByAuthorAsync(user.Id);
+        var testIds = await testReadManager.ListTestIdsByAuthorAsync(user.Id);
 
         return testIds;
     }
@@ -40,7 +42,7 @@ public class TeacherTestsController : Controller
             return Unauthorized();
         }
 
-        var testsPreviews = await testManagement.ListTeacherTestPreviewsByAuthorAsync(user.Id);
+        var testsPreviews = await testReadManager.ListTeacherTestPreviewsByAuthorAsync(user.Id);
         return testsPreviews;
     }
 
@@ -53,7 +55,7 @@ public class TeacherTestsController : Controller
             return Unauthorized();
         }
 
-        (var test, var testValidation) = await testManagement.TryToCreateTestAsync(data, user);
+        (var test, var testValidation) = await testWriteManager.TryToCreateTestAsync(data, user);
         ModelState.Merge(testValidation);
 
         if (!ModelState.IsValid || test == null)
@@ -73,7 +75,7 @@ public class TeacherTestsController : Controller
             return Unauthorized();
         }
 
-        var test = await testManagement.LoadTestAsync(id, false);
+        var test = await testReadManager.LoadTestAsync(id, false);
 
         if (test == null)
         {
@@ -93,7 +95,7 @@ public class TeacherTestsController : Controller
             return Unauthorized();
         }
 
-        var test = await testManagement.LoadTestDefinitionAsync(id);
+        var test = await testReadManager.LoadTestDefinitionAsync(id);
         if (test == null)
         {
             return NotFound();
@@ -104,7 +106,7 @@ public class TeacherTestsController : Controller
             return Forbid();
         }
 
-        var testValidation = await testManagement.TryToUpdateTestAsync(data, id);
+        var testValidation = await testWriteManager.TryToUpdateTestAsync(data, id);
         ModelState.Merge(testValidation);
         if (!ModelState.IsValid)
         {
@@ -121,7 +123,7 @@ public class TeacherTestsController : Controller
         {
             return Unauthorized();
         }
-        var test = await testManagement.LoadTestDefinitionAsync(id);
+        var test = await testReadManager.LoadTestDefinitionAsync(id);
         if (test == null)
         {
             return NotFound();
@@ -131,7 +133,7 @@ public class TeacherTestsController : Controller
             return Forbid();
         }
 
-        await testManagement.DeleteTestAsync(id);
+        await testWriteManager.DeleteTestAsync(id);
         return Ok();
     }
 }

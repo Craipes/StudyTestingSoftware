@@ -10,6 +10,7 @@ global using StudyTestingSoftware.Models.TestSessions;
 
 global using StudyTestingSoftware.DTO;
 global using StudyTestingSoftware.DTO.TeacherTest;
+global using StudyTestingSoftware.DTO.StudentTest;
 global using StudyTestingSoftware.DTO.TeacherGroup;
 
 global using Microsoft.AspNetCore.Authorization;

@@ -7,13 +7,13 @@ public class TestSessionManager
 {
     private readonly AppDbContext dbContext;
     private readonly UserManager<AppUser> userManager;
-    private readonly TestManager testManager;
+    private readonly TestReadManager testReadManager;
 
-    public TestSessionManager(AppDbContext dbContext, UserManager<AppUser> userManager, TestManager testManager)
+    public TestSessionManager(AppDbContext dbContext, UserManager<AppUser> userManager, TestReadManager testReadManager)
     {
         this.dbContext = dbContext;
         this.userManager = userManager;
-        this.testManager = testManager;
+        this.testReadManager = testReadManager;
     }
 
     public async Task<TestSession?> StartSessionAsync(Guid testId, Guid userId)
@@ -70,7 +70,7 @@ public class TestSessionManager
         foreach (var session in sessions)
         {
             FinalizeSessionInMemory(session);
-            var test = await testManager.LoadTestAsync(session.TestId, false);
+            var test = await testReadManager.LoadTestAsync(session.TestId, false);
             if (test != null) UpdateScoreInMemory(session, test);
         }
 
@@ -171,12 +171,46 @@ public class TestSessionManager
         if (session.AutoFinishAt != null && session.AutoFinishAt <= now)
         {
             FinalizeSessionInMemory(session);
-            var test = await testManager.LoadTestAsync(session.TestId, false);
+            var test = await testReadManager.LoadTestAsync(session.TestId, false);
             if (test != null) UpdateScoreInMemory(session, test);
             await dbContext.SaveChangesAsync();
             return true;
         }
 
         return false;
+    }
+
+    public async Task<List<StudentTestPreviewDTO>> ListAvailableTestsForStudentAsync(Guid studentId, int pageSize, int pageNumber)
+    {
+        if (pageSize <= 0) pageSize = 10;
+        if (pageNumber <= 0) pageNumber = 0;
+        var query = dbContext.Tests
+            .Where(t => t.IsPublished && (t.AccessMode != TestAccessMode.Private || t.AuthorId == studentId))
+            .Where(t => !t.HasCloseTime || (t.CloseAt != null && t.CloseAt > DateTime.UtcNow))
+            .Where(t => t.AccessMode != TestAccessMode.Group || t.OpenedToGroups.Any(g => g.Students.Any(m => m.Id == studentId)))
+            .OrderByDescending(t => t.IsOpened)
+            .ThenBy(t => t.CloseAt)
+            .Skip(pageSize * pageNumber)
+            .Take(pageSize);
+        return await GetStudentTestPreviewDTOsAsync(query);
+    }
+
+    private static async Task<List<StudentTestPreviewDTO>> GetStudentTestPreviewDTOsAsync(IQueryable<Test> query)
+    {
+        return await query
+            .AsNoTracking()
+            .Select(t => new StudentTestPreviewDTO(
+                t.Id,
+                t.Name,
+                t.Description,
+                t.AccessMode,
+                t.IsPublished,
+                t.IsOpened,
+                t.HasCloseTime,
+                t.CloseAt,
+                t.Questions.Count,
+                t.DurationInMinutes,
+                t.AttemptsLimit))
+            .ToListAsync();
     }
 }
