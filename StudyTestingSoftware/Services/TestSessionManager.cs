@@ -43,6 +43,7 @@ public class TestSessionManager
         {
             Test = test,
             User = user,
+            RandomSeed = Random.Shared.Next(),
             StartedAt = now,
             AutoFinishAt = autoFinishAt,
             IsCompleted = false,

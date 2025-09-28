@@ -7,6 +7,7 @@ public class TestSession : BaseEntity
     public required AppUser User { get; set; }
     public Guid UserId { get; set; }
 
+    public required int RandomSeed { get; set; }
     public DateTime StartedAt { get; set; } = DateTime.UtcNow;
     public DateTime? FinishedAt { get; set; } = null;
     public DateTime? AutoFinishAt { get; set; } = null;
