@@ -23,7 +23,7 @@ public class TestSessionManager
             return null;
         }
 
-        var test = await dbContext.Tests.AsNoTracking().FirstOrDefaultAsync(t => t.Id == testId);
+        var test = await dbContext.Tests.FirstOrDefaultAsync(t => t.Id == testId);
         if (test == null || !test.IsOpened || !test.IsPublished) return null;
 
         if (test.AccessMode == TestAccessMode.Private && test.AuthorId != userId) return null;
@@ -39,6 +39,14 @@ public class TestSessionManager
                 .AnyAsync(g => g.Students.Any(s => s.Id == userId));
 
             if (!isInGroup) return null;
+        }
+
+        if (test.AttemptsLimit != 0)
+        {
+            var previousAttempts = await dbContext.TestSessions
+                .AsNoTracking()
+                .CountAsync(s => s.UserId == userId && s.TestId == testId);
+            if (previousAttempts >= test.AttemptsLimit) return null;
         }
 
         var now = DateTime.UtcNow;
@@ -60,12 +68,12 @@ public class TestSessionManager
         return session;
     }
 
-    public async Task<StudentTestSessionDTO?> GetStudentSessionDTO(Guid sessionId)
+    public async Task<StudentTestSessionDTO?> GetStudentSessionDTO(Guid sessionId, Guid studentId)
     {
         var session = await dbContext.TestSessions
             .AsNoTracking()
             .Include(s => s.UserAnswers)
-            .FirstOrDefaultAsync(s => s.Id == sessionId);
+            .FirstOrDefaultAsync(s => s.Id == sessionId && s.UserId == studentId);
 
         if (session == null) return null;
 
@@ -145,6 +153,185 @@ public class TestSessionManager
             session.IsCompleted,
             test.DurationInMinutes,
             questions);
+    }
+
+    public async Task<bool> SubmitAnswerAsync(StudentAnswerSubmitDTO answerDTO, Guid userId)
+    {
+        var session = await dbContext.TestSessions
+            .Include(s => s.UserAnswers.Where(a => a.QuestionId == answerDTO.QuestionId))
+            .FirstOrDefaultAsync(s => s.Id == answerDTO.SessionId && s.UserId == userId);
+
+        if (session == null || session.IsCompleted) return false;
+
+        var question = await dbContext.Questions
+            .AsNoTracking()
+            .Include(q => q.ChoiceOptions)
+            .Include(q => q.QuestionRows)
+            .Include(q => q.QuestionColumns)
+            .FirstOrDefaultAsync(q => q.Id == answerDTO.QuestionId);
+
+        if (question == null || question.TestId != session.TestId) return false;
+
+        var answers = session.UserAnswers;
+        switch (question.QuestionType)
+        {
+            case QuestionType.YesNo:
+                if (answerDTO.ResetValue)
+                {
+                    dbContext.TestUserAnswers.RemoveRange(answers);
+                    await dbContext.SaveChangesAsync();
+                    return true;
+                }
+                if (answerDTO.BooleanValue == null) return false;
+                if (answers.Count == 0)
+                {
+                    var answer = new TestUserAnswer
+                    {
+                        TestSession = null!,
+                        Question = null!,
+                        BoolValue = answerDTO.BooleanValue,
+                        QuestionId = question.Id,
+                        TestSessionId = session.Id
+                    };
+                    dbContext.TestUserAnswers.Add(answer);
+                }
+                else
+                {
+                    var existingAnswer = answers[0];
+                    existingAnswer.BoolValue = answerDTO.BooleanValue;
+                    dbContext.TestUserAnswers.Update(existingAnswer);
+                }
+                await dbContext.SaveChangesAsync();
+                return true;
+            case QuestionType.Slider:
+                if (answerDTO.ResetValue)
+                {
+                    dbContext.TestUserAnswers.RemoveRange(answers);
+                    await dbContext.SaveChangesAsync();
+                    return true;
+                }
+                if (answerDTO.NumberValue == null) return false;
+                if (answerDTO.NumberValue < question.MinNumberValue || answerDTO.NumberValue > question.MaxNumberValue) return false;
+                if (answers.Count == 0)
+                {
+                    var answer = new TestUserAnswer
+                    {
+                        TestSession = null!,
+                        Question = null!,
+                        NumberValue = answerDTO.NumberValue,
+                        QuestionId = question.Id,
+                        TestSessionId = session.Id
+                    };
+                    dbContext.TestUserAnswers.Add(answer);
+                }
+                else
+                {
+                    var existingAnswer = answers[0];
+                    existingAnswer.NumberValue = answerDTO.NumberValue;
+                    dbContext.TestUserAnswers.Update(existingAnswer);
+                }
+                await dbContext.SaveChangesAsync();
+                return true;
+            case QuestionType.SingleChoice:
+                if (answerDTO.ResetValue)
+                {
+                    dbContext.TestUserAnswers.RemoveRange(answers);
+                    await dbContext.SaveChangesAsync();
+                    return true;
+                }
+                if (answerDTO.SelectedChoiceOptionId == null) return false;
+                if (!question.ChoiceOptions.Any(o => o.Id == answerDTO.SelectedChoiceOptionId)) return false;
+                if (answers.Count == 0)
+                {
+                    var answer = new TestUserAnswer
+                    {
+                        TestSession = null!,
+                        Question = null!,
+                        SelectedChoiceOptionId = answerDTO.SelectedChoiceOptionId,
+                        QuestionId = question.Id,
+                        TestSessionId = session.Id
+                    };
+                    dbContext.TestUserAnswers.Add(answer);
+                }
+                else
+                {
+                    var existingAnswer = answers[0];
+                    existingAnswer.SelectedChoiceOptionId = answerDTO.SelectedChoiceOptionId;
+                    dbContext.TestUserAnswers.Update(existingAnswer);
+                }
+                await dbContext.SaveChangesAsync();
+                return true;
+            case QuestionType.MultipleChoice:
+                if (answerDTO.SelectedChoiceOptionId == null) return false;
+                if (!question.ChoiceOptions.Any(o => o.Id == answerDTO.SelectedChoiceOptionId)) return false;
+
+                var existing = answers.FirstOrDefault(a => a.SelectedChoiceOptionId == answerDTO.SelectedChoiceOptionId);
+                if (existing != null)
+                {
+                    if (answerDTO.ResetValue)
+                    {
+                        dbContext.TestUserAnswers.Remove(existing);
+                    }
+                }
+                else
+                {
+                    if (!answerDTO.ResetValue)
+                    {
+                        var answer = new TestUserAnswer
+                        {
+                            TestSession = null!,
+                            Question = null!,
+                            SelectedChoiceOptionId = answerDTO.SelectedChoiceOptionId,
+                            QuestionId = question.Id,
+                            TestSessionId = session.Id
+                        };
+                        dbContext.TestUserAnswers.Add(answer);
+                    }
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            case QuestionType.TableSingleChoice:
+            case QuestionType.Ordering:
+                if (answerDTO.SelectedMatrixColumnId == null || answerDTO.SelectedMatrixRowId == null) return false;
+                if (!question.QuestionColumns.Any(o => o.Id == answerDTO.SelectedMatrixColumnId)) return false;
+                if (!question.QuestionRows.Any(o => o.Id == answerDTO.SelectedMatrixRowId)) return false;
+
+                var existingRowAnswer = answers.FirstOrDefault(a => a.SelectedMatrixRowId == answerDTO.SelectedMatrixRowId);
+                if (existingRowAnswer != null)
+                {
+                    if (answerDTO.ResetValue)
+                    {
+                        dbContext.TestUserAnswers.Remove(existingRowAnswer);
+                    }
+                    else
+                    {
+                        existingRowAnswer.SelectedMatrixColumnId = answerDTO.SelectedMatrixColumnId;
+                        dbContext.TestUserAnswers.Update(existingRowAnswer);
+                    }
+                }
+                else
+                {
+                    if (!answerDTO.ResetValue)
+                    {
+                        var answer = new TestUserAnswer
+                        {
+                            TestSession = null!,
+                            Question = null!,
+                            SelectedMatrixColumnId = answerDTO.SelectedMatrixColumnId,
+                            SelectedMatrixRowId = answerDTO.SelectedMatrixRowId,
+                            QuestionId = question.Id,
+                            TestSessionId = session.Id
+                        };
+                        dbContext.TestUserAnswers.Add(answer);
+                    }
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            default:
+                return false;
+        }
     }
 
     public async Task<List<StudentActiveTestSessionPreviewDTO>> GetActiveStudentTestSessionsAsync(Guid userId)
@@ -289,9 +476,26 @@ public class TestSessionManager
         await dbContext.SaveChangesAsync();
     }
 
+    public async Task<bool> SubmitSessionByIdAndUserAsync(Guid sessionId, Guid userId)
+    {
+        var session = await dbContext.TestSessions.FirstOrDefaultAsync(s => s.Id == sessionId && s.UserId == userId);
+        if (session == null || session.IsCompleted) return false;
+
+        FinalizeSessionInMemory(session);
+        var test = await testReadManager.LoadTestAsync(session.TestId, false);
+        if (test != null) UpdateScoreInMemory(session, test);
+        await dbContext.SaveChangesAsync();
+        return true;
+    }
+
     public async Task<bool> TryFinalizeSessionByIdAsync(Guid sessionId)
     {
         var session = await dbContext.TestSessions.FirstOrDefaultAsync(s => s.Id == sessionId);
+        return await TryFinalizeSessionAsync(session);
+    }
+
+    private async Task<bool> TryFinalizeSessionAsync(TestSession? session)
+    {
         if (session == null) return false;
         if (session.IsCompleted) return true;
 
