@@ -18,6 +18,11 @@ public class TestSessionManager
 
     public async Task<TestSession?> StartSessionAsync(Guid testId, Guid userId)
     {
+        if (await dbContext.TestSessions.AnyAsync(s => s.UserId == userId && !s.IsCompleted))
+        {
+            return null;
+        }
+
         var test = await dbContext.Tests.AsNoTracking().FirstOrDefaultAsync(t => t.Id == testId);
         if (test == null || !test.IsOpened || !test.IsPublished) return null;
 
@@ -53,6 +58,129 @@ public class TestSessionManager
         dbContext.TestSessions.Add(session);
         await dbContext.SaveChangesAsync();
         return session;
+    }
+
+    public async Task<StudentTestSessionDTO?> GetStudentSessionDTO(Guid sessionId)
+    {
+        var session = await dbContext.TestSessions
+            .AsNoTracking()
+            .Include(s => s.UserAnswers)
+            .FirstOrDefaultAsync(s => s.Id == sessionId);
+
+        if (session == null) return null;
+
+        var test = await testReadManager.LoadTestAsync(session.TestId, false);
+
+        if (test == null) return null;
+
+        var random = new Random(session.RandomSeed);
+        var answers = session.UserAnswers;
+        List<StudentTestSessionQuestionDTO> questions = [];
+        foreach (var question in test.Questions)
+        {
+            double? selectedNumber = null;
+            bool? selectedBoolean = null;
+
+            List<StudentTestSessionChoiceOptionDTO> choiceOptions = [];
+            List<StudentTestSessionMatrixColumnDTO> questionColumns = [];
+            List<StudentTestSessionMatrixRowDTO> questionRows = [];
+
+            switch (question.QuestionType)
+            {
+                case QuestionType.YesNo:
+                    selectedBoolean = answers.FirstOrDefault(a => a.QuestionId == question.Id)?.BoolValue;
+                    break;
+                case QuestionType.Slider:
+                    selectedNumber = answers.FirstOrDefault(a => a.QuestionId == question.Id)?.NumberValue;
+                    break;
+                case QuestionType.SingleChoice:
+                case QuestionType.MultipleChoice:
+                    choiceOptions = question.ChoiceOptions
+                        .Select(o => new StudentTestSessionChoiceOptionDTO(
+                            o.Id,
+                            o.Text,
+                            answers.Any(a => a.QuestionId == question.Id && a.SelectedChoiceOptionId == o.Id)))
+                        .ToList();
+                    if (test.ShuffleAnswers) choiceOptions.Shuffle(random);
+                    break;
+                case QuestionType.TableSingleChoice:
+                case QuestionType.Ordering:
+                    questionColumns = question.QuestionColumns
+                        .Select(c => new StudentTestSessionMatrixColumnDTO(c.Id, c.Text))
+                        .ToList();
+                    questionRows = question.QuestionRows
+                        .Select(r => new StudentTestSessionMatrixRowDTO(
+                            r.Id,
+                            r.Text,
+                            answers.FirstOrDefault(a => a.QuestionId == question.Id && a.SelectedMatrixRowId == r.Id)?.SelectedMatrixColumnId))
+                        .ToList();
+                    if (test.ShuffleAnswers || question.QuestionType == QuestionType.Ordering) questionColumns.Shuffle(random);
+                    break;
+            }
+
+            questions.Add(new StudentTestSessionQuestionDTO(
+                question.Id,
+                question.Text,
+                question.Points,
+                question.QuestionType,
+                question.MinNumberValue,
+                question.MaxNumberValue,
+                question.NumberValueStep,
+                selectedNumber,
+                selectedBoolean,
+                questionRows,
+                questionColumns,
+                choiceOptions));
+        }
+
+        if (test.ShuffleQuestions) questions.Shuffle(random);
+
+        return new StudentTestSessionDTO(
+            session.Id,
+            test.Name,
+            session.StartedAt,
+            session.FinishedAt,
+            session.AutoFinishAt,
+            session.Score,
+            session.IsCompleted,
+            test.DurationInMinutes,
+            questions);
+    }
+
+    public async Task<List<StudentActiveTestSessionPreviewDTO>> GetActiveStudentTestSessionsAsync(Guid userId)
+    {
+        return await dbContext.TestSessions
+            .AsNoTracking()
+            .Where(s => s.UserId == userId && !s.IsCompleted)
+            .OrderByDescending(s => s.StartedAt)
+            .Select(s => new StudentActiveTestSessionPreviewDTO(
+                s.Id,
+                s.Test.Name,
+                s.StartedAt,
+                s.AutoFinishAt,
+                s.Test.DurationInMinutes))
+            .ToListAsync();
+    }
+
+    public async Task<List<StudentCompletedTestSessionPreviewDTO>> GetCompletedStudentTestSessionsAsync(Guid userId, int pageSize, int pageNumber)
+    {
+        if (pageSize <= 0) pageSize = 10;
+        if (pageNumber <= 0) pageNumber = 0;
+
+        return await dbContext.TestSessions
+            .AsNoTracking()
+            .Where(s => s.UserId == userId && s.IsCompleted)
+            .OrderByDescending(s => s.StartedAt)
+            .Skip(pageSize * pageNumber)
+            .Take(pageSize)
+            .Select(s => new StudentCompletedTestSessionPreviewDTO(
+                s.Id,
+                s.Test.Name,
+                s.StartedAt,
+                s.FinishedAt,
+                s.Score,
+                s.Test.MaxScore))
+            .ToListAsync();
     }
 
     public async Task<int> FinalizeExpiredSessionsAsync(int batchSize, CancellationToken ct = default)
@@ -102,45 +230,45 @@ public class TestSessionManager
                         totalScore += question.Points;
                     break;
                 case QuestionType.Slider:
-                        if (answers.Count != 1) break;
-                        if (answers[0].NumberValue == question.TargetNumberValue)
-                            totalScore += question.Points;
-                        break;
+                    if (answers.Count != 1) break;
+                    if (answers[0].NumberValue == question.TargetNumberValue)
+                        totalScore += question.Points;
+                    break;
                 case QuestionType.SingleChoice:
-                        if (answers.Count != 1) break;
-                        var correctOption = question.ChoiceOptions.FirstOrDefault(o => o.IsCorrect);
-                        if (correctOption != null && answers[0].SelectedChoiceOptionId == correctOption.Id)
-                            totalScore += question.Points;
-                        break;
+                    if (answers.Count != 1) break;
+                    var correctOption = question.ChoiceOptions.FirstOrDefault(o => o.IsCorrect);
+                    if (correctOption != null && answers[0].SelectedChoiceOptionId == correctOption.Id)
+                        totalScore += question.Points;
+                    break;
                 case QuestionType.MultipleChoice:
-                        if (question.ChoiceOptions.Count == 0) break;
-                        var selectedOptions = answers.Select(a => a.SelectedChoiceOptionId).ToHashSet();
+                    if (question.ChoiceOptions.Count == 0) break;
+                    var selectedOptions = answers.Select(a => a.SelectedChoiceOptionId).ToHashSet();
 
-                        int correctCount = 0;
-                        foreach (var option in question.ChoiceOptions)
+                    int correctCount = 0;
+                    foreach (var option in question.ChoiceOptions)
+                    {
+                        if (option.IsCorrect == selectedOptions.Contains(option.Id))
                         {
-                            if (option.IsCorrect == selectedOptions.Contains(option.Id))
-                            {
-                                correctCount++;
-                            }
+                            correctCount++;
                         }
+                    }
 
-                        totalScore += (double)question.Points * correctCount / question.ChoiceOptions.Count;
-                        break;
+                    totalScore += (double)question.Points * correctCount / question.ChoiceOptions.Count;
+                    break;
                 case QuestionType.TableSingleChoice:
                 case QuestionType.Ordering:
-                        int correctMultipleCount = 0;
-                        foreach (var row in question.QuestionRows)
+                    int correctMultipleCount = 0;
+                    foreach (var row in question.QuestionRows)
+                    {
+                        var correctColumnId = row.CorrectMatrixColumnId;
+                        if (answers.FirstOrDefault(a => a.SelectedMatrixRowId == row.Id)?.SelectedMatrixColumnId == correctColumnId)
                         {
-                            var correctColumnId = row.CorrectMatrixColumnId;
-                            if (answers.FirstOrDefault(a => a.SelectedMatrixRowId == row.Id)?.SelectedMatrixColumnId == correctColumnId)
-                            {
                             correctMultipleCount++;
-                            }
                         }
+                    }
 
-                        totalScore += (double)question.Points * correctMultipleCount / question.QuestionRows.Count;
-                        break;
+                    totalScore += (double)question.Points * correctMultipleCount / question.QuestionRows.Count;
+                    break;
             }
         }
 

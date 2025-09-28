@@ -28,4 +28,20 @@ public class StudentTestController : ControllerBase
         if (page < 1) page = 1;
         return await testSessionManager.ListAvailableTestsForStudentAsync(userId, pageSize, page - 1);
     }
+
+    [HttpPost("start/{testId:guid}")]
+    public async Task<ActionResult<Guid?>> StartTestSession(Guid testId)
+    {
+        if (!Guid.TryParse(userManager.GetUserId(User), out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var session = await testSessionManager.StartSessionAsync(testId, userId);
+        if (session == null)
+        {
+            return BadRequest("Cannot start test session. Possible reasons: test not found, not opened, not published, access denied.");
+        }
+        return session.Id;
+    }
 }

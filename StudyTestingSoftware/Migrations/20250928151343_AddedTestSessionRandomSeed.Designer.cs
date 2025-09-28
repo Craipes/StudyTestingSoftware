@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StudyTestingSoftware.Data;
 
@@ -11,9 +12,11 @@ using StudyTestingSoftware.Data;
 namespace StudyTestingSoftware.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250928151343_AddedTestSessionRandomSeed")]
+    partial class AddedTestSessionRandomSeed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,7 +37,7 @@ namespace StudyTestingSoftware.Migrations
 
                     b.HasIndex("StudentsId");
 
-                    b.ToTable("AppUserStudentGroup", (string)null);
+                    b.ToTable("AppUserStudentGroup");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -152,7 +155,7 @@ namespace StudyTestingSoftware.Migrations
 
                     b.HasIndex("OpenedToGroupsId");
 
-                    b.ToTable("StudentGroupTest", (string)null);
+                    b.ToTable("StudentGroupTest");
                 });
 
             modelBuilder.Entity("StudyTestingSoftware.Models.AppRole", b =>
@@ -294,7 +297,7 @@ namespace StudyTestingSoftware.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("StudentGroups", (string)null);
+                    b.ToTable("StudentGroups");
                 });
 
             modelBuilder.Entity("StudyTestingSoftware.Models.TestSessions.TestSession", b =>
@@ -335,7 +338,7 @@ namespace StudyTestingSoftware.Migrations
 
                     b.HasIndex("IsCompleted", "AutoFinishAt");
 
-                    b.ToTable("TestSessions", (string)null);
+                    b.ToTable("TestSessions");
                 });
 
             modelBuilder.Entity("StudyTestingSoftware.Models.TestSessions.TestUserAnswer", b =>
@@ -380,7 +383,7 @@ namespace StudyTestingSoftware.Migrations
 
                     b.HasIndex("TestSessionId");
 
-                    b.ToTable("TestUserAnswers", (string)null);
+                    b.ToTable("TestUserAnswers");
                 });
 
             modelBuilder.Entity("StudyTestingSoftware.Models.Tests.Question", b =>
@@ -424,7 +427,7 @@ namespace StudyTestingSoftware.Migrations
 
                     b.HasIndex("TestId");
 
-                    b.ToTable("Questions", (string)null);
+                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("StudyTestingSoftware.Models.Tests.QuestionChoiceOption", b =>
@@ -450,7 +453,7 @@ namespace StudyTestingSoftware.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("QuestionChoices", (string)null);
+                    b.ToTable("QuestionChoices");
                 });
 
             modelBuilder.Entity("StudyTestingSoftware.Models.Tests.QuestionMatrixColumn", b =>
@@ -473,7 +476,7 @@ namespace StudyTestingSoftware.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("QuestionMatrixColumns", (string)null);
+                    b.ToTable("QuestionMatrixColumns");
                 });
 
             modelBuilder.Entity("StudyTestingSoftware.Models.Tests.QuestionMatrixRow", b =>
@@ -501,7 +504,7 @@ namespace StudyTestingSoftware.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("QuestionMatrixRows", (string)null);
+                    b.ToTable("QuestionMatrixRows");
                 });
 
             modelBuilder.Entity("StudyTestingSoftware.Models.Tests.Test", b =>
@@ -565,7 +568,7 @@ namespace StudyTestingSoftware.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.ToTable("Tests", (string)null);
+                    b.ToTable("Tests");
                 });
 
             modelBuilder.Entity("AppUserStudentGroup", b =>
