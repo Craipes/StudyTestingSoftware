@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace AResult;
+namespace AResultLib;
 
 public class AResult<T> : IAResult<T>
 {

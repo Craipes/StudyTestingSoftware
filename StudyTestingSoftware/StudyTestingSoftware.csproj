@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AResult\AResult.csproj" />
+    <ProjectReference Include="..\AResult\AResultLib.csproj" />
   </ItemGroup>
 
 </Project>

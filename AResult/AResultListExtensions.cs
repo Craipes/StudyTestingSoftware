@@ -1,4 +1,4 @@
-namespace AResult;
+namespace AResultLib;
 
 public static class AResultListExtensions
 {

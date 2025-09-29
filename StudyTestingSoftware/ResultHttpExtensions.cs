@@ -1,4 +1,4 @@
-using AResult;
+using AResultLib;
 
 namespace StudyTestingSoftware;
 
@@ -29,7 +29,7 @@ public static class ResultHttpExtensions
         return controller.StatusCode(status, problem);
     }
 
-    public static ActionResult ToActionResult(this ControllerBase controller, AResult.AResult result, int successStatus = 204)
+    public static ActionResult ToActionResult(this ControllerBase controller, AResultLib.AResult result, int successStatus = 204)
     {
         if (result.IsSuccess)
             return controller.StatusCode(successStatus);

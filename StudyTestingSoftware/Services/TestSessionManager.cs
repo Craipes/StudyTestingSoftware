@@ -16,20 +16,20 @@ public class TestSessionManager
         this.testReadManager = testReadManager;
     }
 
-    public async Task<TestSession?> StartSessionAsync(Guid testId, Guid userId)
+    public async Task<AResult<TestSession>> StartSessionAsync(Guid testId, Guid userId)
     {
         if (await dbContext.TestSessions.AnyAsync(s => s.UserId == userId && !s.IsCompleted))
         {
-            return null;
+            return AResult<TestSession>.Failure(AProblem.Conflict(TestSessionErrors.UserHasActiveSession, "User already has an active test session."));
         }
 
         var test = await dbContext.Tests.FirstOrDefaultAsync(t => t.Id == testId);
-        if (test == null || !test.IsOpened || !test.IsPublished) return null;
+        if (test == null || !test.IsOpened || !test.IsPublished) return AResult<TestSession>.Failure(AProblem.NotFound(TestSessionErrors.TestNotAvailable));
 
-        if (test.AccessMode == TestAccessMode.Private && test.AuthorId != userId) return null;
+        if (test.AccessMode == TestAccessMode.Private && test.AuthorId != userId) return AResult<TestSession>.Failure(AProblem.NotFound(TestSessionErrors.TestNotAvailable));
 
         var user = await userManager.FindByIdAsync(userId.ToString());
-        if (user == null) return null;
+        if (user == null) return AResult<TestSession>.Failure(AProblem.Unauthorized(GeneralErrors.UnauthorizedAccess));
 
         if (test.AccessMode == TestAccessMode.Group)
         {
@@ -38,7 +38,7 @@ public class TestSessionManager
                 .Where(g => g.OpenedTests.Any(t => t.Id == testId))
                 .AnyAsync(g => g.Students.Any(s => s.Id == userId));
 
-            if (!isInGroup) return null;
+            if (!isInGroup) return AResult<TestSession>.Failure(AProblem.NotFound(TestSessionErrors.TestNotAvailable));
         }
 
         if (test.AttemptsLimit != 0)
@@ -46,7 +46,7 @@ public class TestSessionManager
             var previousAttempts = await dbContext.TestSessions
                 .AsNoTracking()
                 .CountAsync(s => s.UserId == userId && s.TestId == testId);
-            if (previousAttempts >= test.AttemptsLimit) return null;
+            if (previousAttempts >= test.AttemptsLimit) return AResult<TestSession>.Failure(AProblem.Forbidden(TestSessionErrors.AttemptLimitReached));
         }
 
         var now = DateTime.UtcNow;
@@ -68,18 +68,18 @@ public class TestSessionManager
         return session;
     }
 
-    public async Task<StudentTestSessionDTO?> GetStudentSessionDTO(Guid sessionId, Guid studentId)
+    public async Task<AResult<StudentTestSessionDTO>> GetStudentSessionDTO(Guid sessionId, Guid studentId)
     {
         var session = await dbContext.TestSessions
             .AsNoTracking()
             .Include(s => s.UserAnswers)
             .FirstOrDefaultAsync(s => s.Id == sessionId && s.UserId == studentId);
 
-        if (session == null) return null;
+        if (session == null) return AResult<StudentTestSessionDTO>.Failure(AProblem.NotFound(GeneralErrors.ResourceNotFound));
 
         var test = await testReadManager.LoadTestAsync(session.TestId, false);
 
-        if (test == null) return null;
+        if (test == null) return AResult<StudentTestSessionDTO>.Failure(AProblem.NotFound(GeneralErrors.ResourceNotFound));
 
         var random = new Random(session.RandomSeed);
         var answers = session.UserAnswers;
@@ -155,13 +155,13 @@ public class TestSessionManager
             questions);
     }
 
-    public async Task<bool> SubmitAnswerAsync(StudentAnswerSubmitDTO answerDTO, Guid userId)
+    public async Task<AResult> SubmitAnswerAsync(StudentAnswerSubmitDTO answerDTO, Guid userId)
     {
         var session = await dbContext.TestSessions
             .Include(s => s.UserAnswers.Where(a => a.QuestionId == answerDTO.QuestionId))
             .FirstOrDefaultAsync(s => s.Id == answerDTO.SessionId && s.UserId == userId);
 
-        if (session == null || session.IsCompleted) return false;
+        if (session == null || session.IsCompleted) return AResult.Failure(AProblem.NotFound(GeneralErrors.ResourceNotFound));
 
         var question = await dbContext.Questions
             .AsNoTracking()
@@ -170,7 +170,7 @@ public class TestSessionManager
             .Include(q => q.QuestionColumns)
             .FirstOrDefaultAsync(q => q.Id == answerDTO.QuestionId);
 
-        if (question == null || question.TestId != session.TestId) return false;
+        if (question == null || question.TestId != session.TestId) return AResult.Failure(AProblem.NotFound(GeneralErrors.ResourceNotFound));
 
         var answers = session.UserAnswers;
         switch (question.QuestionType)
@@ -180,9 +180,9 @@ public class TestSessionManager
                 {
                     dbContext.TestUserAnswers.RemoveRange(answers);
                     await dbContext.SaveChangesAsync();
-                    return true;
+                    return AResult.Success();
                 }
-                if (answerDTO.BooleanValue == null) return false;
+                if (answerDTO.BooleanValue == null) return AResult.Failure(AProblem.Validation(GeneralErrors.InvalidInput));
                 if (answers.Count == 0)
                 {
                     var answer = new TestUserAnswer
@@ -202,16 +202,19 @@ public class TestSessionManager
                     dbContext.TestUserAnswers.Update(existingAnswer);
                 }
                 await dbContext.SaveChangesAsync();
-                return true;
+                return AResult.Success();
             case QuestionType.Slider:
                 if (answerDTO.ResetValue)
                 {
                     dbContext.TestUserAnswers.RemoveRange(answers);
                     await dbContext.SaveChangesAsync();
-                    return true;
+                    return AResult.Success();
                 }
-                if (answerDTO.NumberValue == null) return false;
-                if (answerDTO.NumberValue < question.MinNumberValue || answerDTO.NumberValue > question.MaxNumberValue) return false;
+                if (answerDTO.NumberValue == null 
+                    || answerDTO.NumberValue < question.MinNumberValue 
+                    || answerDTO.NumberValue > question.MaxNumberValue) 
+                    return AResult.Failure(AProblem.Validation(GeneralErrors.InvalidInput));
+
                 if (answers.Count == 0)
                 {
                     var answer = new TestUserAnswer
@@ -231,16 +234,19 @@ public class TestSessionManager
                     dbContext.TestUserAnswers.Update(existingAnswer);
                 }
                 await dbContext.SaveChangesAsync();
-                return true;
+                return AResult.Success();
             case QuestionType.SingleChoice:
                 if (answerDTO.ResetValue)
                 {
                     dbContext.TestUserAnswers.RemoveRange(answers);
                     await dbContext.SaveChangesAsync();
-                    return true;
+                    return AResult.Success();
                 }
-                if (answerDTO.SelectedChoiceOptionId == null) return false;
-                if (!question.ChoiceOptions.Any(o => o.Id == answerDTO.SelectedChoiceOptionId)) return false;
+
+                if (answerDTO.SelectedChoiceOptionId == null 
+                    || !question.ChoiceOptions.Any(o => o.Id == answerDTO.SelectedChoiceOptionId)) 
+                    return AResult.Failure(AProblem.Validation(GeneralErrors.InvalidInput));
+
                 if (answers.Count == 0)
                 {
                     var answer = new TestUserAnswer
@@ -260,10 +266,11 @@ public class TestSessionManager
                     dbContext.TestUserAnswers.Update(existingAnswer);
                 }
                 await dbContext.SaveChangesAsync();
-                return true;
+                return AResult.Success();
             case QuestionType.MultipleChoice:
-                if (answerDTO.SelectedChoiceOptionId == null) return false;
-                if (!question.ChoiceOptions.Any(o => o.Id == answerDTO.SelectedChoiceOptionId)) return false;
+                if (answerDTO.SelectedChoiceOptionId == null 
+                    || !question.ChoiceOptions.Any(o => o.Id == answerDTO.SelectedChoiceOptionId)) 
+                    return AResult.Failure(AProblem.Validation(GeneralErrors.InvalidInput));
 
                 var existing = answers.FirstOrDefault(a => a.SelectedChoiceOptionId == answerDTO.SelectedChoiceOptionId);
                 if (existing != null)
@@ -290,12 +297,14 @@ public class TestSessionManager
                 }
 
                 await dbContext.SaveChangesAsync();
-                return true;
+                return AResult.Success();
             case QuestionType.TableSingleChoice:
             case QuestionType.Ordering:
-                if (answerDTO.SelectedMatrixColumnId == null || answerDTO.SelectedMatrixRowId == null) return false;
-                if (!question.QuestionColumns.Any(o => o.Id == answerDTO.SelectedMatrixColumnId)) return false;
-                if (!question.QuestionRows.Any(o => o.Id == answerDTO.SelectedMatrixRowId)) return false;
+                if (answerDTO.SelectedMatrixColumnId == null 
+                    || answerDTO.SelectedMatrixRowId == null 
+                    || !question.QuestionColumns.Any(o => o.Id == answerDTO.SelectedMatrixColumnId) 
+                    || !question.QuestionRows.Any(o => o.Id == answerDTO.SelectedMatrixRowId))
+                    return AResult.Failure(AProblem.Validation(GeneralErrors.InvalidInput));
 
                 var existingRowAnswer = answers.FirstOrDefault(a => a.SelectedMatrixRowId == answerDTO.SelectedMatrixRowId);
                 if (existingRowAnswer != null)
@@ -328,9 +337,9 @@ public class TestSessionManager
                 }
 
                 await dbContext.SaveChangesAsync();
-                return true;
+                return AResult.Success();
             default:
-                return false;
+                return AResult.Failure(AProblem.Validation(GeneralErrors.InvalidInput));
         }
     }
 
@@ -476,16 +485,16 @@ public class TestSessionManager
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task<bool> SubmitSessionByIdAndUserAsync(Guid sessionId, Guid userId)
+    public async Task<AResult> SubmitSessionByIdAndUserAsync(Guid sessionId, Guid userId)
     {
         var session = await dbContext.TestSessions.FirstOrDefaultAsync(s => s.Id == sessionId && s.UserId == userId);
-        if (session == null || session.IsCompleted) return false;
+        if (session == null || session.IsCompleted) return AResult.Failure(AProblem.NotFound(GeneralErrors.ResourceNotFound));
 
         FinalizeSessionInMemory(session);
         var test = await testReadManager.LoadTestAsync(session.TestId, false);
         if (test != null) UpdateScoreInMemory(session, test);
         await dbContext.SaveChangesAsync();
-        return true;
+        return AResult.Success();
     }
 
     public async Task<bool> TryFinalizeSessionByIdAsync(Guid sessionId)

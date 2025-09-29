@@ -5,7 +5,7 @@ VisualStudioVersion = 17.14.36429.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudyTestingSoftware", "StudyTestingSoftware\StudyTestingSoftware.csproj", "{EF5BB162-617C-4445-95A5-CE773A782E91}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AResult", "AResult\AResult.csproj", "{FB7A45AF-792A-48F5-B9D6-EDE6D38D4615}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AResultLib", "AResult\AResultLib.csproj", "{FB7A45AF-792A-48F5-B9D6-EDE6D38D4615}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
