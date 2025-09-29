@@ -10,14 +10,14 @@ public class TeacherGroupsController : Controller
 {
     private readonly UserManager<AppUser> userManager;
     private readonly GroupManager groupManager;
-    private readonly TestManager testManager;
+    private readonly TestReadManager testReadManager;
     private readonly CustomUserManager customUserManager;
 
-    public TeacherGroupsController(UserManager<AppUser> userManager, GroupManager groupManager, TestManager testManager, CustomUserManager customUserManager)
+    public TeacherGroupsController(UserManager<AppUser> userManager, GroupManager groupManager, TestReadManager testReadManager, CustomUserManager customUserManager)
     {
         this.userManager = userManager;
         this.groupManager = groupManager;
-        this.testManager = testManager;
+        this.testReadManager = testReadManager;
         this.customUserManager = customUserManager;
     }
 
@@ -227,7 +227,7 @@ public class TeacherGroupsController : Controller
             return Forbid();
         }
 
-        var test = await testManager.LoadTestDefinitionAsync(testId);
+        var test = await testReadManager.LoadTestDefinitionAsync(testId);
         if (test == null)
         {
             return NotFound();
@@ -258,7 +258,7 @@ public class TeacherGroupsController : Controller
             return Forbid();
         }
 
-        var test = await testManager.LoadTestDefinitionAsync(testId);
+        var test = await testReadManager.LoadTestDefinitionAsync(testId);
         if (test == null)
         {
             return NotFound();
@@ -288,7 +288,7 @@ public class TeacherGroupsController : Controller
         {
             return Forbid();
         }
-        var tests = await testManager.ListTeacherTestPreviewsByGroupAsync(groupId, user.Id);
+        var tests = await testReadManager.ListTeacherTestPreviewsByGroupAsync(groupId, user.Id);
         return tests;
     }
 
