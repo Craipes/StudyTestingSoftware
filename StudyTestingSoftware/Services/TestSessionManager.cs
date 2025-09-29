@@ -358,14 +358,18 @@ public class TestSessionManager
             .ToListAsync();
     }
 
-    public async Task<List<StudentCompletedTestSessionPreviewDTO>> GetCompletedStudentTestSessionsAsync(Guid userId, int pageSize, int pageNumber)
+    public async Task<StudentCompletedTestSessionPreviewPaginationDTO> GetCompletedStudentTestSessionsAsync(Guid userId, int pageSize, int pageNumber)
     {
-        if (pageSize <= 0) pageSize = 10;
-        if (pageNumber <= 0) pageNumber = 0;
-
-        return await dbContext.TestSessions
+        var query = dbContext.TestSessions
             .AsNoTracking()
-            .Where(s => s.UserId == userId && s.IsCompleted)
+            .Where(s => s.UserId == userId && s.IsCompleted);   
+        
+        var totalCount = await query.CountAsync();
+        if (pageSize <= 0) pageSize = 10;
+        int maxPageNumber = (int)Math.Ceiling((double)totalCount / pageSize) - 1;
+        pageNumber = Math.Clamp(pageNumber - 1, 0, maxPageNumber);
+
+        var items = await query
             .OrderByDescending(s => s.StartedAt)
             .Skip(pageSize * pageNumber)
             .Take(pageSize)
@@ -377,6 +381,8 @@ public class TestSessionManager
                 s.Score,
                 s.Test.MaxScore))
             .ToListAsync();
+
+        return new StudentCompletedTestSessionPreviewPaginationDTO(items, maxPageNumber + 1);
     }
 
     public async Task<int> FinalizeExpiredSessionsAsync(int batchSize, CancellationToken ct = default)
@@ -522,19 +528,30 @@ public class TestSessionManager
         return false;
     }
 
-    public async Task<List<StudentTestPreviewDTO>> ListAvailableTestsForStudentAsync(Guid studentId, int pageSize, int pageNumber)
+    public async Task<StudentTestPreviewPaginationDTO> ListAvailableTestsForStudentAsync(Guid studentId, int pageSize, int pageNumber)
     {
-        if (pageSize <= 0) pageSize = 10;
-        if (pageNumber <= 0) pageNumber = 0;
-        var query = dbContext.Tests
+        var now = DateTime.UtcNow;
+
+        IQueryable<Test> baseQuery = dbContext.Tests
             .Where(t => t.IsPublished && (t.AccessMode != TestAccessMode.Private || t.AuthorId == studentId))
-            .Where(t => !t.HasCloseTime || (t.CloseAt != null && t.CloseAt > DateTime.UtcNow))
-            .Where(t => t.AccessMode != TestAccessMode.Group || t.OpenedToGroups.Any(g => g.Students.Any(m => m.Id == studentId)))
+            .Where(t => !t.HasCloseTime || (t.CloseAt != null && t.CloseAt > now))
+            .Where(t => t.AccessMode != TestAccessMode.Group || t.OpenedToGroups.Any(g => g.Students.Any(m => m.Id == studentId)));
+
+        var totalCount = await baseQuery.CountAsync();
+
+        if (pageSize <= 0) pageSize = 10;
+        int maxPageNumber = (int)Math.Ceiling((double)totalCount / pageSize) - 1;
+        pageNumber = Math.Clamp(pageNumber - 1, 0, maxPageNumber);
+
+        var pageQuery = baseQuery
             .OrderByDescending(t => t.IsOpened)
             .ThenBy(t => t.CloseAt)
             .Skip(pageSize * pageNumber)
             .Take(pageSize);
-        return await GetStudentTestPreviewDTOsAsync(query);
+
+        var items = await GetStudentTestPreviewDTOsAsync(pageQuery);
+
+        return new StudentTestPreviewPaginationDTO(items, maxPageNumber + 1);
     }
 
     private static async Task<List<StudentTestPreviewDTO>> GetStudentTestPreviewDTOsAsync(IQueryable<Test> query)

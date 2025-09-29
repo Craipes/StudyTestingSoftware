@@ -1,0 +1,3 @@
+﻿namespace StudyTestingSoftware.DTO.StudentTest;
+
+public record StudentCompletedTestSessionPreviewPaginationDTO(List<StudentCompletedTestSessionPreviewDTO> Items, int TotalPagesCount);

@@ -16,17 +16,15 @@ public class StudentTestController : ControllerBase
         this.userManager = userManager;
     }
 
-    [HttpGet("list-available-tests/{page:int}")]
-    public async Task<ActionResult<List<StudentTestPreviewDTO>>> ListAvailableTests(int page = 1)
+    [HttpGet("list-available-tests")]
+    public async Task<ActionResult<StudentTestPreviewPaginationDTO>> ListAvailableTests([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         if (!Guid.TryParse(userManager.GetUserId(User), out var userId))
         {
             return Unauthorized();
         }
 
-        const int pageSize = 10;
-        if (page < 1) page = 1;
-        return await testSessionManager.ListAvailableTestsForStudentAsync(userId, pageSize, page - 1);
+        return await testSessionManager.ListAvailableTestsForStudentAsync(userId, pageSize, page);
     }
 
     [HttpGet("active-sessions")]
@@ -39,16 +37,15 @@ public class StudentTestController : ControllerBase
         return await testSessionManager.GetActiveStudentTestSessionsAsync(userId);
     }
 
-    [HttpGet("completed-sessions/{page:int}")]
-    public async Task<ActionResult<List<StudentCompletedTestSessionPreviewDTO>>> ListCompletedTestSessions(int page = 1)
+    [HttpGet("completed-sessions")]
+    public async Task<ActionResult<StudentCompletedTestSessionPreviewPaginationDTO>> ListCompletedTestSessions([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         if (!Guid.TryParse(userManager.GetUserId(User), out var userId))
         {
             return Unauthorized();
         }
-        const int pageSize = 10;
-        if (page < 1) page = 1;
-        return await testSessionManager.GetCompletedStudentTestSessionsAsync(userId, pageSize, page - 1);
+
+        return await testSessionManager.GetCompletedStudentTestSessionsAsync(userId, pageSize, page);
     }
 
     [HttpPost("start/{testId:guid}")]
