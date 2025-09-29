@@ -76,11 +76,11 @@ const ManageTestsPage = () => {
   const getAccessModeText = (mode: number) => {
     switch (mode) {
       case 0:
-        return 'Публічний';
-      case 1:
         return 'Приватний';
+      case 1:
+        return 'Груповий';
       default:
-        return 'Невідомий';
+        return 'Публічний';
     }
   };
 

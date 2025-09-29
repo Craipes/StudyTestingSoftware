@@ -14,6 +14,7 @@ import Link from 'next/link';
 
   const breadcrumbItems = [
     { name: 'Дашборд', href: '/dashboard' },
+    { name: 'Керування тестами', href: '/dashboard/manage-tests' },
     { name: 'Cтворити тест'}
   ];
 
@@ -394,7 +395,7 @@ export default function CreateTestPage() {
                 <Breadcrumbs items={breadcrumbItems} />
                 </h1>
             <Link
-            href={'/dashboard/create-test'}
+            href={'/dashboard/manage-tests'}
               className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300"
             >
               Всі тести

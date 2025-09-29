@@ -7,6 +7,6 @@ import { Toaster } from "react-hot-toast";
 export function Providers({children}: {children: React.ReactNode}) {
     return <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
                 <Toaster toastOptions={{className:'dark:bg-slate-900'}}/>
-        <NextTopLoader />
+        <NextTopLoader showSpinner={false} color="#155dfc" height={4}/>
         {children}</ThemeProvider>;
 }

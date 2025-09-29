@@ -21,6 +21,7 @@ interface TestPreview {
   name: string;
   isPublished: boolean;
   questionsCount: number;
+  accessMode:number;
 }
 
 interface GroupTest {
@@ -32,6 +33,21 @@ interface ManageTestsModalProps {
   groupId: string;
   onClose: () => void;
 }
+
+  const getAccessModeText = (mode: number) => {
+    switch (mode) {
+      case 0:
+        return 'Приватний';
+      case 1:
+        return 'Груповий';
+      default:
+        return 'Публічний';
+    }
+  };
+
+  const getPublicationStatusText = (test: TestPreview) => {
+    return test.isPublished ? 'Опубліковано' : 'Не опубліковано';
+  }
 
 const ManageTestsModal: React.FC<ManageTestsModalProps> = ({ groupId, onClose }) => {
   const [availableTests, setAvailableTests] = useState<TestPreview[]>([]);
@@ -105,6 +121,12 @@ const ManageTestsModal: React.FC<ManageTestsModalProps> = ({ groupId, onClose })
                     </div>
                     <span className="text-sm text-gray-500">
                       ({test.questionsCount} питань)
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {getAccessModeText(test.accessMode)}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {getPublicationStatusText(test)}
                     </span>
                   </div>
                 );
