@@ -15,3 +15,5 @@ global using StudyTestingSoftware.DTO.TeacherGroup;
 
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
+
+global using AResult;
