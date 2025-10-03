@@ -366,7 +366,7 @@ public class TestSessionManager
         
         var totalCount = await query.CountAsync();
         if (pageSize <= 0) pageSize = 10;
-        int maxPageNumber = (int)Math.Ceiling((double)totalCount / pageSize) - 1;
+        int maxPageNumber = Math.Max((int)Math.Ceiling((double)totalCount / pageSize) - 1, 0);
         pageNumber = Math.Clamp(pageNumber - 1, 0, maxPageNumber);
 
         var items = await query
@@ -540,7 +540,7 @@ public class TestSessionManager
         var totalCount = await baseQuery.CountAsync();
 
         if (pageSize <= 0) pageSize = 10;
-        int maxPageNumber = (int)Math.Ceiling((double)totalCount / pageSize) - 1;
+        int maxPageNumber = Math.Max((int)Math.Ceiling((double)totalCount / pageSize) - 1, 0);
         pageNumber = Math.Clamp(pageNumber - 1, 0, maxPageNumber);
 
         var pageQuery = baseQuery
