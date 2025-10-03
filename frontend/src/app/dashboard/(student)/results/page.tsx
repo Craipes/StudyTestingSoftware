@@ -2,22 +2,22 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {  AvailableTestsResponse } from '@/types';
-import { fetchAvailableTests } from '@/lib/api';
-import { TestCard } from '@/components/shared/TestCard';
+import {  CompletedTestSessionsResponse } from '@/types';
+import { fetchCompletedTestSessions } from '@/lib/api';
 import Breadcrumbs from '@/components/shared/BreadCrumbs';
 import Link from 'next/link';
+import { TestResultCard } from '@/components/shared/TestResultCard';
 
 const PAGE_SIZE = 10;
 
   const breadcrumbItems = [
     { name: 'Дашборд', href: '/dashboard' },
-    { name: 'Доступні тести'}
+    { name: 'Результати тестів'}
   ];
 
 
 export default function StudentTestsPage() {
-  const [data, setData] = useState<AvailableTestsResponse | null>(null);
+  const [data, setData] = useState<CompletedTestSessionsResponse | null>(null);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,11 +28,11 @@ export default function StudentTestsPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await fetchAvailableTests({ page: currentPage, pageSize: PAGE_SIZE });
+      const result = await fetchCompletedTestSessions({ page: currentPage, pageSize: PAGE_SIZE });
       setData(result);
     } catch (err) {
       console.error(err);
-      setError('Не вдалося завантажити тести.');
+      setError('Не вдалося завантажити результати.');
     } finally {
       setIsLoading(false);
     }
@@ -47,37 +47,38 @@ export default function StudentTestsPage() {
   };
 
   if (isLoading) {
-    return <div className="p-6 max-w-4xl mx-auto">Завантаження тестів...</div>;
+    return <div className="p-6 max-w-4xl mx-auto">Завантаження результатів...</div>;
   }
 
   if (error) {
     return <div className="p-6 max-w-4xl mx-auto text-red-600 font-bold">{error}</div>;
   }
+
   return (
     <div className="flex-1 pt-6 sm:p-8">
       <div className="sm:flex flex-row justify-between items-center mb-6">
-            <h1 className='text-3xl font-bold text-gray-800 dark:text-gray-200 mb-4 sm:mb-0'>Доступні тести
+            <h1 className='text-3xl font-bold text-gray-800 dark:text-gray-200 mb-4 sm:mb-0'>Результати Тестів
         <Breadcrumbs items={breadcrumbItems} />
             </h1>
             <Link
-            href={'/dashboard/results'}
+            href={'/dashboard/tests'}
               className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300"
             >
-              Мої результати
+              Доступні тести
             </Link>
       </div>
 
-      {!data || data.items.length === 0 ? (
-        <div className="text-center text-gray-600 dark:text-gray-400">
-          Немає доступних тестів.
-        </div>
-      ):(
-     <div className="grid gap-6 md:grid-cols-2">
-        {data.items.map((test) => (
-          <TestCard key={test.id} test={test} />
-        ))}
-      </div>
-      )}
+        {!data || data.items.length === 0 ? (
+          <div className="text-center text-gray-600 dark:text-gray-400">
+            Немає завершених тестів для відображення.
+          </div>
+        ):(
+              <div className="grid gap-6 md:grid-cols-2">
+                {data.items.map((test) => (
+                  <TestResultCard key={test.id} sessionResult={test} />
+                ))}
+              </div>
+        )}
       
       {/* Компонент пагінації */}
       {totalPages > 1 && (

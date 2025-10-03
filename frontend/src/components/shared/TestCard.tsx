@@ -1,8 +1,10 @@
 import { AvailableTestItem } from "@/types";
 import { format } from 'date-fns';
+import {useRouter} from "next/navigation";
 
 export const TestCard = ({ test }: { test: AvailableTestItem }) => {
   const isClosed = test.hasCloseTime && new Date(test.closeAt) < new Date();
+  const router = useRouter();
   
   return (
     <div className={`p-4 dark:bg-gray-800 rounded-lg bg-white shadow-md ${isClosed ? 'bg-gray-100 opacity-60' : 'hover:shadow-lg transition'}`}>
@@ -24,7 +26,7 @@ export const TestCard = ({ test }: { test: AvailableTestItem }) => {
       <div className="mt-4 flex justify-end">
         <button 
           className="btn-primary w-[35%]"
-          onClick={() => {/* TODO: Навігація на сторінку тесту /student/test/${test.id} */}}
+          onClick={() => {router.push(`/student/test/${test.id}`)}}
           disabled={isClosed}
         >
           {isClosed ? 'Завершився' : 'Розпочати'}

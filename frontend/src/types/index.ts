@@ -54,7 +54,25 @@ export interface AvailableTestItem {
   attemptsLimit: number;
 }
 
+export interface ResultTestItem {
+
+}
+
+export interface CompletedTestSessionsItem {
+  id: string;
+  testName: string;
+  startedAt: string;
+  finishedAt: string;
+  score: number;
+  maxScore: number;
+}
+
 export interface AvailableTestsResponse {
   items: AvailableTestItem[];
+  totalPagesCount: number;
+}
+
+export interface CompletedTestSessionsResponse {
+  items: CompletedTestSessionsItem[];
   totalPagesCount: number;
 }

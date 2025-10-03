@@ -1,4 +1,4 @@
-import { RegisterFormData, AuthTokens, AvailableTestsResponse, FetchAvailableTestsParams } from '@/types';
+import { RegisterFormData, AuthTokens, AvailableTestsResponse, FetchAvailableTestsParams, CompletedTestSessionsResponse } from '@/types';
 import api from './axios';
 
 // Register a new user
@@ -28,6 +28,14 @@ export const loginUser = async (email: string, password: string,): Promise<AuthT
 //Get availble tests for student
 export const fetchAvailableTests = async ({page,pageSize}:FetchAvailableTestsParams): Promise<AvailableTestsResponse> => {
   const response=await api.get<AvailableTestsResponse>(`/student/tests/list-available-tests`,{
+    params: { page, pageSize }
+  });
+  return response.data;
+}
+
+//Get students completed test sessions
+export const fetchCompletedTestSessions = async ({page,pageSize}:FetchAvailableTestsParams ): Promise<CompletedTestSessionsResponse> => {
+  const response=await api.get<CompletedTestSessionsResponse>(`/student/tests/completed-sessions`,{
     params: { page, pageSize }
   });
   return response.data;
