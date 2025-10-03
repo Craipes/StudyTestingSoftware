@@ -3,6 +3,7 @@
 global using StudyTestingSoftware.Data;
 global using StudyTestingSoftware.Options;
 global using StudyTestingSoftware.Services;
+global using StudyTestingSoftware.ProblemsDefinitions;
 
 global using StudyTestingSoftware.Models;
 global using StudyTestingSoftware.Models.Tests;
@@ -15,3 +16,5 @@ global using StudyTestingSoftware.DTO.TeacherGroup;
 
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
+
+global using AResultLib;

@@ -16,17 +16,15 @@ public class StudentTestController : ControllerBase
         this.userManager = userManager;
     }
 
-    [HttpGet("list-available-tests/{page:int}")]
-    public async Task<ActionResult<List<StudentTestPreviewDTO>>> ListAvailableTests(int page = 1)
+    [HttpGet("list-available-tests")]
+    public async Task<ActionResult<StudentTestPreviewPaginationDTO>> ListAvailableTests([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         if (!Guid.TryParse(userManager.GetUserId(User), out var userId))
         {
             return Unauthorized();
         }
 
-        const int pageSize = 10;
-        if (page < 1) page = 1;
-        return await testSessionManager.ListAvailableTestsForStudentAsync(userId, pageSize, page - 1);
+        return await testSessionManager.ListAvailableTestsForStudentAsync(userId, pageSize, page);
     }
 
     [HttpGet("active-sessions")]
@@ -39,16 +37,15 @@ public class StudentTestController : ControllerBase
         return await testSessionManager.GetActiveStudentTestSessionsAsync(userId);
     }
 
-    [HttpGet("completed-sessions/{page:int}")]
-    public async Task<ActionResult<List<StudentCompletedTestSessionPreviewDTO>>> ListCompletedTestSessions(int page = 1)
+    [HttpGet("completed-sessions")]
+    public async Task<ActionResult<StudentCompletedTestSessionPreviewPaginationDTO>> ListCompletedTestSessions([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         if (!Guid.TryParse(userManager.GetUserId(User), out var userId))
         {
             return Unauthorized();
         }
-        const int pageSize = 10;
-        if (page < 1) page = 1;
-        return await testSessionManager.GetCompletedStudentTestSessionsAsync(userId, pageSize, page - 1);
+
+        return await testSessionManager.GetCompletedStudentTestSessionsAsync(userId, pageSize, page);
     }
 
     [HttpPost("start/{testId:guid}")]
@@ -59,12 +56,12 @@ public class StudentTestController : ControllerBase
             return Unauthorized();
         }
 
-        var session = await testSessionManager.StartSessionAsync(testId, userId);
-        if (session == null)
+        var session = (await testSessionManager.StartSessionAsync(testId, userId)).Map<Guid?>(s => s.Id);
+        if (!session.IsSuccess)
         {
-            return BadRequest("Cannot start test session. Possible reasons: test not found, not opened, not published, access denied.");
+            return this.ToActionResult(session);
         }
-        return session.Id;
+        return session.Value;
     }
 
     [HttpGet("session/{sessionId:guid}")]
@@ -76,12 +73,12 @@ public class StudentTestController : ControllerBase
         }
 
         var session = await testSessionManager.GetStudentSessionDTO(sessionId, userId);
-        if (session == null)
+        if (!session.IsSuccess)
         {
-            return NotFound("Test session not found or access denied.");
+            return this.ToActionResult(session);
         }
 
-        return session;
+        return session.Value!;
     }
 
     [HttpPut("session/submit-answer")]
@@ -93,9 +90,9 @@ public class StudentTestController : ControllerBase
         }
 
         var result = await testSessionManager.SubmitAnswerAsync(answerDTO, userId);
-        if (!result)
+        if (!result.IsSuccess)
         {
-            return BadRequest("Cannot submit answer. Possible reasons: session not found, access denied, already finalized.");
+            return this.ToActionResult(result);
         }
 
         return Ok();
@@ -109,9 +106,9 @@ public class StudentTestController : ControllerBase
             return Unauthorized();
         }
         var result = await testSessionManager.SubmitSessionByIdAndUserAsync(sessionId, userId);
-        if (!result)
+        if (!result.IsSuccess)
         {
-            return BadRequest("Cannot finalize test session. Possible reasons: session not found, access denied, already finalized.");
+            return this.ToActionResult(result);
         }
         return Ok();
     }

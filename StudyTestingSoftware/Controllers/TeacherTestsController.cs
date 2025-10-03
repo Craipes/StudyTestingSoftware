@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using StudyTestingSoftware.DTO.TeacherTest;
 
 namespace StudyTestingSoftware.Controllers;
 
@@ -55,15 +54,10 @@ public class TeacherTestsController : Controller
             return Unauthorized();
         }
 
-        (var test, var testValidation) = await testWriteManager.TryToCreateTestAsync(data, user);
-        ModelState.Merge(testValidation);
+        var result = (await testWriteManager.TryToCreateTestAsync(data, user))
+            .Map(r => r.Id);
 
-        if (!ModelState.IsValid || test == null)
-        {
-            return BadRequest(ModelState);
-        }
-
-        return Ok(test.Id);
+        return this.ToActionResult(result);
     }
 
     [HttpGet("edit/{id:guid}")]
@@ -87,7 +81,7 @@ public class TeacherTestsController : Controller
     }
 
     [HttpPut("edit/{id:guid}")]
-    public async Task<ActionResult<Guid>> EditTest([FromRoute] Guid id, [FromBody] TeacherTestDTO data)
+    public async Task<ActionResult<Guid?>> EditTest([FromRoute] Guid id, [FromBody] TeacherTestDTO data)
     {
         var user = await userManager.GetUserAsync(User);
         if (user == null)
@@ -106,13 +100,10 @@ public class TeacherTestsController : Controller
             return Forbid();
         }
 
-        var testValidation = await testWriteManager.TryToUpdateTestAsync(data, id);
-        ModelState.Merge(testValidation);
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-        return Ok(test.Id);
+        var result = (await testWriteManager.TryToUpdateTestAsync(data, id))
+            .Map(r => r?.Id);
+
+        return this.ToActionResult(result);
     }
 
     [HttpDelete("delete/{id:guid}")]

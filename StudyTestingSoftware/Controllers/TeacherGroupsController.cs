@@ -159,7 +159,7 @@ public class TeacherGroupsController : Controller
         {
             if (string.IsNullOrWhiteSpace(userEmail))
             {
-                return BadRequest("User email must be provided when useEmail is true.");
+                return this.ToActionResult(AResult.Failure(AProblem.Validation(GeneralErrors.EmailRequired)));
             }
             return await groupManager.AddUserToGroupByEmailAsync(groupId, userEmail);
         }
@@ -167,7 +167,7 @@ public class TeacherGroupsController : Controller
         {
             if (userId == null || userId == Guid.Empty)
             {
-                return BadRequest("User ID must be provided when useEmail is false.");
+                return this.ToActionResult(AResult.Failure(AProblem.Validation(GeneralErrors.IdRequired)));
             }
             return await groupManager.AddUserToGroupByIdAsync(groupId, userId.Value);
         }
@@ -195,7 +195,7 @@ public class TeacherGroupsController : Controller
         {
             if (string.IsNullOrWhiteSpace(userEmail))
             {
-                return BadRequest("User email must be provided when useEmail is true.");
+                return this.ToActionResult(AResult.Failure(AProblem.Validation(GeneralErrors.EmailRequired)));
             }
             return await groupManager.RemoveUserFromGroupByEmailAsync(groupId, userEmail);
         }
@@ -203,7 +203,7 @@ public class TeacherGroupsController : Controller
         {
             if (userId == null || userId == Guid.Empty)
             {
-                return BadRequest("User ID must be provided when useEmail is false.");
+                return this.ToActionResult(AResult.Failure(AProblem.Validation(GeneralErrors.IdRequired)));
             }
             return await groupManager.RemoveUserFromGroupByIdAsync(groupId, userId.Value);
         }

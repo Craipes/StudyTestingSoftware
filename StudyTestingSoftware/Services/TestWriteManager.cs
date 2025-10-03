@@ -21,15 +21,16 @@ public class TestWriteManager
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task<(Test?, ModelStateDictionary)> TryToCreateTestAsync(TeacherTestDTO data, AppUser teacher)
+    public async Task<AResult<Test>> TryToCreateTestAsync(TeacherTestDTO data, AppUser teacher)
     {
         PreprocessTeacherTestDto(data);
 
-        ModelStateDictionary modelState = new();
         Test test = new()
         {
             Author = teacher
         };
+
+        var result = AResult<Test>.Success(test);
 
         data.UpdateEntity(test);
         dbContext.Tests.Add(test);
@@ -58,8 +59,8 @@ public class TestWriteManager
             {
                 if (matrixRowDTO.ValidColumnOrder < 0 || matrixRowDTO.ValidColumnOrder >= question.QuestionColumns.Count)
                 {
-                    modelState.AddModelError((Test t) => t.Questions[i], $"Question's matrix row has invalid ValidColumnOrder {matrixRowDTO.ValidColumnOrder}.");
-                    return (null, modelState);
+                    result.AddProblem(AProblem.Validation(TestErrors.InvalidValidColumnId, $"Question's matrix row has invalid ValidColumnOrder {matrixRowDTO.ValidColumnOrder}.", $"Questions[{i}]"));
+                    continue;
                 }
 
                 QuestionMatrixColumn answerColumn = question.QuestionColumns[matrixRowDTO.ValidColumnOrder];
@@ -84,19 +85,15 @@ public class TestWriteManager
             }
         }
 
-        modelState.Merge(ValidateTest(test));
+        result.Merge(ValidateTest(test));
 
-        // Error found
-        if (!modelState.IsValid)
+        if (result.IsSuccess)
         {
-            return (null, modelState);
+            UpdateTestMaxScore(test);
+            await dbContext.SaveChangesAsync();
         }
 
-        UpdateTestMaxScore(test);
-
-        await dbContext.SaveChangesAsync();
-
-        return (test, modelState);
+        return result;
     }
 
     /// <summary>
@@ -105,17 +102,16 @@ public class TestWriteManager
     /// <param name="data">DTO of the updated test</param>
     /// <param name="testId">Id of the test to update</param>
     /// <returns></returns>
-    public async Task<ModelStateDictionary> TryToUpdateTestAsync(TeacherTestDTO data, Guid testId)
+    public async Task<AResult<Test?>> TryToUpdateTestAsync(TeacherTestDTO data, Guid testId)
     {
-        ModelStateDictionary modelState = new();
-
         var test = await testReadManager.LoadTestAsync(testId, true);
 
         if (test == null)
         {
-            modelState.AddModelError(string.Empty, "Test not found.");
-            return modelState;
+            return AResult<Test?>.Failure(AProblem.NotFound(GeneralErrors.ResourceNotFound, "Test not found."));
         }
+
+        var result = AResult<Test?>.Success(test);
 
         PreprocessTeacherTestDto(data);
 
@@ -141,8 +137,7 @@ public class TestWriteManager
                         if (dto.ValidColumnOrder < 0 || dto.ValidColumnOrder >= updatedColumnsInDtoOrder.Count)
                         {
                             int qi = data.Questions.IndexOf(questionDTO);
-                            modelState.AddModelError((Test t) => t.Questions[qi],
-                                $"Question's matrix row has invalid ValidColumnOrder {dto.ValidColumnOrder}.");
+                            result.AddProblem(AProblem.Validation(TestErrors.InvalidValidColumnId, $"Question's matrix row has invalid ValidColumnOrder {dto.ValidColumnOrder}.", $"Questions[{qi}]"));
                             return null;
                         }
 
@@ -185,10 +180,10 @@ public class TestWriteManager
 
         test.Questions = resultingQuestionsInDtoOrder;
 
-        modelState.Merge(ValidateTest(test));
-        if (!modelState.IsValid)
+        result.Merge(ValidateTest(test));
+        if (!result.IsSuccess)
         {
-            return modelState;
+            return result;
         }
 
         UpdateTestMaxScore(test);
@@ -197,7 +192,7 @@ public class TestWriteManager
 
         await testSessionManager.UpdateScoreForTestSessionsAsync(test);
 
-        return modelState;
+        return result;
     }
 
     private List<Type> SyncCollection<Type, DTO>(ICollection<Type> originalCollection, ICollection<DTO> dtoCollection,
@@ -268,74 +263,90 @@ public class TestWriteManager
         test.MaxScore = test.Questions.Sum(q => q.Points);
     }
 
-    private static ModelStateDictionary ValidateTest(Test test)
+    private static AResult<Test> ValidateTest(Test test)
     {
-        ModelStateDictionary modelState = new();
+        var result = AResult<Test>.Success(test);
+
         for (int i = 0; i < test.Questions.Count; i++)
         {
-            Question question = test.Questions[i];
+            var question = test.Questions[i];
+            string questionPath = $"Questions[{i}]";
+
             if (question.QuestionType == QuestionType.TableSingleChoice || question.QuestionType == QuestionType.Ordering)
             {
                 if (question.QuestionRows.Count == 0)
                 {
-                    modelState.AddModelError((Test t) => t.Questions[i], $"Question is of type {question.QuestionType} but has no rows.");
+                    result.AddProblem(AProblem.Validation(TestErrors.QuestionRowsMissing,
+                        $"Question is of type {question.QuestionType} but has no rows.", questionPath));
                 }
                 if (question.QuestionColumns.Count == 0)
                 {
-                    modelState.AddModelError((Test t) => t.Questions[i], $"Question is of type {question.QuestionType} but has no columns.");
+                    result.AddProblem(AProblem.Validation(TestErrors.QuestionColumnsMissing,
+                        $"Question is of type {question.QuestionType} but has no columns.", questionPath));
                 }
+
                 foreach (var row in question.QuestionRows)
                 {
                     if (row.CorrectMatrixColumn == null)
                     {
-                        modelState.AddModelError((Test t) => t.Questions[i], $"Question has a row {row.Id} with no correct column.");
+                        result.AddProblem(AProblem.Validation(TestErrors.RowMissingCorrectColumn,
+                            $"Question has a row {row.Id} with no correct column.", questionPath));
                     }
                     else if (!question.QuestionColumns.Contains(row.CorrectMatrixColumn))
                     {
-                        modelState.AddModelError((Test t) => t.Questions[i], $"Question has a row {row.Id} with a correct column that does not belong to the question.");
+                        result.AddProblem(AProblem.Validation(TestErrors.RowIncorrectColumnReference,
+                            $"Question has a row {row.Id} with a correct column that does not belong to the question.", questionPath));
                     }
                 }
 
                 if (question.QuestionRows.DistinctBy(q => q.Order).Count() != question.QuestionRows.Count)
                 {
-                    modelState.AddModelError((Test t) => t.Questions[i], $"Question has duplicate rows.");
+                    result.AddProblem(AProblem.Validation(TestErrors.DuplicateRows,
+                        "Question has duplicate rows.", questionPath));
                 }
                 if (question.QuestionColumns.DistinctBy(q => q.Order).Count() != question.QuestionColumns.Count)
                 {
-                    modelState.AddModelError((Test t) => t.Questions[i], $"Question has duplicate columns.");
+                    result.AddProblem(AProblem.Validation(TestErrors.DuplicateColumns,
+                        "Question has duplicate columns.", questionPath));
                 }
             }
             else if (question.QuestionType == QuestionType.MultipleChoice || question.QuestionType == QuestionType.SingleChoice)
             {
                 if (question.ChoiceOptions.Count == 0)
                 {
-                    modelState.AddModelError((Test t) => t.Questions[i], $"Question is of type {question.QuestionType} but has no choice options.");
+                    result.AddProblem(AProblem.Validation(TestErrors.ChoiceOptionsMissing,
+                        $"Question is of type {question.QuestionType} but has no choice options.", questionPath));
                 }
                 if (!question.ChoiceOptions.Any(co => co.IsCorrect))
                 {
-                    modelState.AddModelError((Test t) => t.Questions[i], $"Question is of type {question.QuestionType} but has no correct choice option.");
+                    result.AddProblem(AProblem.Validation(TestErrors.NoCorrectChoiceOption,
+                        $"Question is of type {question.QuestionType} but has no correct choice option.", questionPath));
                 }
                 if (question.ChoiceOptions.DistinctBy(co => co.Order).Count() != question.ChoiceOptions.Count)
                 {
-                    modelState.AddModelError((Test t) => t.Questions[i], $"Question has duplicate choice options.");
+                    result.AddProblem(AProblem.Validation(TestErrors.DuplicateChoiceOptions,
+                        "Question has duplicate choice options.", questionPath));
                 }
                 if (question.QuestionType == QuestionType.SingleChoice && question.ChoiceOptions.Count(co => co.IsCorrect) > 1)
                 {
-                    modelState.AddModelError((Test t) => t.Questions[i], $"Question is of type SingleChoice but has multiple correct choice options.");
+                    result.AddProblem(AProblem.Validation(TestErrors.MultipleCorrectOptionsForSingleChoice,
+                        "Question is of type SingleChoice but has multiple correct choice options.", questionPath));
                 }
             }
         }
 
         if (test.HasCloseTime && (test.CloseAt == null || test.CloseAt < DateTime.UtcNow))
         {
-            modelState.AddModelError((Test t) => t.CloseAt, $"Test has a close time set but it is either null or in the past.");
+            result.AddProblem(AProblem.Validation(TestErrors.CloseAtInvalid,
+                "Test has a close time set but it is either null or in the past.", "CloseAt"));
         }
 
         if (test.Questions.Count == 0)
         {
-            modelState.AddModelError((Test t) => t.Questions, "Test has no questions.");
+            result.AddProblem(AProblem.Validation(TestErrors.QuestionsEmpty,
+                "Test has no questions.", "Questions"));
         }
 
-        return modelState;
+        return result;
     }
 }
