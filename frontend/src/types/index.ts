@@ -19,3 +19,42 @@ export interface ApiError {
   message: string;
   status: number;
 }
+
+export enum QuestionType {
+    SingleChoice = 0,
+    MultipleChoice = 1,
+    TableSingleChoice = 2,
+    Ordering = 3,
+    Slider = 4,
+    YesNo = 5,
+}
+
+export enum AccessMode {
+    Private = 0,
+    Group = 1,
+    Public = 2,
+}
+
+export interface FetchAvailableTestsParams {
+  page: number;
+  pageSize: number;
+}
+
+export interface AvailableTestItem {
+  id: string;
+  name: string;
+  description: string;
+  accessMode: AccessMode; 
+  isPublished: boolean;
+  isOpened: boolean;
+  hasCloseTime: boolean;
+  closeAt: string; 
+  questionsCount: number;
+  durationInMinutes: number;
+  attemptsLimit: number;
+}
+
+export interface AvailableTestsResponse {
+  items: AvailableTestItem[];
+  totalPagesCount: number;
+}
