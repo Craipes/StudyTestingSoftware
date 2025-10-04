@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using StudyTestingSoftware.Models.Tests;
 using System.Threading.Tasks;
 
 namespace StudyTestingSoftware.Services;
@@ -559,12 +560,12 @@ public class TestSessionManager
             .Skip(pageSize * pageNumber)
             .Take(pageSize);
 
-        var items = await GetStudentTestPreviewDTOsAsync(pageQuery);
+        var items = await GetStudentTestPreviewDTOsAsync(studentId, pageQuery);
 
         return new StudentTestPreviewPaginationDTO(items, maxPageNumber + 1);
     }
 
-    private static async Task<List<StudentTestPreviewDTO>> GetStudentTestPreviewDTOsAsync(IQueryable<Test> query)
+    private async Task<List<StudentTestPreviewDTO>> GetStudentTestPreviewDTOsAsync(Guid studentId, IQueryable<Test> query)
     {
         return await query
             .AsNoTracking()
@@ -579,7 +580,11 @@ public class TestSessionManager
                 t.CloseAt,
                 t.Questions.Count,
                 t.DurationInMinutes,
-                t.AttemptsLimit))
+                t.AttemptsLimit,
+                dbContext.TestSessions
+                .AsNoTracking()
+                .Count(s => s.UserId == studentId && s.TestId == t.Id)
+                ))
             .ToListAsync();
     }
 }
