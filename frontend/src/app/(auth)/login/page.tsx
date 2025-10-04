@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import { AuthTokens } from '@/types';
 import { LoginForm } from '@/components/shared/LoginForm';
 import Link from 'next/link';
-import FloatingShapesBackground from '@/components/shared/FloatingShapesBackground';
+
 
 export default function LoginPage() {
   const router = useRouter();

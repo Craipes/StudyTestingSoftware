@@ -40,3 +40,9 @@ export const fetchCompletedTestSessions = async ({page,pageSize}:FetchAvailableT
   });
   return response.data;
 }
+
+//Create test session for student
+export const createTestSession = async (testId:string): Promise<{sessionId:string}> => {
+  const response=await api.post<{sessionId:string}>(`/student/tests/start/${testId}`);
+  return response.data;
+}

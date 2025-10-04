@@ -86,7 +86,7 @@ export default function StudentTestsPage() {
           <button 
             onClick={() => handlePageChange(page - 1)} 
             disabled={page === 1}
-            className="px-4 py-2 border rounded disabled:text-gray-400"
+            className=" px-4 py-2 bg-blue-600  text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300 flex items-center cursor-pointer justify-center disabled:bg-gray-400"
           >
             ← Попередня
           </button>
@@ -96,7 +96,7 @@ export default function StudentTestsPage() {
           <button 
             onClick={() => handlePageChange(page + 1)} 
             disabled={page === totalPages}
-            className="px-4 py-2 border rounded disabled:text-gray-400"
+            className=" px-4 py-2 bg-blue-600  text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300 flex items-center cursor-pointer justify-center disabled:bg-gray-400"
           >
             Наступна →
           </button>

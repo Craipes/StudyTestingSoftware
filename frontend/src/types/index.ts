@@ -76,3 +76,14 @@ export interface CompletedTestSessionsResponse {
   items: CompletedTestSessionsItem[];
   totalPagesCount: number;
 }
+
+export interface SubmitAnswerRequest {
+  sessionId: string;
+  questionId: string;
+  resetValue?: boolean;
+  booleanValue?: boolean;
+  numberValue?: number;
+  selectedChoiceOptionId?: string;
+  selectedMatrixRowId?: string;
+  selectedMatrixColumnId?: string;
+}
