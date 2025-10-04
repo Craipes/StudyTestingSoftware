@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace StudyTestingSoftware.Services;
 
@@ -402,7 +403,7 @@ public class TestSessionManager
         {
             FinalizeSessionInMemory(session);
             var test = await testReadManager.LoadTestAsync(session.TestId, false);
-            if (test != null) UpdateScoreInMemory(session, test);
+            if (test != null) await UpdateScoreInMemoryAsync(session, test);
         }
 
         await dbContext.SaveChangesAsync(ct);
@@ -412,17 +413,26 @@ public class TestSessionManager
     public void FinalizeSessionInMemory(TestSession session)
     {
         if (session.IsCompleted) return;
-        var finishedAt = session.AutoFinishAt ?? DateTime.UtcNow;
+        var now = DateTime.UtcNow;
+        var finishedAt = session.AutoFinishAt != null && session.AutoFinishAt < now
+            ? session.AutoFinishAt.Value
+            : now;
+
         session.FinishedAt = finishedAt;
         session.IsCompleted = true;
     }
 
-    private static void UpdateScoreInMemory(TestSession session, Test test)
+    private async Task UpdateScoreInMemoryAsync(TestSession session, Test test)
     {
         double totalScore = 0d;
+        var allAnswers = await dbContext.TestUserAnswers
+            .AsNoTracking()
+            .Where(a => a.TestSessionId == session.Id)
+            .ToListAsync();
+
         foreach (var question in test.Questions)
         {
-            var answers = session.UserAnswers.Where(a => a.QuestionId == question.Id).ToList();
+            var answers = allAnswers.Where(a => a.QuestionId == question.Id).ToList();
             if (answers == null) continue;
             switch (question.QuestionType)
             {
@@ -486,7 +496,7 @@ public class TestSessionManager
 
         foreach (var session in sessions)
         {
-            UpdateScoreInMemory(session, test);
+            await UpdateScoreInMemoryAsync(session, test);
         }
         await dbContext.SaveChangesAsync();
     }
@@ -498,7 +508,7 @@ public class TestSessionManager
 
         FinalizeSessionInMemory(session);
         var test = await testReadManager.LoadTestAsync(session.TestId, false);
-        if (test != null) UpdateScoreInMemory(session, test);
+        if (test != null) await UpdateScoreInMemoryAsync(session, test);
         await dbContext.SaveChangesAsync();
         return AResult.Success();
     }
@@ -520,7 +530,7 @@ public class TestSessionManager
         {
             FinalizeSessionInMemory(session);
             var test = await testReadManager.LoadTestAsync(session.TestId, false);
-            if (test != null) UpdateScoreInMemory(session, test);
+            if (test != null) await UpdateScoreInMemoryAsync(session, test);
             await dbContext.SaveChangesAsync();
             return true;
         }

@@ -6,7 +6,7 @@ public class Question : BaseEntity
 {
     public string Text { get; set; } = string.Empty;
     public int Order { get; set; }
-    [Range(0, 100)] public int Points { get; set; }
+    [Range(1, 100)] public int Points { get; set; }
     public QuestionType QuestionType { get; set; }
 
     // Slider
