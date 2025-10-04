@@ -16,7 +16,7 @@ public class CustomUserManager
         this.userManager = userManager;
     }
 
-    public async Task<UserInfoDTO?> GetInfo(ClaimsPrincipal principal)
+    public async Task<UserInfoDTO?> GetInfoAsync(ClaimsPrincipal principal)
     {
         var user = await userManager.GetUserAsync(principal);
 
@@ -25,20 +25,20 @@ public class CustomUserManager
             return null;
         }
 
-        return await GetInfo(user);
+        return await GetInfoAsync(user);
     }
 
-    public async Task<UserInfoDTO?> GetInfo(Guid userId)
+    public async Task<UserInfoDTO?> GetInfoAsync(Guid userId)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null)
         {
             return null;
         }
-        return await GetInfo(user);
+        return await GetInfoAsync(user);
     }
 
-    private async Task<UserInfoDTO> GetInfo(AppUser user)
+    private async Task<UserInfoDTO> GetInfoAsync(AppUser user)
     {
         var roles = await userManager.GetRolesAsync(user);
         var userDTO = new UserInfoDTO(
@@ -52,7 +52,21 @@ public class CustomUserManager
         return userDTO;
     }
 
-    public async Task<List<UserInfoDTO>> GetUsersInfoInGroup(Guid groupId)
+    public async Task<UserInfoDTO?> GetGroupOwnerInfoAsync(Guid groupId)
+    {
+        var owner = await dbContext.StudentGroups
+            .Where(g => g.Id == groupId)
+            .Select(g => g.Owner)
+            .FirstOrDefaultAsync();
+
+        if (owner == null)
+        {
+            return null;
+        }
+        return await GetInfoAsync(owner);
+    }
+
+    public async Task<List<UserInfoDTO>> GetUsersInfoInGroupAsync(Guid groupId)
     {
         var users = await dbContext.StudentGroups
             .Where(g => g.Id == groupId)
@@ -62,7 +76,7 @@ public class CustomUserManager
         var usersInfo = new List<UserInfoDTO>();
         foreach (var user in users)
         {
-            var userInfo = await GetInfo(user);
+            var userInfo = await GetInfoAsync(user);
             usersInfo.Add(userInfo);
         }
         return usersInfo;

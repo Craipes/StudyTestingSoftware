@@ -14,6 +14,13 @@ public class GroupManager
         this.dbContext = dbContext;
     }
 
+    public async Task<bool> IsInGroupAsync(Guid groupId, Guid userId)
+    {
+        return await dbContext.StudentGroups
+            .AsNoTracking()
+            .AnyAsync(g => g.Id == groupId && g.Students.Any(s => s.Id == userId));
+    }
+
     public async Task<List<Guid>> ListGroupIdsByAuthorAsync(Guid authorId)
     {
         return await dbContext.StudentGroups

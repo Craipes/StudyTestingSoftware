@@ -310,7 +310,7 @@ public class TeacherGroupsController : Controller
             return Forbid();
         }
 
-        var students = await customUserManager.GetUsersInfoInGroup(groupId);
+        var students = await customUserManager.GetUsersInfoInGroupAsync(groupId);
         return Ok(students);
     }
 }

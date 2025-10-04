@@ -541,11 +541,7 @@ public class TestSessionManager
 
     public async Task<StudentTestPreviewPaginationDTO> ListAvailableTestsForStudentAsync(Guid studentId, int pageSize, int pageNumber)
     {
-        var now = DateTime.UtcNow;
-
-        IQueryable<Test> baseQuery = dbContext.Tests
-            .Where(t => t.IsPublished && (t.AccessMode != TestAccessMode.Private || t.AuthorId == studentId))
-            .Where(t => !t.HasCloseTime || (t.CloseAt != null && t.CloseAt > now))
+        IQueryable<Test> baseQuery = GetBaseAvailableTestsQuery(studentId)
             .Where(t => t.AccessMode != TestAccessMode.Group || t.OpenedToGroups.Any(g => g.Students.Any(m => m.Id == studentId)));
 
         var totalCount = await baseQuery.CountAsync();
@@ -563,6 +559,24 @@ public class TestSessionManager
         var items = await GetStudentTestPreviewDTOsAsync(studentId, pageQuery);
 
         return new StudentTestPreviewPaginationDTO(items, maxPageNumber + 1);
+    }
+
+    public async Task<List<StudentTestPreviewDTO>> ListAvailableGroupTestsForStudentAsync(Guid groupId, Guid studentId)
+    {
+        IQueryable<Test> query = GetBaseAvailableTestsQuery(studentId)
+            .Where(t => t.OpenedToGroups.Any(g => g.Id == groupId))
+            .OrderByDescending(t => t.IsOpened)
+            .ThenBy(t => t.CloseAt);
+        var groups = await query.Select(q => q.OpenedToGroups).ToListAsync();
+        return await GetStudentTestPreviewDTOsAsync(studentId, query);
+    }
+
+    private IQueryable<Test> GetBaseAvailableTestsQuery(Guid studentId)
+    {
+        var now = DateTime.UtcNow;
+        return dbContext.Tests
+            .Where(t => t.IsPublished && (t.AccessMode != TestAccessMode.Private || t.AuthorId == studentId))
+            .Where(t => !t.HasCloseTime || (t.CloseAt != null && t.CloseAt > now));
     }
 
     private async Task<List<StudentTestPreviewDTO>> GetStudentTestPreviewDTOsAsync(Guid studentId, IQueryable<Test> query)

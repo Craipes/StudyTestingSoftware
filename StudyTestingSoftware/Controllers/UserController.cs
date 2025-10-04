@@ -22,8 +22,8 @@ public class UserController : Controller
     public async Task<ActionResult<UserInfoDTO>> GetInfo([FromQuery] Guid? userId)
     {
         var user = userId == null 
-            ? await customUserManager.GetInfo(User)
-            : await customUserManager.GetInfo(userId.Value);
+            ? await customUserManager.GetInfoAsync(User)
+            : await customUserManager.GetInfoAsync(userId.Value);
 
         if (user == null)
         {
