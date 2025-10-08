@@ -5,7 +5,7 @@ public record StudentGroupFullDTO
     Guid Id,
     string Name,
     string? Description,
-    UserInfoDTO? Owner,
-    List<UserInfoDTO> Students,
+    FullUserInfoDTO? Owner,
+    List<FullUserInfoDTO> Students,
     List<StudentTestPreviewDTO> Tests
 );

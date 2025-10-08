@@ -127,4 +127,23 @@ public class TeacherTestsController : Controller
         await testWriteManager.DeleteTestAsync(id);
         return Ok();
     }
+
+    [HttpGet("view/{id:guid}")]
+    public async Task<ActionResult<TeacherPaginatedTestViewDTO>> ViewTest([FromRoute] Guid id, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var testDTO = await testReadManager.LoadTestViewForTeacherAsync(id, user.Id, pageSize, page);
+
+        if (testDTO == null)
+        {
+            return NotFound();
+        }
+
+        return testDTO;
+    }
 }

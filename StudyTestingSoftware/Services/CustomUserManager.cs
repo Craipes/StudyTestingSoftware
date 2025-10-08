@@ -16,7 +16,7 @@ public class CustomUserManager
         this.userManager = userManager;
     }
 
-    public async Task<UserInfoDTO?> GetInfoAsync(ClaimsPrincipal principal)
+    public async Task<FullUserInfoDTO?> GetInfoAsync(ClaimsPrincipal principal)
     {
         var user = await userManager.GetUserAsync(principal);
 
@@ -28,7 +28,7 @@ public class CustomUserManager
         return await GetInfoAsync(user);
     }
 
-    public async Task<UserInfoDTO?> GetInfoAsync(Guid userId)
+    public async Task<FullUserInfoDTO?> GetInfoAsync(Guid userId)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null)
@@ -38,10 +38,10 @@ public class CustomUserManager
         return await GetInfoAsync(user);
     }
 
-    private async Task<UserInfoDTO> GetInfoAsync(AppUser user)
+    private async Task<FullUserInfoDTO> GetInfoAsync(AppUser user)
     {
         var roles = await userManager.GetRolesAsync(user);
-        var userDTO = new UserInfoDTO(
+        var userDTO = new FullUserInfoDTO(
             user.Id,
             user.FirstName,
             user.LastName,
@@ -52,7 +52,7 @@ public class CustomUserManager
         return userDTO;
     }
 
-    public async Task<UserInfoDTO?> GetGroupOwnerInfoAsync(Guid groupId)
+    public async Task<FullUserInfoDTO?> GetGroupOwnerInfoAsync(Guid groupId)
     {
         var owner = await dbContext.StudentGroups
             .Where(g => g.Id == groupId)
@@ -66,14 +66,14 @@ public class CustomUserManager
         return await GetInfoAsync(owner);
     }
 
-    public async Task<List<UserInfoDTO>> GetUsersInfoInGroupAsync(Guid groupId)
+    public async Task<List<FullUserInfoDTO>> GetUsersInfoInGroupAsync(Guid groupId)
     {
         var users = await dbContext.StudentGroups
             .Where(g => g.Id == groupId)
             .SelectMany(g => g.Students)
             .ToListAsync();
 
-        var usersInfo = new List<UserInfoDTO>();
+        var usersInfo = new List<FullUserInfoDTO>();
         foreach (var user in users)
         {
             var userInfo = await GetInfoAsync(user);

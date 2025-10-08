@@ -19,7 +19,7 @@ public class UserController : Controller
     }
 
     [HttpGet("info")]
-    public async Task<ActionResult<UserInfoDTO>> GetInfo([FromQuery] Guid? userId)
+    public async Task<ActionResult<FullUserInfoDTO>> GetInfo([FromQuery] Guid? userId)
     {
         var user = userId == null 
             ? await customUserManager.GetInfoAsync(User)
