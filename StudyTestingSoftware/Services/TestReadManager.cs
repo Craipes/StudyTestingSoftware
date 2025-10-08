@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace StudyTestingSoftware.Services;
 
 public class TestReadManager
 {
     private readonly AppDbContext dbContext;
+    private readonly CustomUserManager customUserManager;
 
-    public TestReadManager(AppDbContext dbContext)
+    public TestReadManager(AppDbContext dbContext, CustomUserManager customUserManager)
     {
         this.dbContext = dbContext;
+        this.customUserManager = customUserManager;
     }
 
     public async Task<List<Guid>> ListTestIdsByAuthorAsync(Guid authorId)
@@ -174,5 +175,39 @@ public class TestReadManager
             users,
             maxPageNumber + 1
         );
+    }
+
+    public async Task<TeacherTestUserSessionsDTO?> LoadUserSessionsAsync(AppUser authorId, Guid testId, Guid userId)
+    {
+        int testMaxScore = await dbContext.Tests
+            .AsNoTracking()
+            .Where(t => t.Id == testId && t.AuthorId == authorId.Id)
+            .Select(t => t.MaxScore)
+            .FirstOrDefaultAsync();
+
+        if (testMaxScore == 0)
+        {
+            return null;
+        }
+
+        var sessions = await dbContext.TestSessions
+            .AsNoTracking()
+            .Where(ts => ts.TestId == testId && ts.UserId == userId)
+            .Select(ts => new TeacherTestSessionPreviewDTO(
+                ts.Id,
+                ts.StartedAt,
+                ts.FinishedAt,
+                ts.Score,
+                ts.IsCompleted
+            ))
+            .ToListAsync();
+
+        sessions ??= [];
+
+        return new TeacherTestUserSessionsDTO(
+            await customUserManager.GetInfoAsync(userId),
+            testMaxScore,
+            sessions.Max(s => s.Score),
+            sessions);
     }
 }

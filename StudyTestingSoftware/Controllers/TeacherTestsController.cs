@@ -146,4 +146,20 @@ public class TeacherTestsController : Controller
 
         return testDTO;
     }
+
+    [HttpGet("view/{testId:guid}/{userId:guid}")]
+    public async Task<ActionResult<TeacherTestUserSessionsDTO>> ViewTestForStudent([FromRoute] Guid testId, [FromRoute] Guid userId)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        var testDTO = await testReadManager.LoadUserSessionsAsync(user, testId, userId);
+        if (testDTO == null)
+        {
+            return NotFound();
+        }
+        return testDTO;
+    }
 }
