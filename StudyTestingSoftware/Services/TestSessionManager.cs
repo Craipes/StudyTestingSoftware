@@ -10,12 +10,14 @@ public class TestSessionManager
     private readonly AppDbContext dbContext;
     private readonly UserManager<AppUser> userManager;
     private readonly TestReadManager testReadManager;
+    private readonly CustomUserManager customUserManager;
 
-    public TestSessionManager(AppDbContext dbContext, UserManager<AppUser> userManager, TestReadManager testReadManager)
+    public TestSessionManager(AppDbContext dbContext, UserManager<AppUser> userManager, TestReadManager testReadManager, CustomUserManager customUserManager)
     {
         this.dbContext = dbContext;
         this.userManager = userManager;
         this.testReadManager = testReadManager;
+        this.customUserManager = customUserManager;
     }
 
     public async Task<AResult<TestSession>> StartSessionAsync(Guid testId, Guid userId)
@@ -212,9 +214,9 @@ public class TestSessionManager
                     await dbContext.SaveChangesAsync();
                     return AResult.Success();
                 }
-                if (answerDTO.NumberValue == null 
-                    || answerDTO.NumberValue < question.MinNumberValue 
-                    || answerDTO.NumberValue > question.MaxNumberValue) 
+                if (answerDTO.NumberValue == null
+                    || answerDTO.NumberValue < question.MinNumberValue
+                    || answerDTO.NumberValue > question.MaxNumberValue)
                     return AResult.Failure(AProblem.Validation(GeneralErrors.InvalidInput));
 
                 if (answers.Count == 0)
@@ -245,8 +247,8 @@ public class TestSessionManager
                     return AResult.Success();
                 }
 
-                if (answerDTO.SelectedChoiceOptionId == null 
-                    || !question.ChoiceOptions.Any(o => o.Id == answerDTO.SelectedChoiceOptionId)) 
+                if (answerDTO.SelectedChoiceOptionId == null
+                    || !question.ChoiceOptions.Any(o => o.Id == answerDTO.SelectedChoiceOptionId))
                     return AResult.Failure(AProblem.Validation(GeneralErrors.InvalidInput));
 
                 if (answers.Count == 0)
@@ -270,8 +272,8 @@ public class TestSessionManager
                 await dbContext.SaveChangesAsync();
                 return AResult.Success();
             case QuestionType.MultipleChoice:
-                if (answerDTO.SelectedChoiceOptionId == null 
-                    || !question.ChoiceOptions.Any(o => o.Id == answerDTO.SelectedChoiceOptionId)) 
+                if (answerDTO.SelectedChoiceOptionId == null
+                    || !question.ChoiceOptions.Any(o => o.Id == answerDTO.SelectedChoiceOptionId))
                     return AResult.Failure(AProblem.Validation(GeneralErrors.InvalidInput));
 
                 var existing = answers.FirstOrDefault(a => a.SelectedChoiceOptionId == answerDTO.SelectedChoiceOptionId);
@@ -302,9 +304,9 @@ public class TestSessionManager
                 return AResult.Success();
             case QuestionType.TableSingleChoice:
             case QuestionType.Ordering:
-                if (answerDTO.SelectedMatrixColumnId == null 
-                    || answerDTO.SelectedMatrixRowId == null 
-                    || !question.QuestionColumns.Any(o => o.Id == answerDTO.SelectedMatrixColumnId) 
+                if (answerDTO.SelectedMatrixColumnId == null
+                    || answerDTO.SelectedMatrixRowId == null
+                    || !question.QuestionColumns.Any(o => o.Id == answerDTO.SelectedMatrixColumnId)
                     || !question.QuestionRows.Any(o => o.Id == answerDTO.SelectedMatrixRowId))
                     return AResult.Failure(AProblem.Validation(GeneralErrors.InvalidInput));
 
@@ -364,8 +366,8 @@ public class TestSessionManager
     {
         var query = dbContext.TestSessions
             .AsNoTracking()
-            .Where(s => s.UserId == userId && s.IsCompleted);   
-        
+            .Where(s => s.UserId == userId && s.IsCompleted);
+
         var totalCount = await query.CountAsync();
         if (pageSize <= 0) pageSize = 10;
         int maxPageNumber = Math.Max((int)Math.Ceiling((double)totalCount / pageSize) - 1, 0);
@@ -600,5 +602,61 @@ public class TestSessionManager
                 .Count(s => s.UserId == studentId && s.TestId == t.Id)
                 ))
             .ToListAsync();
+    }
+
+    public async Task<TeacherTestUserSessionsDTO?> LoadUserSessionsAsync(AppUser authorId, Guid testId, Guid userId)
+    {
+        int testMaxScore = await dbContext.Tests
+            .AsNoTracking()
+            .Where(t => t.Id == testId && t.AuthorId == authorId.Id)
+            .Select(t => t.MaxScore)
+            .FirstOrDefaultAsync();
+
+        if (testMaxScore == 0)
+        {
+            return null;
+        }
+
+        var sessions = await dbContext.TestSessions
+            .AsNoTracking()
+            .Where(ts => ts.TestId == testId && ts.UserId == userId)
+            .Select(ts => new TeacherTestSessionPreviewDTO(
+                ts.Id,
+                ts.StartedAt,
+                ts.FinishedAt,
+                ts.Score,
+                ts.IsCompleted
+            ))
+            .ToListAsync();
+
+        sessions ??= [];
+
+        var userInfo = await customUserManager.GetInfoAsync(userId);
+
+        if (userInfo == null)
+        {
+            return null;
+        }
+
+        return new TeacherTestUserSessionsDTO(
+            userInfo,
+            testMaxScore,
+            sessions.Max(s => s.Score),
+            sessions);
+    }
+
+    public async Task<bool> DeleteUserSessionAsync(Guid sessionId, AppUser authorId)
+    {
+        var session = await dbContext.TestSessions
+            .FirstOrDefaultAsync(s => s.Id == sessionId && s.UserId == authorId.Id);
+
+        if (session == null)
+        {
+            return false;
+        }
+
+        dbContext.TestSessions.Remove(session);
+        await dbContext.SaveChangesAsync();
+        return true;
     }
 }

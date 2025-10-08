@@ -10,12 +10,14 @@ public class TeacherTestsController : Controller
     private readonly UserManager<AppUser> userManager;
     private readonly TestReadManager testReadManager;
     private readonly TestWriteManager testWriteManager;
+    private readonly TestSessionManager testSessionManager;
 
-    public TeacherTestsController(UserManager<AppUser> userManager, TestReadManager testReadManager, TestWriteManager testWriteManager)
+    public TeacherTestsController(UserManager<AppUser> userManager, TestReadManager testReadManager, TestWriteManager testWriteManager, TestSessionManager testSessionManager)
     {
         this.userManager = userManager;
         this.testReadManager = testReadManager;
         this.testWriteManager = testWriteManager;
+        this.testSessionManager = testSessionManager;
     }
 
     [HttpGet("list-ids")]
@@ -155,11 +157,28 @@ public class TeacherTestsController : Controller
         {
             return Unauthorized();
         }
-        var testDTO = await testReadManager.LoadUserSessionsAsync(user, testId, userId);
+        var testDTO = await testSessionManager.LoadUserSessionsAsync(user, testId, userId);
         if (testDTO == null)
         {
             return NotFound();
         }
         return testDTO;
+    }
+
+    [HttpDelete("delete-session/{sessionId:guid}")]
+    public async Task<ActionResult> DeleteTestSession([FromRoute] Guid sessionId)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        if (await testSessionManager.DeleteUserSessionAsync(sessionId, user))
+        {
+            return NoContent();
+        }
+
+        return NotFound();
     }
 }
