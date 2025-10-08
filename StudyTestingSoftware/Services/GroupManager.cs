@@ -24,7 +24,17 @@ public class GroupManager
     public async Task<List<Guid>> ListGroupIdsByAuthorAsync(Guid authorId)
     {
         return await dbContext.StudentGroups
+            .AsNoTracking()
             .Where(g => g.OwnerId == authorId)
+            .Select(g => g.Id)
+            .ToListAsync();
+    }
+
+    public async Task<List<Guid>> ListGroupsIdsForStudentAsync(Guid studentId)
+    {
+        return await dbContext.StudentGroups
+            .AsNoTracking()
+            .Where(g => g.Students.Any(s => s.Id == studentId))
             .Select(g => g.Id)
             .ToListAsync();
     }
@@ -40,6 +50,22 @@ public class GroupManager
                 g.Description,
                 g.Students.Count,
                 g.OpenedTests.Count
+            ))
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<List<StudentGroupPreviewDTO>> GetStudentPreviews(Guid studentId)
+    {
+        return await dbContext.StudentGroups
+            .Where(g => g.Students.Any(s => s.Id == studentId))
+            .Select(g => new StudentGroupPreviewDTO
+            (
+                g.Id,
+                g.Name,
+                g.Description,
+                g.OpenedTests.Count(t => t.IsOpened && t.IsPublished),
+                g.OpenedTests.Count(t => t.IsOpened && t.IsPublished && !t.TestSessions.Any(ts => ts.UserId == studentId && ts.IsCompleted))
             ))
             .AsNoTracking()
             .ToListAsync();

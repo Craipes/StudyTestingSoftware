@@ -29,4 +29,5 @@ public class Test : BaseEntity
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public List<StudentGroup> OpenedToGroups { get; set; } = [];
+    public List<TestSession> TestSessions { get; set; } = [];
 }

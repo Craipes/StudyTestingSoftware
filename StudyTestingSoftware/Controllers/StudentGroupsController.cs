@@ -20,6 +20,28 @@ public class StudentGroupsController : ControllerBase
         this.customUserManager = customUserManager;
     }
 
+    [HttpGet("list-ids")]
+    public async Task<ActionResult<List<Guid>>> ListGroupsIds()
+    {
+        if (!Guid.TryParse(userManager.GetUserId(User), out var userId))
+        {
+            return Unauthorized();
+        }
+        var groupsIds = await groupManager.ListGroupsIdsForStudentAsync(userId);
+        return groupsIds;
+    }
+
+    [HttpGet("list-previews")]
+    public async Task<ActionResult<List<StudentGroupPreviewDTO>>> ListGroupsPreviews()
+    {
+        if (!Guid.TryParse(userManager.GetUserId(User), out var userId))
+        {
+            return Unauthorized();
+        }
+        var groups = await groupManager.GetStudentPreviews(userId);
+        return groups;
+    }
+
     [HttpGet("{groupId:guid}")]
     public async Task<ActionResult<StudentGroupFullDTO>> GetGroup(Guid groupId)
     {
