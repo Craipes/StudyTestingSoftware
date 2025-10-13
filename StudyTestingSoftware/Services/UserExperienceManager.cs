@@ -59,11 +59,14 @@ public class UserExperienceManager
                 t.Id,
                 t.MaxScore,
                 t.MaxExperience,
-                MaxUserScore = t.TestSessions
-                    .Where(ts => ts.UserId == session.UserId && ts.Id != session.Id && ts.IsCompleted)
-                    .Select(ts => ts.Score)
-                    .DefaultIfEmpty(0d)
-                    .Max()
+                MaxUserScore =
+                    dbContext.TestSessions
+                        .Where(ts => ts.TestId == t.Id
+                                     && ts.UserId == session.UserId
+                                     && ts.Id != session.Id
+                                     && ts.IsCompleted)
+                        .Select(ts => (double?)ts.Score)
+                        .Max() ?? 0d
             })
             .FirstOrDefaultAsync(t => t.Id == session.TestId);
 
