@@ -46,6 +46,9 @@ public class CustomUserManager
             user.FirstName,
             user.LastName,
             user.MiddleName,
+            user.Level,
+            user.Experience,
+            user.RequiredExperience,
             roles.Contains(AppRolesConstants.TeacherRole),
             roles.Contains(AppRolesConstants.StudentRole)
         );

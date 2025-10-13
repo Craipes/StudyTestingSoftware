@@ -139,6 +139,9 @@ public class TestReadManager
                     u.FirstName,
                     u.LastName,
                     u.MiddleName,
+                    u.Level,
+                    u.Experience,
+                    u.RequiredExperience,
                     g.AttemptsCount,
                     g.BestScore,
                     g.LastAttemptAt
@@ -150,7 +153,7 @@ public class TestReadManager
             .Skip(pageSize * pageNumber)
             .Take(pageSize)
             .Select(x => new TeacherTestUserPreviewDTO(
-                new ShortUserInfoDTO(x.UserId, x.FirstName, x.LastName, x.MiddleName),
+                new ShortUserInfoDTO(x.UserId, x.FirstName, x.LastName, x.MiddleName, x.Level, x.Experience, x.RequiredExperience),
                 x.AttemptsCount,
                 x.BestScore,
                 x.LastAttemptAt

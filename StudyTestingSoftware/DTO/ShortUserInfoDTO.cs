@@ -5,5 +5,8 @@ public record ShortUserInfoDTO
     Guid Id,
     string FirstName,
     string LastName,
-    string? MiddleName
+    string? MiddleName,
+    int Level,
+    double Experience,
+    double RequiredExperience
 );

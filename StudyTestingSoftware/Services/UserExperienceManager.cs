@@ -34,20 +34,20 @@ public class UserExperienceManager
 
         user.Experience += experience;
 
-        double requiredExperience = GetRequiredExperience();
-        while (user.Experience >= requiredExperience)
+        user.RequiredExperience = GetRequiredExperience(user.Level);
+        while (user.Experience >= user.RequiredExperience)
         {
-            user.Experience -= requiredExperience;
+            user.Experience -= user.RequiredExperience;
             user.Level++;
-            requiredExperience = GetRequiredExperience();
+            user.RequiredExperience = GetRequiredExperience(user.Level);
         }
 
         await dbContext.SaveChangesAsync();
+    }
 
-        double GetRequiredExperience()
-        {
-            return 30 * Math.Pow(user.Level + 1, 1.25d);
-        }
+    public double GetRequiredExperience(int level)
+    {
+        return 30 * Math.Pow(level, 1.25d);
     }
 
     private async Task<double> GetTestSessionCompletionDeltaExperienceAsync(TestSession session)
