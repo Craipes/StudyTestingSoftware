@@ -11,13 +11,15 @@ public class TestSessionManager
     private readonly UserManager<AppUser> userManager;
     private readonly TestReadManager testReadManager;
     private readonly CustomUserManager customUserManager;
+    private readonly UserExperienceManager userExperienceManager;
 
-    public TestSessionManager(AppDbContext dbContext, UserManager<AppUser> userManager, TestReadManager testReadManager, CustomUserManager customUserManager)
+    public TestSessionManager(AppDbContext dbContext, UserManager<AppUser> userManager, TestReadManager testReadManager, CustomUserManager customUserManager, UserExperienceManager userExperienceManager)
     {
         this.dbContext = dbContext;
         this.userManager = userManager;
         this.testReadManager = testReadManager;
         this.customUserManager = customUserManager;
+        this.userExperienceManager = userExperienceManager;
     }
 
     public async Task<AResult<TestSession>> StartSessionAsync(Guid testId, Guid userId)
@@ -488,6 +490,8 @@ public class TestSessionManager
         }
 
         session.Score = totalScore;
+
+        await userExperienceManager.ProcessTestSessionCompletedAsync(session);
     }
 
     public async Task UpdateScoreForTestSessionsAsync(Test test)
@@ -656,6 +660,7 @@ public class TestSessionManager
         }
 
         dbContext.TestSessions.Remove(session);
+        await userExperienceManager.ProcessTestSessionDeletedAsync(session);
         await dbContext.SaveChangesAsync();
         return true;
     }

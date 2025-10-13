@@ -84,6 +84,7 @@ builder.Services.AddScoped<TestSessionManager>();
 
 builder.Services.AddScoped<GroupManager>();
 builder.Services.AddScoped<CustomUserManager>();
+builder.Services.AddScoped<UserExperienceManager>();
 
 builder.Services.AddScoped<TestSessionManager>();
 builder.Services.AddHostedService<TestSessionAutoFinalizer>();
