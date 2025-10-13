@@ -10,7 +10,8 @@ public class AppUser : IdentityUser<Guid>
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public int Experience { get; set; }
+    public double Experience { get; set; }
+    public double RequiredExperience { get; set; }
     public int Level { get; set; } = 1;
     public int Coins { get; set; }
 

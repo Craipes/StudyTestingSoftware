@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using StudyTestingSoftware.Models.Tests;
 using System.Threading.Tasks;
 
 namespace StudyTestingSoftware.Services;
@@ -9,12 +10,16 @@ public class TestSessionManager
     private readonly AppDbContext dbContext;
     private readonly UserManager<AppUser> userManager;
     private readonly TestReadManager testReadManager;
+    private readonly CustomUserManager customUserManager;
+    private readonly UserExperienceManager userExperienceManager;
 
-    public TestSessionManager(AppDbContext dbContext, UserManager<AppUser> userManager, TestReadManager testReadManager)
+    public TestSessionManager(AppDbContext dbContext, UserManager<AppUser> userManager, TestReadManager testReadManager, CustomUserManager customUserManager, UserExperienceManager userExperienceManager)
     {
         this.dbContext = dbContext;
         this.userManager = userManager;
         this.testReadManager = testReadManager;
+        this.customUserManager = customUserManager;
+        this.userExperienceManager = userExperienceManager;
     }
 
     public async Task<AResult<TestSession>> StartSessionAsync(Guid testId, Guid userId)
@@ -211,9 +216,9 @@ public class TestSessionManager
                     await dbContext.SaveChangesAsync();
                     return AResult.Success();
                 }
-                if (answerDTO.NumberValue == null 
-                    || answerDTO.NumberValue < question.MinNumberValue 
-                    || answerDTO.NumberValue > question.MaxNumberValue) 
+                if (answerDTO.NumberValue == null
+                    || answerDTO.NumberValue < question.MinNumberValue
+                    || answerDTO.NumberValue > question.MaxNumberValue)
                     return AResult.Failure(AProblem.Validation(GeneralErrors.InvalidInput));
 
                 if (answers.Count == 0)
@@ -244,8 +249,8 @@ public class TestSessionManager
                     return AResult.Success();
                 }
 
-                if (answerDTO.SelectedChoiceOptionId == null 
-                    || !question.ChoiceOptions.Any(o => o.Id == answerDTO.SelectedChoiceOptionId)) 
+                if (answerDTO.SelectedChoiceOptionId == null
+                    || !question.ChoiceOptions.Any(o => o.Id == answerDTO.SelectedChoiceOptionId))
                     return AResult.Failure(AProblem.Validation(GeneralErrors.InvalidInput));
 
                 if (answers.Count == 0)
@@ -269,8 +274,8 @@ public class TestSessionManager
                 await dbContext.SaveChangesAsync();
                 return AResult.Success();
             case QuestionType.MultipleChoice:
-                if (answerDTO.SelectedChoiceOptionId == null 
-                    || !question.ChoiceOptions.Any(o => o.Id == answerDTO.SelectedChoiceOptionId)) 
+                if (answerDTO.SelectedChoiceOptionId == null
+                    || !question.ChoiceOptions.Any(o => o.Id == answerDTO.SelectedChoiceOptionId))
                     return AResult.Failure(AProblem.Validation(GeneralErrors.InvalidInput));
 
                 var existing = answers.FirstOrDefault(a => a.SelectedChoiceOptionId == answerDTO.SelectedChoiceOptionId);
@@ -301,9 +306,9 @@ public class TestSessionManager
                 return AResult.Success();
             case QuestionType.TableSingleChoice:
             case QuestionType.Ordering:
-                if (answerDTO.SelectedMatrixColumnId == null 
-                    || answerDTO.SelectedMatrixRowId == null 
-                    || !question.QuestionColumns.Any(o => o.Id == answerDTO.SelectedMatrixColumnId) 
+                if (answerDTO.SelectedMatrixColumnId == null
+                    || answerDTO.SelectedMatrixRowId == null
+                    || !question.QuestionColumns.Any(o => o.Id == answerDTO.SelectedMatrixColumnId)
                     || !question.QuestionRows.Any(o => o.Id == answerDTO.SelectedMatrixRowId))
                     return AResult.Failure(AProblem.Validation(GeneralErrors.InvalidInput));
 
@@ -363,8 +368,8 @@ public class TestSessionManager
     {
         var query = dbContext.TestSessions
             .AsNoTracking()
-            .Where(s => s.UserId == userId && s.IsCompleted);   
-        
+            .Where(s => s.UserId == userId && s.IsCompleted);
+
         var totalCount = await query.CountAsync();
         if (pageSize <= 0) pageSize = 10;
         int maxPageNumber = Math.Max((int)Math.Ceiling((double)totalCount / pageSize) - 1, 0);
@@ -485,6 +490,8 @@ public class TestSessionManager
         }
 
         session.Score = totalScore;
+
+        await userExperienceManager.ProcessTestSessionCompletedAsync(session);
     }
 
     public async Task UpdateScoreForTestSessionsAsync(Test test)
@@ -540,11 +547,7 @@ public class TestSessionManager
 
     public async Task<StudentTestPreviewPaginationDTO> ListAvailableTestsForStudentAsync(Guid studentId, int pageSize, int pageNumber)
     {
-        var now = DateTime.UtcNow;
-
-        IQueryable<Test> baseQuery = dbContext.Tests
-            .Where(t => t.IsPublished && (t.AccessMode != TestAccessMode.Private || t.AuthorId == studentId))
-            .Where(t => !t.HasCloseTime || (t.CloseAt != null && t.CloseAt > now))
+        IQueryable<Test> baseQuery = GetBaseAvailableTestsQuery(studentId)
             .Where(t => t.AccessMode != TestAccessMode.Group || t.OpenedToGroups.Any(g => g.Students.Any(m => m.Id == studentId)));
 
         var totalCount = await baseQuery.CountAsync();
@@ -559,12 +562,30 @@ public class TestSessionManager
             .Skip(pageSize * pageNumber)
             .Take(pageSize);
 
-        var items = await GetStudentTestPreviewDTOsAsync(pageQuery);
+        var items = await GetStudentTestPreviewDTOsAsync(studentId, pageQuery);
 
         return new StudentTestPreviewPaginationDTO(items, maxPageNumber + 1);
     }
 
-    private static async Task<List<StudentTestPreviewDTO>> GetStudentTestPreviewDTOsAsync(IQueryable<Test> query)
+    public async Task<List<StudentTestPreviewDTO>> ListAvailableGroupTestsForStudentAsync(Guid groupId, Guid studentId)
+    {
+        IQueryable<Test> query = GetBaseAvailableTestsQuery(studentId)
+            .Where(t => t.OpenedToGroups.Any(g => g.Id == groupId))
+            .OrderByDescending(t => t.IsOpened)
+            .ThenBy(t => t.CloseAt);
+        var groups = await query.Select(q => q.OpenedToGroups).ToListAsync();
+        return await GetStudentTestPreviewDTOsAsync(studentId, query);
+    }
+
+    private IQueryable<Test> GetBaseAvailableTestsQuery(Guid studentId)
+    {
+        var now = DateTime.UtcNow;
+        return dbContext.Tests
+            .Where(t => t.IsPublished && (t.AccessMode != TestAccessMode.Private || t.AuthorId == studentId))
+            .Where(t => !t.HasCloseTime || (t.CloseAt != null && t.CloseAt > now));
+    }
+
+    private async Task<List<StudentTestPreviewDTO>> GetStudentTestPreviewDTOsAsync(Guid studentId, IQueryable<Test> query)
     {
         return await query
             .AsNoTracking()
@@ -579,7 +600,68 @@ public class TestSessionManager
                 t.CloseAt,
                 t.Questions.Count,
                 t.DurationInMinutes,
-                t.AttemptsLimit))
+                t.AttemptsLimit,
+                dbContext.TestSessions
+                .AsNoTracking()
+                .Count(s => s.UserId == studentId && s.TestId == t.Id)
+                ))
             .ToListAsync();
+    }
+
+    public async Task<TeacherTestUserSessionsDTO?> LoadUserSessionsAsync(AppUser authorId, Guid testId, Guid userId)
+    {
+        int testMaxScore = await dbContext.Tests
+            .AsNoTracking()
+            .Where(t => t.Id == testId && t.AuthorId == authorId.Id)
+            .Select(t => t.MaxScore)
+            .FirstOrDefaultAsync();
+
+        if (testMaxScore == 0)
+        {
+            return null;
+        }
+
+        var sessions = await dbContext.TestSessions
+            .AsNoTracking()
+            .Where(ts => ts.TestId == testId && ts.UserId == userId)
+            .Select(ts => new TeacherTestSessionPreviewDTO(
+                ts.Id,
+                ts.StartedAt,
+                ts.FinishedAt,
+                ts.Score,
+                ts.IsCompleted
+            ))
+            .ToListAsync();
+
+        sessions ??= [];
+
+        var userInfo = await customUserManager.GetInfoAsync(userId);
+
+        if (userInfo == null)
+        {
+            return null;
+        }
+
+        return new TeacherTestUserSessionsDTO(
+            userInfo,
+            testMaxScore,
+            sessions.Max(s => s.Score),
+            sessions);
+    }
+
+    public async Task<bool> DeleteUserSessionAsync(Guid sessionId, AppUser authorId)
+    {
+        var session = await dbContext.TestSessions
+            .FirstOrDefaultAsync(s => s.Id == sessionId && s.UserId == authorId.Id);
+
+        if (session == null)
+        {
+            return false;
+        }
+
+        dbContext.TestSessions.Remove(session);
+        await userExperienceManager.ProcessTestSessionDeletedAsync(session);
+        await dbContext.SaveChangesAsync();
+        return true;
     }
 }

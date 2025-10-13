@@ -10,12 +10,14 @@ public class TeacherTestsController : Controller
     private readonly UserManager<AppUser> userManager;
     private readonly TestReadManager testReadManager;
     private readonly TestWriteManager testWriteManager;
+    private readonly TestSessionManager testSessionManager;
 
-    public TeacherTestsController(UserManager<AppUser> userManager, TestReadManager testReadManager, TestWriteManager testWriteManager)
+    public TeacherTestsController(UserManager<AppUser> userManager, TestReadManager testReadManager, TestWriteManager testWriteManager, TestSessionManager testSessionManager)
     {
         this.userManager = userManager;
         this.testReadManager = testReadManager;
         this.testWriteManager = testWriteManager;
+        this.testSessionManager = testSessionManager;
     }
 
     [HttpGet("list-ids")]
@@ -126,5 +128,57 @@ public class TeacherTestsController : Controller
 
         await testWriteManager.DeleteTestAsync(id);
         return Ok();
+    }
+
+    [HttpGet("view/{id:guid}")]
+    public async Task<ActionResult<TeacherPaginatedTestViewDTO>> ViewTest([FromRoute] Guid id, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var testDTO = await testReadManager.LoadTestViewForTeacherAsync(id, user.Id, pageSize, page);
+
+        if (testDTO == null)
+        {
+            return NotFound();
+        }
+
+        return testDTO;
+    }
+
+    [HttpGet("view/{testId:guid}/{userId:guid}")]
+    public async Task<ActionResult<TeacherTestUserSessionsDTO>> ViewTestForStudent([FromRoute] Guid testId, [FromRoute] Guid userId)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        var testDTO = await testSessionManager.LoadUserSessionsAsync(user, testId, userId);
+        if (testDTO == null)
+        {
+            return NotFound();
+        }
+        return testDTO;
+    }
+
+    [HttpDelete("delete-session/{sessionId:guid}")]
+    public async Task<ActionResult> DeleteTestSession([FromRoute] Guid sessionId)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        if (await testSessionManager.DeleteUserSessionAsync(sessionId, user))
+        {
+            return NoContent();
+        }
+
+        return NotFound();
     }
 }

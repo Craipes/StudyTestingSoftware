@@ -293,7 +293,7 @@ public class TeacherGroupsController : Controller
     }
 
     [HttpGet("list-students/{groupId:guid}")]
-    public async Task<ActionResult<List<UserInfoDTO>>> ListGroupStudents([FromRoute] Guid groupId)
+    public async Task<ActionResult<List<FullUserInfoDTO>>> ListGroupStudents([FromRoute] Guid groupId)
     {
         var user = await userManager.GetUserAsync(User);
         if (user == null)
@@ -310,7 +310,7 @@ public class TeacherGroupsController : Controller
             return Forbid();
         }
 
-        var students = await customUserManager.GetUsersInfoInGroup(groupId);
+        var students = await customUserManager.GetUsersInfoInGroupAsync(groupId);
         return Ok(students);
     }
 }

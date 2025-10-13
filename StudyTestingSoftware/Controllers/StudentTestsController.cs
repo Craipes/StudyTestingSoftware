@@ -5,12 +5,12 @@ namespace StudyTestingSoftware.Controllers;
 [Route("student/tests")]
 [ApiController]
 [Authorize]
-public class StudentTestController : ControllerBase
+public class StudentTestsController : ControllerBase
 {
     private readonly TestSessionManager testSessionManager;
     private readonly UserManager<AppUser> userManager;
 
-    public StudentTestController(TestSessionManager testSessionManager, UserManager<AppUser> userManager)
+    public StudentTestsController(TestSessionManager testSessionManager, UserManager<AppUser> userManager)
     {
         this.testSessionManager = testSessionManager;
         this.userManager = userManager;

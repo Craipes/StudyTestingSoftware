@@ -14,5 +14,6 @@ public record StudentTestPreviewDTO
     DateTime? CloseAt,
     int QuestionsCount,
     int DurationInMinutes,
-    int AttemptsLimit
+    int AttemptsLimit,
+    int UsedAttemptsCount
 );
