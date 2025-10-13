@@ -3,19 +3,25 @@
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 
 import { Lock,SquarePlus,Layers,NotebookPen,BookOpen,DoorOpen,Menu,X, Users  } from 'lucide-react';
 
-
-
 interface UserInfo {
   firstName: string;
   lastName: string;
   isTeacher: boolean;
   isStudent: boolean;
+  level:number;
+  experience:number;
+  requiredExperience:number;
 }
 
 interface SidebarProps {
@@ -79,9 +85,19 @@ export function Sidebar({ userInfo }: SidebarProps) {
     <aside className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out w-[60%] md:w-70 bg-gray-800 dark:bg-slate-950 text-white p-4 flex flex-col justify-between z-40`}>
       <div>
         {/* Блок з інформацією про користувача */}
-        <div className="flex flex-col items-center border-b border-gray-700 pb-4 mb-4">
-          <p className="font-bold text-xl">{userInfo?.firstName} {userInfo?.lastName}</p>
-          <p className="text-sm text-gray-400 mt-1">{getRoles()}</p>
+        <div className='flex flex-row gap-4 justify-center border-b border-gray-700 pb-4 mb-4'>
+          <div className="flex flex-col items-center">
+            <p className="font-bold text-xl">{userInfo?.firstName} {userInfo?.lastName}</p>
+            <p className="text-sm text-gray-400 mt-1">{getRoles()}</p>
+          </div>
+          <div className='my-auto'>
+              <Tooltip>
+                <TooltipTrigger><span className="rounded-full border-2 border-green-500 px-3 py-2">{userInfo?.level || 0}</span></TooltipTrigger>
+                <TooltipContent>
+                  <p>{userInfo?.experience || 0} / {userInfo?.requiredExperience || 0} до наступного рівня</p>
+                </TooltipContent>
+            </Tooltip>
+          </div>
         </div>
 
         {/* Навігаційне меню */}

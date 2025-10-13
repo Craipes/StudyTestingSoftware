@@ -14,6 +14,9 @@ interface UserInfo {
   lastName: string;
   isTeacher: boolean;
   isStudent: boolean;
+  level:number;
+  experience:number;
+  requiredExperience:number;
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

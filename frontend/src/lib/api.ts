@@ -14,6 +14,9 @@ export const getUser = async (): Promise<{
   middleName: string;
   isTeacher: boolean;
   isStudent: boolean;
+  level:number;
+  experience:number;
+  requiredExperience:number;
 }> => {
   const response = await api.get('/user/info');
   return response.data;

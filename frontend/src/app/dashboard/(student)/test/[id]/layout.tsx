@@ -10,9 +10,9 @@ export default function TestLayout({ children }: { children: React.ReactNode }) 
       <div className='fixed top-5 right-5 z-50'>
             <ThemeSwitcher/>
       </div>
-      <main className="flex-1 p-8">
+      <div className="flex-1 p-8">
         {children}
-      </main>
+      </div>
     </div>
   );
 }

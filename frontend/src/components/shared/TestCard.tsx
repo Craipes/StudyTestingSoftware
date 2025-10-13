@@ -1,13 +1,16 @@
 import { createTestSession } from "@/lib/api";
 import { AvailableTestItem } from "@/types";
 import axios from "axios";
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz'; 
+
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from 'react-hot-toast';
 
+const KYIV_TIMEZONE = 'Europe/Kyiv';
+
 export const TestCard = ({ test }: { test: AvailableTestItem }) => {
-  const isClosed = test.hasCloseTime && new Date(test.closeAt) < new Date();
+  const isClosed = test.hasCloseTime && new Date(test.closeAt) < new Date(); 
   const router = useRouter();
   
   const [isLoading, setIsLoading] = useState(false);
@@ -59,7 +62,8 @@ export const TestCard = ({ test }: { test: AvailableTestItem }) => {
         <p>🛡️ Спроб: {test.attemptsLimit === 0 ? 'Безлімітно' : test.attemptsLimit}</p>
         {test.hasCloseTime && (
           <p className={isClosed ? 'text-red-500 font-medium' : 'text-green-600'}>
-            📅 Доступний до: {format(new Date(test.closeAt), 'dd.MM.yyyy HH:mm')}
+            📅 Доступний до: 
+            {formatInTimeZone(new Date(test.closeAt), KYIV_TIMEZONE, 'dd.MM.yyyy HH:mm')}
             {isClosed && ' (Закрито)'}
           </p>
         )}
@@ -68,7 +72,7 @@ export const TestCard = ({ test }: { test: AvailableTestItem }) => {
       {error && <p className="text-red-500 mt-2 text-sm">{error}</p>}
       
       <div className="mt-4 flex justify-end">
-        <button  
+        <button  
           className="btn-primary w-[35%]"
           onClick={handleStartTest}
           disabled={isClosed || isLoading}

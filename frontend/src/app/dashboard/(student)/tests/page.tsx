@@ -8,7 +8,7 @@ import { TestCard } from '@/components/shared/TestCard';
 import Breadcrumbs from '@/components/shared/BreadCrumbs';
 import Link from 'next/link';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 6;
 
   const breadcrumbItems = [
     { name: 'Дашборд', href: '/dashboard' },
@@ -87,7 +87,7 @@ export default function StudentTestsPage() {
             disabled={page === 1}
             className=" px-4 py-2 bg-blue-600  text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300 flex items-center cursor-pointer justify-center disabled:bg-gray-400"
           >
-            ← Попередня
+            ←
           </button>
           
           <span className="text-lg font-medium">Сторінка {page} з {totalPages}</span>
@@ -97,7 +97,7 @@ export default function StudentTestsPage() {
             disabled={page === totalPages}
             className=" px-4 py-2 bg-blue-600  text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300 flex items-center cursor-pointer justify-center disabled:bg-gray-400"
           >
-            Наступна →
+            →
           </button>
         </div>
       )}

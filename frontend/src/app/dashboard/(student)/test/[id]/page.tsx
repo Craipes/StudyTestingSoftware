@@ -147,12 +147,21 @@ const TestPage = () => {
   const submitAnswer = async (questionId: string, answerData: any) => {
     try {
       setSubmitting(true)
+
+      const payload = {
+      sessionId: id,
+      questionId,
+      ...answerData
+    }
+    
+    console.log('Sending answer payload:', payload)
+
       await api.put('/student/tests/session/submit-answer', {
         sessionId: id,
         questionId,
         ...answerData
       })
-      console.log('Answer submitted successfully:', id, questionId, answerData)
+
     } catch (err) {
       console.error('Error submitting answer:', err)
       // Якщо помилка, можна відкотити зміни в стані
@@ -238,6 +247,7 @@ const TestPage = () => {
     // Відправляємо на сервер
     try {
       await submitAnswer(questionId, {
+        resetValue: true,
         booleanValue: value
       })
     } catch (err) {
@@ -364,7 +374,7 @@ const TestPage = () => {
         disabled={submitting}
         className={`flex-1 p-4 border rounded-lg transition-colors ${
           question.selectedBooleanValue === true 
-            ? 'bg-green-500 text-white border-green-500' 
+            ? 'bg-blue-500 text-white border-blue-500' 
             : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
         } ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
@@ -375,7 +385,7 @@ const TestPage = () => {
         disabled={submitting}
         className={`flex-1 p-4 border rounded-lg transition-colors ${
           question.selectedBooleanValue === false 
-            ? 'bg-red-500 text-white border-red-500' 
+            ? 'bg-blue-500 text-white border-blue-500' 
             : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
         } ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
       >

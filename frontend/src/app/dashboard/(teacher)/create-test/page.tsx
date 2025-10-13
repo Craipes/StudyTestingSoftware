@@ -11,28 +11,13 @@ import api from '@/lib/axios';
 import { isValid } from 'zod/v3';
 import Breadcrumbs from '@/components/shared/BreadCrumbs';
 import Link from 'next/link';
+import { AccessMode, QuestionType } from '@/types';
 
   const breadcrumbItems = [
     { name: 'Дашборд', href: '/dashboard' },
     { name: 'Керування тестами', href: '/dashboard/manage-tests' },
     { name: 'Cтворити тест'}
   ];
-
-// === Enum для числових значень ===
-enum QuestionType {
-    SingleChoice = 0,
-    MultipleChoice = 1,
-    TableSingleChoice = 2,
-    Ordering = 3,
-    Slider = 4,
-    YesNo = 5,
-}
-
-enum AccessMode {
-    Private = 0,
-    Group = 1,
-    Public = 2,
-}
 
 // === Типи та схеми валідації ===
 
@@ -259,7 +244,7 @@ const OrderingEditor = ({ rows, columns, onAdd, onRemove, onUpdateRowText, onUpd
         <div className="space-y-4 mt-4">
             <h3 className="font-semibold">Співставлення: Питання та Відповіді</h3>
             {rows.map((row, index) => (
-                <div key={index} className="flex-wrap sm:p-3 sm:flex items-center gap-2">
+                <div key={index} className="flex-wrap sm:flex items-center gap-2">
                     <label className="text-sm font-medium whitespace-nowrap">Питання:</label>
                     <input
                         type="text"
