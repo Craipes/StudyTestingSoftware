@@ -664,4 +664,157 @@ public class TestSessionManager
         await dbContext.SaveChangesAsync();
         return true;
     }
+
+    public async Task<TeacherTestSessionDTO?> LoadSessionForTeacherAsync(AppUser author, Guid sessionId)
+    {
+        var session = await dbContext.TestSessions
+            .AsNoTracking()
+            .Include(s => s.UserAnswers)
+            .FirstOrDefaultAsync(s => s.Id == sessionId);
+
+        if (session == null) return null;
+
+        var test = await testReadManager.LoadTestAsync(session.TestId, false);
+        if (test == null || test.AuthorId != author.Id) return null;
+
+        var random = new Random(session.RandomSeed);
+        var answers = session.UserAnswers;
+
+        List<TeacherTestSessionQuestionDTO> questions = [];
+
+        foreach (var question in test.Questions)
+        {
+            double? selectedNumber = null;
+            bool? selectedBoolean = null;
+
+            double? validNumber = null;
+            bool? validBoolean = null;
+
+            List<TeacherTestSessionChoiceOptionDTO> choiceOptions = [];
+            List<TeacherTestSessionMatrixColumnDTO> questionColumns = [];
+            List<TeacherTestSessionMatrixRowDTO> questionRows = [];
+
+            // Calculate received score for this question based on user's answers
+            double receivedScore = 0d;
+            var questionAnswers = answers.Where(a => a.QuestionId == question.Id).ToList();
+
+            switch (question.QuestionType)
+            {
+                case QuestionType.YesNo:
+                    selectedBoolean = answers.FirstOrDefault(a => a.QuestionId == question.Id)?.BoolValue;
+                    validBoolean = question.TargetBoolValue;
+                    if (questionAnswers.Count == 1 && selectedBoolean == question.TargetBoolValue)
+                    {
+                        receivedScore = question.Points;
+                    }
+                    break;
+                case QuestionType.Slider:
+                    selectedNumber = answers.FirstOrDefault(a => a.QuestionId == question.Id)?.NumberValue;
+                    validNumber = question.TargetNumberValue;
+                    if (questionAnswers.Count == 1 && selectedNumber == question.TargetNumberValue)
+                    {
+                        receivedScore = question.Points;
+                    }
+                    break;
+                case QuestionType.SingleChoice:
+                case QuestionType.MultipleChoice:
+                    choiceOptions = question.ChoiceOptions
+                        .Select(o => new TeacherTestSessionChoiceOptionDTO(
+                            o.Id,
+                            o.Text,
+                            answers.Any(a => a.QuestionId == question.Id && a.SelectedChoiceOptionId == o.Id),
+                            o.IsCorrect))
+                        .ToList();
+                    if (test.ShuffleAnswers) choiceOptions.Shuffle(random);
+
+                    if (question.QuestionType == QuestionType.SingleChoice)
+                    {
+                        if (questionAnswers.Count == 1)
+                        {
+                            var correctOption = question.ChoiceOptions.FirstOrDefault(o => o.IsCorrect);
+                            if (correctOption != null && questionAnswers[0].SelectedChoiceOptionId == correctOption.Id)
+                            {
+                                receivedScore = question.Points;
+                            }
+                        }
+                    }
+                    else // MultipleChoice
+                    {
+                        if (question.ChoiceOptions.Count > 0)
+                        {
+                            var selectedOptions = questionAnswers.Select(a => a.SelectedChoiceOptionId).ToHashSet();
+                            int correctCount = 0;
+                            foreach (var option in question.ChoiceOptions)
+                            {
+                                if (option.IsCorrect == selectedOptions.Contains(option.Id))
+                                {
+                                    correctCount++;
+                                }
+                            }
+                            receivedScore = (double)question.Points * correctCount / question.ChoiceOptions.Count;
+                        }
+                    }
+                    break;
+                case QuestionType.TableSingleChoice:
+                case QuestionType.Ordering:
+                    questionColumns = question.QuestionColumns
+                        .Select(c => new TeacherTestSessionMatrixColumnDTO(c.Id, c.Text))
+                        .ToList();
+                    questionRows = question.QuestionRows
+                        .Select(r => new TeacherTestSessionMatrixRowDTO(
+                            r.Id,
+                            r.Text,
+                            answers.FirstOrDefault(a => a.QuestionId == question.Id && a.SelectedMatrixRowId == r.Id)?.SelectedMatrixColumnId,
+                            r.CorrectMatrixColumnId))
+                        .ToList();
+                    if (test.ShuffleAnswers || question.QuestionType == QuestionType.Ordering) questionColumns.Shuffle(random);
+
+                    if (question.QuestionRows.Count > 0)
+                    {
+                        int correctMultipleCount = 0;
+                        foreach (var row in question.QuestionRows)
+                        {
+                            var correctColumnId = row.CorrectMatrixColumnId;
+                            if (questionAnswers.FirstOrDefault(a => a.SelectedMatrixRowId == row.Id)?.SelectedMatrixColumnId == correctColumnId)
+                            {
+                                correctMultipleCount++;
+                            }
+                        }
+                        receivedScore = (double)question.Points * correctMultipleCount / question.QuestionRows.Count;
+                    }
+                    break;
+            }
+
+            questions.Add(new TeacherTestSessionQuestionDTO(
+                question.Id,
+                question.Text,
+                question.Points,
+                question.QuestionType,
+                receivedScore,
+                question.MinNumberValue,
+                question.MaxNumberValue,
+                question.NumberValueStep,
+                selectedNumber,
+                selectedBoolean,
+                validNumber,
+                validBoolean,
+                questionRows,
+                questionColumns,
+                choiceOptions));
+        }
+
+        if (test.ShuffleQuestions) questions.Shuffle(random);
+
+        return new TeacherTestSessionDTO(
+            session.Id,
+            test.Name,
+            session.StartedAt,
+            session.FinishedAt,
+            session.AutoFinishAt,
+            session.Score,
+            session.IsCompleted,
+            test.DurationInMinutes,
+            test.MaxScore,
+            questions);
+    }
 }

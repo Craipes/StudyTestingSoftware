@@ -165,6 +165,24 @@ public class TeacherTestsController : Controller
         return testDTO;
     }
 
+    [HttpGet("view-session/{sessionId:guid}")]
+    public async Task<ActionResult<TeacherTestSessionDTO>> ViewTestSession([FromRoute] Guid sessionId)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var dto = await testSessionManager.LoadSessionForTeacherAsync(user, sessionId);
+        if (dto == null)
+        {
+            return NotFound();
+        }
+
+        return dto;
+    }
+
     [HttpDelete("delete-session/{sessionId:guid}")]
     public async Task<ActionResult> DeleteTestSession([FromRoute] Guid sessionId)
     {
