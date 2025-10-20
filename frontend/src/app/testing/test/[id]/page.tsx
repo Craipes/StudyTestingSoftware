@@ -316,7 +316,7 @@ const TestPage = () => {
 
   // Компоненти для різних типів питань
   const renderSingleChoice = (question: Question) => (
-    <div className="space-y-3">
+    <div className="space-y-3 dark:text-gray-200">
       {question.choiceOptions.map((option) => (
         <button
           key={option.id}
@@ -325,7 +325,7 @@ const TestPage = () => {
           className={`w-full p-4 text-left border rounded-lg transition-colors ${
             option.isSelected 
               ? 'bg-blue-500 text-white border-blue-500' 
-              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              : 'bg-white text-gray-700 border-gray-300 dark:bg-gray-700 dark:text-gray-200 hover:bg-gray-50'
           } ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           {option.text}
@@ -335,11 +335,11 @@ const TestPage = () => {
   )
 
   const renderMultipleChoice = (question: Question) => (
-    <div className="space-y-3">
+    <div className="space-y-3 dark:text-gray-200">
       {question.choiceOptions.map((option) => (
         <label 
           key={option.id} 
-          className={`flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 ${
+          className={`flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 ${
             submitting ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
@@ -357,13 +357,13 @@ const TestPage = () => {
   )
 
   const renderTableSingleChoice = (question: Question) => (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse border border-gray-300">
+    <div className="overflow-x-auto dark:text-gray-200">
+      <table className="w-full border-collapse bord border-gray-300">
         <thead>
           <tr>
-            <th className="border border-gray-300 p-3 bg-gray-50"></th>
+            <th className="border border-gray-300 p-3 bg-gray-50 font-medium dark:text-gray-200 dark:bg-gray-700"></th>
             {question.questionColumns.map((column) => (
-              <th key={column.id} className="border border-gray-300 p-3 bg-gray-50 text-center">
+              <th key={column.id} className="border border-gray-300 p-3 bg-gray-50 text-center dark:text-gray-200 dark:bg-gray-700">
                 {column.text}
               </th>
             ))}
@@ -372,7 +372,7 @@ const TestPage = () => {
         <tbody>
           {question.questionRows.map((row) => (
             <tr key={row.id}>
-              <td className="border border-gray-300 p-3 bg-gray-50 font-medium">
+              <td className="border border-gray-300 p-3 bg-gray-50 font-medium dark:text-gray-200 dark:bg-gray-700">
                 {row.text}
               </td>
               {question.questionColumns.map((column) => (
@@ -402,7 +402,7 @@ const TestPage = () => {
         className={`flex-1 p-4 border rounded-lg transition-colors ${
           question.selectedBooleanValue === true 
             ? 'bg-blue-500 text-white border-blue-500' 
-            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            : 'bg-white text-gray-700 border-gray-300 dark:bg-gray-700 dark:text-gray-200 hover:bg-gray-50'
         } ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         Так
@@ -413,7 +413,7 @@ const TestPage = () => {
         className={`flex-1 p-4 border rounded-lg transition-colors ${
           question.selectedBooleanValue === false 
             ? 'bg-blue-500 text-white border-blue-500' 
-            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            : 'bg-white text-gray-700 dark:bg-gray-700 dark:text-gray-200 border-gray-300 hover:bg-gray-50'
         } ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         Ні
@@ -511,13 +511,13 @@ const TestPage = () => {
 
   return (
     <div className="min-h-screen bg-[##90a1b9] py-8">
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-4xl mx-auto sm:px-4">
         {/* Заголовок тесту */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6 dark:bg-gray-800 ">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2 dark:text-white">
             {testSession.testName}
           </h1>
-          <div className="flex justify-between items-center text-sm text-gray-600">
+          <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
             <span>Питання {currentQuestionIndex + 1} з {testSession.questions.length}</span>
             <span>Бали за відповідь: {currentQuestion.points}</span>
             <span className="font-semibold text-red-600">
@@ -527,8 +527,8 @@ const TestPage = () => {
         </div>
 
         {/* Поточне питання */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6 dark:bg-gray-800">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 dark:text-white">
             {currentQuestion.text}
           </h2>
           
@@ -540,7 +540,7 @@ const TestPage = () => {
           <button
             onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
             disabled={currentQuestionIndex === 0 || submitting}
-            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            className="px-6 dark:text-gray-200 py-2 border border-gray-300 rounded-lg text-gray-700 disabled:opacity-50 dark:hover:bg-gray-500 disabled:cursor-not-allowed hover:bg-gray-50"
           >
             Назад
           </button>

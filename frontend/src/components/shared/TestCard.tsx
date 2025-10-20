@@ -18,7 +18,7 @@ export const TestCard = ({ test }: { test: AvailableTestItem }) => {
     setError(null);
     try {
       const sessionId = await createTestSession(test.id);
-      router.push(`/dashboard/test/${sessionId}`);
+      router.push(`/testing/test/${sessionId}`);
       toast.success("Сесію тесту успішно створено!");
     } catch (err) {
     if (axios.isAxiosError(err) && err.response) {
