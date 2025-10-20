@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import api from '@/lib/axios';
+import {formatTimeLeft, getKyivDateFromUTC } from '@/utils/parse-date';
 
 // Типи для даних (залишаються незмінними)
 interface ChoiceOption {
@@ -57,6 +58,8 @@ const TestPage = () => {
   const [error, setError] = useState<string | null>(null)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [submitting, setSubmitting] = useState(false)
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+
 
   // Завантаження тесту
   useEffect(() => {
@@ -64,6 +67,7 @@ const TestPage = () => {
       try {
         setLoading(true)
         const response = await api.get(`/student/tests/session/${id}`)
+        console.log('Fetched test session:', response.data)
         setTestSession(response.data)
       } catch (err) {
         setError('Не вдалося завантажити тест')
@@ -77,6 +81,29 @@ const TestPage = () => {
       fetchTestSession()
     }
   }, [id])
+
+  // Таймер
+    useEffect(() => {
+      if (!testSession?.autoFinishAt) return;
+
+      const finishTimeKyiv = getKyivDateFromUTC(testSession.autoFinishAt);
+
+      const interval = setInterval(() => {
+        const now = new Date();
+        const diff = finishTimeKyiv.getTime() - now.getTime();
+
+        if (diff <= 0) {
+          clearInterval(interval);
+          finishTest(); 
+        } else {
+          setTimeLeft(Math.floor(diff / 1000));
+        }
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }, [testSession]);
+
+
 
   // Функція для оновлення питання в локальному стані
   const updateQuestionInState = (questionId: string, updates: any) => {
@@ -492,7 +519,10 @@ const TestPage = () => {
           </h1>
           <div className="flex justify-between items-center text-sm text-gray-600">
             <span>Питання {currentQuestionIndex + 1} з {testSession.questions.length}</span>
-            <span>Бали: {currentQuestion.points}</span>
+            <span>Бали за відповідь: {currentQuestion.points}</span>
+            <span className="font-semibold text-red-600">
+              ⏱ Залишилось часу: {formatTimeLeft(timeLeft)}
+            </span>
           </div>
         </div>
 
@@ -551,3 +581,4 @@ const TestPage = () => {
 }
 
 export default TestPage
+

@@ -1,6 +1,6 @@
 import { createTestSession } from "@/lib/api";
 import { AvailableTestItem } from "@/types";
-import { convertUtcStringToKyiv } from "@/utils/pare-date";
+import { convertUtcStringToKyiv } from "@/utils/parse-date";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

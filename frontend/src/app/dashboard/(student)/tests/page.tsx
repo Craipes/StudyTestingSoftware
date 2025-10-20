@@ -79,28 +79,84 @@ export default function StudentTestsPage() {
       </div>
       )}
       
-      {/* Компонент пагінації */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center space-x-4 mt-8">
-          <button 
-            onClick={() => handlePageChange(page - 1)} 
-            disabled={page === 1}
-            className=" px-4 py-2 bg-blue-600  text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300 flex items-center cursor-pointer justify-center disabled:bg-gray-400"
-          >
-            ←
-          </button>
-          
-          <span className="text-lg font-medium">Сторінка {page} з {totalPages}</span>
-          
-          <button 
-            onClick={() => handlePageChange(page + 1)} 
-            disabled={page === totalPages}
-            className=" px-4 py-2 bg-blue-600  text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300 flex items-center cursor-pointer justify-center disabled:bg-gray-400"
-          >
-            →
-          </button>
-        </div>
-      )}
+  {/* Компонент пагінації */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center space-x-4 mt-8">
+
+            {totalPages <= 5 ? (
+              // Якщо сторінок мало — показуємо всі
+              Array.from({ length: totalPages }, (_, i) => (
+                <button
+                  key={i}
+                  onClick={() => handlePageChange(i + 1)}
+                  className={`px-4 py-2 font-semibold rounded-lg transition-colors duration-300 ${
+                    i + 1 === page
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))
+            ) : (
+              <>
+                {/* Перша сторінка */}
+                <button
+                  onClick={() => handlePageChange(1)}
+                  className={`px-4 py-2 font-semibold rounded-lg transition-colors duration-300 ${
+                    page === 1
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                  }`}
+                >
+                  1
+                </button>
+
+                {/* Якщо поточна сторінка > 3 — показуємо "..." */}
+                {page > 3 && <span className="px-2">...</span>}
+
+                {/* Поточна сторінка та сусідні */}
+                {Array.from({ length: 3 }, (_, i) => {
+                  const pageNumber = page - 1 + i;
+                  if (pageNumber > 1 && pageNumber < totalPages) {
+                    return (
+                      <button
+                        key={pageNumber}
+                        onClick={() => handlePageChange(pageNumber)}
+                        className={`px-4 py-2 font-semibold rounded-lg transition-colors duration-300 ${
+                          pageNumber === page
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                        }`}
+                      >
+                        {pageNumber}
+                      </button>
+                    );
+                  }
+                  return null;
+                })}
+
+                {/* Якщо ще далеко до кінця — показуємо "..." */}
+                {page < totalPages - 2 && <span className="px-2">...</span>}
+
+                {/* Остання сторінка */}
+                <button
+                  onClick={() => handlePageChange(totalPages)}
+                  className={`px-4 py-2 font-semibold rounded-lg transition-colors duration-300 ${
+                    page === totalPages
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                  }`}
+                >
+                  {totalPages}
+                </button>
+              </>
+            )}
+
+            {/*<span className="text-lg font-medium">Сторінка {page} з {totalPages}</span>*/}
+            
+          </div>
+        )}
     </div>
   );
 }

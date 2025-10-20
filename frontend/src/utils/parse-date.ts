@@ -1,22 +1,3 @@
-import { formatInTimeZone } from 'date-fns-tz'; 
-
-const KYIV_TIMEZONE = 'Europe/Kyiv';
-
-export const formatDate = (dateString: string) => {
-    try {
-      const normalizedDateString = dateString.replace(/(\.\d{3})\d+/, '$1');
-      const date = new Date(normalizedDateString);
-      
-      if (isNaN(date.getTime())) {
-        return 'Невірна дата';
-      }
-      
-      return formatInTimeZone(date, KYIV_TIMEZONE, 'dd.MM.yyyy HH:mm');
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return 'Помилка дати';
-    }
-  };
 
   export function convertToKyivTime(utcDateString: string): string {
   const date = new Date(utcDateString);
@@ -52,3 +33,24 @@ export function convertUtcStringToKyiv(utcString: string): string {
 
   return new Intl.DateTimeFormat('uk-UA', options as Intl.DateTimeFormatOptions).format(date);
 }
+
+export function getKyivDateFromUTC(utcDateString: string): Date {
+  const normalized = utcDateString.endsWith('Z') ? utcDateString : `${utcDateString}Z`;
+  const utcDate = new Date(normalized);
+  const kyivTime = new Date(
+    utcDate.toLocaleString('en-US', { timeZone: 'Europe/Kyiv' })
+  );
+
+  return kyivTime;
+}
+
+
+
+export function formatTimeLeft(seconds: number | null): string {
+  if (seconds === null) return '--:--';
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+

@@ -1,5 +1,5 @@
 import { CompletedTestSessionsItem } from "@/types";
-import { convertUtcStringToKyiv} from "@/utils/pare-date";
+import { convertUtcStringToKyiv} from "@/utils/parse-date";
 
 
 

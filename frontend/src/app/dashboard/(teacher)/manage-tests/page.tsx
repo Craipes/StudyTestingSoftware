@@ -21,10 +21,171 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Edit, Trash, Folder, ArrowLeft, Eye } from 'lucide-react';
+import { Edit, Trash, Folder, ArrowLeft, Eye, CheckCircle, XCircle } from 'lucide-react';
 import Breadcrumbs from '@/components/shared/BreadCrumbs';
 import Link from 'next/link';
 import { TestDetails, TestPreview, UserSessionDetails } from '@/types/manage-tests-types';
+
+// Enum для типів питань
+export enum QuestionType {
+  SingleChoice = 0,
+  MultipleChoice = 1,
+  TableSingleChoice = 2,
+  Ordering = 3, 
+  Slider = 4,
+  YesNo = 5,
+}
+
+interface ChoiceOption {
+  id: string;
+  text: string;
+  isSelected: boolean;
+  isCorrect: boolean;
+}
+
+interface QuestionRow {
+  id: string;
+  text: string;
+  selectedColumnId: string;
+  correctColumnId: string;
+}
+
+interface QuestionColumn {
+  id: string;
+  text: string;
+}
+
+interface Question {
+  id: string;
+  text: string;
+  points: number;
+  questionType: QuestionType;
+  receivedScore: number;
+  minNumberValue?: number;
+  maxNumberValue?: number;
+  numberValueStep?: number;
+  selectedNumberValue?: number;
+  selectedBooleanValue?: boolean;
+  validNumberValue?: number;
+  validBooleanValue?: boolean;
+  questionRows?: QuestionRow[];
+  questionColumns?: QuestionColumn[];
+  choiceOptions?: ChoiceOption[];
+}
+
+interface SessionDetails {
+  id: string;
+  testName: string;
+  startedAt: string;
+  finishedAt: string;
+  autoFinishAt: string;
+  score: number;
+  isCompleted: boolean;
+  durationInMinutes: number;
+  maxScore: number;
+  questions: Question[];
+}
+
+
+
+const QuestionRenderer = ({ question }: { question: Question }) => {
+  const getOptionStyle = (option: ChoiceOption) => {
+    if (option.isSelected && option.isCorrect) {
+      return 'text-green-600 font-bold'; 
+    }
+    if (option.isSelected && !option.isCorrect) {
+      return 'text-red-600 font-bold'; 
+    }
+    if (!option.isSelected && option.isCorrect) {
+      return 'text-green-600'; 
+    }
+    return 'dark:text-gray-300';
+  };
+  
+  const renderQuestionContent = () => {
+    switch (question.questionType) {
+      case QuestionType.SingleChoice:
+      case QuestionType.MultipleChoice:
+        return (
+          <ul className="space-y-2">
+            {question.choiceOptions?.map(option => (
+              <li key={option.id} className={`flex items-center gap-2 ${getOptionStyle(option)}`}>
+                 {option.isSelected && option.isCorrect && <CheckCircle size={16} className="text-green-600" />}
+                 {option.isSelected && !option.isCorrect && <XCircle size={16} className="text-red-600" />}
+                 {!option.isSelected && option.isCorrect && <CheckCircle size={16} className="text-green-600" />}
+                 <span>{option.text}</span>
+              </li>
+            ))}
+          </ul>
+        );
+
+      case QuestionType.TableSingleChoice:
+      case QuestionType.Ordering:
+        return (
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 mt-2">
+            <thead className="bg-gray-50 dark:bg-gray-800">
+              <tr>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Рядок</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Відповідь студента</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Правильна відповідь</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+              {question.questionRows?.map(row => {
+                const selectedColumn = question.questionColumns?.find(c => c.id === row.selectedColumnId);
+                const correctColumn = question.questionColumns?.find(c => c.id === row.correctColumnId);
+                const isCorrect = row.selectedColumnId === row.correctColumnId;
+                return (
+                  <tr key={row.id}>
+                    <td className="px-4 py-2">{row.text}</td>
+                    <td className={`px-4 py-2 ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+                      {selectedColumn?.text || 'Немає відповіді'}
+                    </td>
+                    <td className="px-4 py-2 text-green-600">{correctColumn?.text}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        );
+
+      case QuestionType.Slider:
+        const isSliderCorrect = question.selectedNumberValue === question.validNumberValue;
+        return (
+          <div className="flex gap-4">
+             <p>Відповідь студента: <span className={isSliderCorrect ? 'font-bold text-green-600' : 'font-bold text-red-600'}>{question.selectedNumberValue}</span></p>
+             <p>Правильна відповідь: <span className="font-bold text-green-600">{question.validNumberValue}</span></p>
+          </div>
+        );
+
+      case QuestionType.YesNo:
+        const isYesNoCorrect = question.selectedBooleanValue === question.validBooleanValue;
+        const studentAnswer = question.selectedBooleanValue ? 'Так' : 'Ні';
+        const correctAnswer = question.validBooleanValue ? 'Так' : 'Ні';
+        return (
+          <div className="flex gap-4">
+            <p>Відповідь студента: <span className={isYesNoCorrect ? 'font-bold text-green-600' : 'font-bold text-red-600'}>{studentAnswer}</span></p>
+            <p>Правильна відповідь: <span className="font-bold text-green-600">{correctAnswer}</span></p>
+          </div>
+        );
+
+      default:
+        return <p>Невідомий тип питання.</p>;
+    }
+  };
+
+  return (
+     <div className="mb-6 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+      <div className="flex justify-between items-center mb-2">
+        <h4 className="font-semibold text-lg dark:text-gray-100">{question.text}</h4>
+        <span className="text-sm font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+          {question.receivedScore} / {question.points}
+        </span>
+      </div>
+      <div className="mt-2 text-sm">{renderQuestionContent()}</div>
+    </div>
+  );
+};
 
 
 const ManageTestsPage = () => {
@@ -37,6 +198,11 @@ const ManageTestsPage = () => {
   const [selectedTest, setSelectedTest] = useState<TestDetails | null>(null);
   const [selectedUserSessions, setSelectedUserSessions] = useState<UserSessionDetails | null>(null);
   const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null);
+
+  const [session, setSession] = useState<SessionDetails | null>(null);
+  const [isSessionDetailsModalOpen, setIsSessionDetailsModalOpen] = useState(false);
+  const [loadingSessionDetails, setLoadingSessionDetails] = useState(false);
+
 
   const breadcrumbItems = [
     { name: 'Дашборд', href: '/dashboard' },
@@ -69,6 +235,20 @@ const ManageTestsPage = () => {
       setDeletingTestId(null);
     }
   };
+
+  const handleSessionDetails = async (sessionId: string) => {
+    setIsSessionDetailsModalOpen(true);
+    setLoadingSessionDetails(true);
+    try {
+      const response = await api.get(`/teacher/tests/view-session/${sessionId}`);
+      setSession(response.data);
+    } catch (err) {
+      toast.error('Помилка при завантаженні деталей сесії.');
+      setIsSessionDetailsModalOpen(false); 
+    } finally {
+      setLoadingSessionDetails(false);
+    }
+  }
   
   const handleOpenSessions = async (testId: string) => {
     setIsSessionsModalOpen(true);
@@ -135,6 +315,11 @@ const ManageTestsPage = () => {
     setSelectedTest(null);
     setSelectedUserSessions(null);
   };
+
+  const handleCloseDetailsModal = () => {
+    setIsSessionDetailsModalOpen(false);
+    setSession(null);
+  }
   
   return (
     <div>
@@ -216,8 +401,9 @@ const ManageTestsPage = () => {
         </div>
       )}
 
+      {/* Основне модальне вікно для списків */}
       <Dialog open={isSessionsModalOpen} onOpenChange={handleCloseModal}>
-        <DialogContent className="w-11/12">
+        <DialogContent className="w-11/12 max-w-4xl">
           <DialogHeader className='mb-4'>
             <DialogTitle>
               {selectedUserSessions
@@ -256,6 +442,9 @@ const ManageTestsPage = () => {
                             <td className="px-6 py-4 whitespace-nowrap">{session.score}</td>
                             <td className="px-6 py-4 whitespace-nowrap">{session.isCompleted ? 'Завершено' : 'В процесі'}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-right">
+                              <button onClick={() => handleSessionDetails(session.id)} className="px-3 py-1 text-sm  text-blue-500 rounded-full hover:bg-blue-100 dark:hover:bg-gray-700" title='Переглянути деталі сесії'>
+                                <Eye size={18} className="" />
+                              </button>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <button onClick={() => setDeletingSessionId(session.id)} title='Видалити сесію' className="p-2 text-red-500 rounded-md hover:bg-red-100 dark:hover:bg-gray-700">
@@ -307,7 +496,7 @@ const ManageTestsPage = () => {
                                   onClick={() => handleViewUserSessions(userAttempt.userInfo.id)}
                                   className="px-3 py-1 text-sm  text-blue-500 rounded-full hover:bg-blue-100 dark:hover:bg-gray-700"
                                 >
-                                  <Eye size={24} className="inline-block mr-1" />
+                                  <Eye size={24} className="inline-block" />
                                 </button>
                               </td>
                             </tr>
@@ -324,6 +513,36 @@ const ManageTestsPage = () => {
           )}
         </DialogContent>
       </Dialog>
+      
+      {/* Модальне вікно для деталей сесії */}
+      <Dialog open={isSessionDetailsModalOpen} onOpenChange={handleCloseDetailsModal}>
+        <DialogContent className="w-11/12 max-w-4xl h-[90vh] flex flex-col">
+           <DialogHeader>
+             <DialogTitle>Деталі сесії: {session?.testName}</DialogTitle>
+           </DialogHeader>
+           {loadingSessionDetails ? (
+            <div className='flex-grow flex items-center justify-center'>Завантаження деталей...</div>
+           ) : session ? (
+             <div className="flex-grow overflow-y-auto pr-4">
+               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                <div><p className="text-sm text-gray-500">Результат</p><p className="font-bold text-lg">{session.score} / {session.maxScore}</p></div>
+                <div><p className="text-sm text-gray-500">Початок</p><p className="font-semibold">{new Date(session.startedAt).toLocaleString()}</p></div>
+                <div><p className="text-sm text-gray-500">Завершення</p><p className="font-semibold">{new Date(session.finishedAt).toLocaleString()}</p></div>
+                <div><p className="text-sm text-gray-500">Статус</p><p className={`font-bold ${session.isCompleted ? 'text-green-600' : 'text-yellow-600'}`}>{session.isCompleted ? "Завершено" : "В процесі"}</p></div>
+               </div>
+
+               <div>
+                 {session.questions.map(question => (
+                   <QuestionRenderer key={question.id} question={question} />
+                 ))}
+               </div>
+             </div>
+           ) : (
+            <div className='flex-grow flex items-center justify-center'>Не вдалося завантажити дані.</div>
+           )}
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 };
