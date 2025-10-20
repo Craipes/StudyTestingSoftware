@@ -21,15 +21,7 @@ import Breadcrumbs from '@/components/shared/BreadCrumbs';
 import ManageStudentsModal from '@/components/shared/ManageStudentsModal';
 import ManageTestsModal from '@/components/shared/ManageTestsModal';
 import GroupFormModal from '@/components/shared/GroupFormModal';
-
-
-interface GroupPreview {
-  id: string;
-  name: string;
-  description: string;
-  studentsCount: number;
-  testsCount: number;
-}
+import { GroupPreview } from '@/types/manage-groups-types';
 
 const ManageGroupsPage = () => {
   const [loading, setLoading] = useState(true);

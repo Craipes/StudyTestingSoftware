@@ -12,6 +12,7 @@ import { isValid } from 'zod/v3';
 import Breadcrumbs from '@/components/shared/BreadCrumbs';
 import Link from 'next/link';
 import { AccessMode, QuestionType } from '@/types';
+import { handleApiError } from '@/utils/handle-api-errors';
 
   const breadcrumbItems = [
     { name: 'Дашборд', href: '/dashboard' },
@@ -327,8 +328,7 @@ export default function CreateTestPage() {
             toast.success('Тест успішно створено!');
             router.push('/dashboard/manage-tests');
         } catch (err) {
-            console.error(err);
-            toast.error('Не вдалося створити тест.');
+            handleApiError(err, 'Помилка при збереженні тесту.');
         } finally {
             setLoading(false);
         }

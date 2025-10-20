@@ -6,6 +6,7 @@ import { ChangePasswordForm } from '@/components/shared/ChangePasswordForm';
 import toast from 'react-hot-toast';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
+import { handleApiError } from '@/utils/handle-api-errors';
 
 export default function ChangePasswordPage() {
   const [loading, setLoading] = useState(false);
@@ -41,16 +42,7 @@ export default function ChangePasswordPage() {
       toast.success('Пароль успішно змінено!');
       router.push('/dashboard');
     } catch (err: any) {
-      if (axios.isAxiosError(err) && err.response) {
-        if (err.response.status === 401) {
-          setError('Невірний старий пароль.');
-        } else {
-          setError('Помилка під час зміни пароля. Спробуйте знову.');
-        }
-      } else {
-        setError('Сталася невідома помилка.');
-      }
-      console.error(err);
+      handleApiError(err, 'Помилка при зміні пароля.');
     } finally {
       setLoading(false);
     }

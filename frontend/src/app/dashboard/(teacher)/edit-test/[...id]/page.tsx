@@ -10,78 +10,9 @@ import { useRouter, useParams } from 'next/navigation';
 import api from '@/lib/axios';
 import Breadcrumbs from '@/components/shared/BreadCrumbs';
 import Link from 'next/link';
+import { AccessMode, ChoiceOptionSchema, EditTestFormSchema, QuestionColumnSchema, QuestionRowSchema, QuestionSchema, QuestionType } from '@/types/edit-test-types-schemas';
+import { handleApiError } from '@/utils/handle-api-errors';
 
-
-// === Enum для числових значень ===
-enum QuestionType {
-    SingleChoice = 0,
-    MultipleChoice = 1,
-    TableSingleChoice = 2,
-    Ordering = 3,
-    Slider = 4,
-    YesNo = 5,
-}
-
-enum AccessMode {
-    Private = 0,
-    Group = 1,
-    Public = 2,
-}
-
-// === Типи та схеми валідації ===
-
-const ChoiceOptionSchema = z.object({
-    id: z.string().optional(),
-    text: z.string().min(1, 'Текст відповіді не може бути порожнім.'),
-    isCorrect: z.boolean(),
-    order: z.number().int().optional(),
-});
-
-const QuestionRowSchema = z.object({
-    id: z.string().optional(),
-    text: z.string().min(1, 'Текст рядка не може бути порожнім.'),
-    order: z.number().int(),
-    validColumnOrder: z.number().int(),
-});
-
-const QuestionColumnSchema = z.object({
-    id: z.string().optional(),
-    text: z.string().min(1, 'Текст стовпця не може бути порожнім.'),
-    order: z.number().int(),
-});
-
-const QuestionSchema = z.object({
-    id: z.string().optional(),
-    text: z.string().min(1, 'Текст питання не може бути порожнім.'),
-    order: z.number().int().min(0),
-    points: z.number().int().min(1).max(5, 'Бали повинні бути від 1 до 5.'),
-    questionType: z.nativeEnum(QuestionType),
-    minNumberValue: z.number().int().optional(),
-    maxNumberValue: z.number().int().optional(),
-    numberValueStep: z.number().int().optional(),
-    targetNumberValue: z.number().int().optional(),
-    targetBoolValue: z.boolean().optional(),
-    choiceOptions: z.array(ChoiceOptionSchema).default([]).optional(),
-    questionRows: z.array(QuestionRowSchema).default([]).optional(),
-    questionColumns: z.array(QuestionColumnSchema).default([]).optional(),
-});
-
-const EditTestFormSchema = z.object({
-    id: z.string(),
-    name: z.string().min(1, 'Назва тесту не може бути порожньою.'),
-    description: z.string().optional(),
-    maxExperience: z.number().int().min(0),
-    accessMode: z.nativeEnum(AccessMode),
-    durationInMinutes: z.number().int().min(0),
-    shuffleQuestions: z.boolean(),
-    shuffleAnswers: z.boolean(),
-    attemptsLimit: z.number().int(),
-    isPublished: z.boolean(),
-    isOpened: z.boolean().optional(),
-    hasCloseTime: z.boolean().optional(),
-    closeAt: z.string().optional().nullable(),
-    questions: z.array(QuestionSchema),
-});
 
 type EditTestFormValues = z.infer<typeof EditTestFormSchema>;
 type QuestionValues = z.infer<typeof QuestionSchema>;
@@ -325,8 +256,13 @@ export default function EditTestPage() {
             try {
                 const response = await api.get(`/teacher/tests/edit/${testId}`);
                 const data = response.data;
+                console.log('Fetched test data:', data);
                 if (data.closeAt) {
-                    data.closeAt = new Date(data.closeAt).toISOString().slice(0, 16);
+                    const utcDate = new Date(data.closeAt + 'Z');
+                    const kyivDate = new Date(
+                    utcDate.toLocaleString('en-US', { timeZone: 'Europe/Kyiv' })
+                    );
+                    data.closeAt = kyivDate.toISOString().slice(0, 16);
                 }
                 methods.reset(data);
             } catch (err) {
@@ -395,7 +331,7 @@ export default function EditTestPage() {
             router.push('/dashboard/manage-tests'); 
         } catch (err) {
             console.error(err);
-            toast.error('Не вдалося оновити тест.');
+            handleApiError(err, 'Помилка при збереженні тесту.');
         } finally {
             setIsSaving(false);
         }

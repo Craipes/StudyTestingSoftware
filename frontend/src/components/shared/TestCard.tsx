@@ -1,13 +1,10 @@
 import { createTestSession } from "@/lib/api";
 import { AvailableTestItem } from "@/types";
+import { convertUtcStringToKyiv } from "@/utils/pare-date";
 import axios from "axios";
-import { formatInTimeZone } from 'date-fns-tz'; 
-
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from 'react-hot-toast';
-
-const KYIV_TIMEZONE = 'Europe/Kyiv';
 
 export const TestCard = ({ test }: { test: AvailableTestItem }) => {
   const isClosed = test.hasCloseTime && new Date(test.closeAt) < new Date(); 
@@ -62,8 +59,8 @@ export const TestCard = ({ test }: { test: AvailableTestItem }) => {
         <p>🛡️ Спроб: {test.attemptsLimit === 0 ? 'Безлімітно' : test.attemptsLimit}</p>
         {test.hasCloseTime && (
           <p className={isClosed ? 'text-red-500 font-medium' : 'text-green-600'}>
-            📅 Доступний до: 
-            {formatInTimeZone(new Date(test.closeAt), KYIV_TIMEZONE, 'dd.MM.yyyy HH:mm')}
+            📅 Доступний до:{" "}
+            {convertUtcStringToKyiv(test.closeAt)}
             {isClosed && ' (Закрито)'}
           </p>
         )}

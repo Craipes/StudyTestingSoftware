@@ -12,7 +12,7 @@ import {
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 
-import { Lock,SquarePlus,Layers,NotebookPen,BookOpen,DoorOpen,Menu,X, Users  } from 'lucide-react';
+import { Lock,SquarePlus,Layers,NotebookPen,BookOpen,DoorOpen,Menu, Folder, Users  } from 'lucide-react';
 
 interface UserInfo {
   firstName: string;
@@ -92,7 +92,7 @@ export function Sidebar({ userInfo }: SidebarProps) {
           </div>
           <div className='my-auto'>
               <Tooltip>
-                <TooltipTrigger><span className="rounded-full border-2 border-green-500 px-3 py-2">{userInfo?.level || 0}</span></TooltipTrigger>
+                <TooltipTrigger><span className="rounded-full border-2 border-green-500 px-4 py-2">{userInfo?.level || 0}</span></TooltipTrigger>
                 <TooltipContent>
                   <p>{userInfo?.experience || 0} / {userInfo?.requiredExperience || 0} до наступного рівня</p>
                 </TooltipContent>

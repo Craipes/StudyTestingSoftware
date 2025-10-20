@@ -7,6 +7,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { registerUser } from '@/lib/api';
 import { RegisterForm } from '@/components/shared/RegisterForm'; 
+import { handleApiError } from '@/utils/handle-api-errors';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -20,15 +21,7 @@ export default function RegisterPage() {
       toast.success('Реєстрація успішна! Тепер ви можете увійти.');
       router.push('/login');
     } catch (err: any) {
-      if (err.response?.data?.errors) {
-        toast.error('Помилка реєстрації. Будь ласка, спробуйте ще раз.');
-        const firstErrorKey = Object.keys(err.response.data.errors)[0];
-        const errorMessage = err.response.data.errors[firstErrorKey][0];
-        setError(errorMessage);
-      } else {
-        toast.error('Помилка реєстрації. Будь ласка, спробуйте ще раз.');
-        setError('Помилка реєстрації. Будь ласка, спробуйте ще раз.');
-      }
+        handleApiError(err, 'Помилка при реєстрації.');
     }
   };
 

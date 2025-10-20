@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { AuthTokens } from '@/types';
 import { LoginForm } from '@/components/shared/LoginForm';
 import Link from 'next/link';
+import { handleApiError } from '@/utils/handle-api-errors';
 
 
 export default function LoginPage() {
@@ -34,12 +35,7 @@ export default function LoginPage() {
       toast.success('Успішний вхід!');
       router.push('/dashboard');
     } catch (err: any) {
-      if (axios.isAxiosError(err) && err.response) {
-        setError('Невірний email або пароль.');
-      } else {
-        setError('Сталася невідома помилка.');
-      }
-      console.error(err);
+        handleApiError(err, 'Помилка при вході.');
     }
   };
 
