@@ -94,7 +94,7 @@ export function Sidebar({ userInfo }: SidebarProps) {
               <Tooltip>
                 <TooltipTrigger><span className="rounded-full border-2 border-green-500 px-4 py-2">{userInfo?.level || 0}</span></TooltipTrigger>
                 <TooltipContent>
-                  <p>{userInfo?.experience || 0} / {userInfo?.requiredExperience || 0} до наступного рівня</p>
+                  <p>{userInfo?.experience.toFixed(2) || 0} / {userInfo?.requiredExperience.toFixed(2) || 0} до наступного рівня</p>
                 </TooltipContent>
             </Tooltip>
           </div>
