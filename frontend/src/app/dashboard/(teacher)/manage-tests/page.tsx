@@ -25,6 +25,7 @@ import { Edit, Trash, Folder, ArrowLeft, Eye, CheckCircle, XCircle } from 'lucid
 import Breadcrumbs from '@/components/shared/BreadCrumbs';
 import Link from 'next/link';
 import { TestDetails, TestPreview, UserSessionDetails } from '@/types/manage-tests-types';
+import { convertUtcStringToKyiv } from '@/utils/parse-date';
 
 // Enum для типів питань
 export enum QuestionType {
@@ -271,6 +272,7 @@ const ManageTestsPage = () => {
     try {
       const response = await api.get(`/teacher/tests/view/${selectedTest.id}/${userId}`);
       setSelectedUserSessions(response.data);
+      console.log("User Sessions:", response.data);
     } catch (err) {
       toast.error('Помилка при завантаженні сесій користувача.');
     } finally {
@@ -437,8 +439,8 @@ const ManageTestsPage = () => {
                       <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                         {selectedUserSessions.sessions.map(session => (
                           <tr key={session.id}>
-                            <td className="px-6 py-4 whitespace-nowrap">{new Date(session.startedAt).toLocaleString()}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">{session.finishedAt ? new Date(session.finishedAt).toLocaleString() : '---'}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">{convertUtcStringToKyiv(session.startedAt)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">{session.finishedAt ? convertUtcStringToKyiv(session.finishedAt) : '---'}</td>
                             <td className="px-6 py-4 whitespace-nowrap">{session.score}</td>
                             <td className="px-6 py-4 whitespace-nowrap">{session.isCompleted ? 'Завершено' : 'В процесі'}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-right">
@@ -526,8 +528,8 @@ const ManageTestsPage = () => {
              <div className="flex-grow overflow-y-auto pr-4">
                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
                 <div><p className="text-sm text-gray-500">Результат</p><p className="font-bold text-lg">{session.score} / {session.maxScore}</p></div>
-                <div><p className="text-sm text-gray-500">Початок</p><p className="font-semibold">{new Date(session.startedAt).toLocaleString()}</p></div>
-                <div><p className="text-sm text-gray-500">Завершення</p><p className="font-semibold">{new Date(session.finishedAt).toLocaleString()}</p></div>
+                <div><p className="text-sm text-gray-500">Початок</p><p className="font-semibold">{convertUtcStringToKyiv(session.startedAt)}</p></div>
+                <div><p className="text-sm text-gray-500">Завершення</p><p className="font-semibold">{convertUtcStringToKyiv(session.finishedAt)}</p></div>
                 <div><p className="text-sm text-gray-500">Статус</p><p className={`font-bold ${session.isCompleted ? 'text-green-600' : 'text-yellow-600'}`}>{session.isCompleted ? "Завершено" : "В процесі"}</p></div>
                </div>
 

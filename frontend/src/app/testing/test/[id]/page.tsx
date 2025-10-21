@@ -227,7 +227,6 @@ const TestPage = () => {
     // Відправляємо на сервер
     try {
       await submitAnswer(questionId, {
-        resetValue: true,
         selectedChoiceOptionId: optionId
       })
     } catch (err) {
@@ -274,7 +273,6 @@ const TestPage = () => {
     // Відправляємо на сервер
     try {
       await submitAnswer(questionId, {
-        resetValue: true,
         booleanValue: value
       })
     } catch (err) {
