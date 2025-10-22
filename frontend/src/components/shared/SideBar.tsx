@@ -12,7 +12,7 @@ import {
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 
-import { Lock,SquarePlus,Layers,NotebookPen,BookOpen,DoorOpen,Menu, Folder, Users  } from 'lucide-react';
+import { Lock,SquarePlus,Layers,NotebookPen,BookOpen,DoorOpen,Menu, Folder, Users, LayoutDashboard  } from 'lucide-react';
 
 interface UserInfo {
   firstName: string;
@@ -116,6 +116,7 @@ export function Sidebar({ userInfo }: SidebarProps) {
                 <div className="flex flex-col pl-6 mt-1 space-y-1">
                   <Link href="/dashboard/tests" className={`py-1 px-2  flex items-center gap-2 rounded hover:bg-gray-700 transition-colors ${pathname === '/dashboard/tests' ? 'bg-gray-700 font-bold' : ''}`}><BookOpen /> Переглянути тести</Link>
                   <Link href="/dashboard/results" className={`py-1 px-2  flex items-center gap-2 rounded hover:bg-gray-700 transition-colors ${pathname === '/dashboard/results' ? 'bg-gray-700 font-bold' : ''}`}><NotebookPen /> Мої результати</Link>
+                  <Link href="/dashboard/groups" className={`py-1 px-2  flex items-center gap-2 rounded hover:bg-gray-700 transition-colors ${pathname === '/dashboard/groups' ? 'bg-gray-700 font-bold' : ''}`}><Users /> Мої групи</Link>
                 </div>
               )}
             </div>
@@ -135,7 +136,7 @@ export function Sidebar({ userInfo }: SidebarProps) {
                 <div className="flex flex-col pl-6 mt-1 space-y-1">
                   <Link href="/dashboard/create-test" className={`py-1 px-2  flex items-center gap-2 rounded hover:bg-gray-700 transition-colors ${pathname === '/dashboard/create-test' ? 'bg-gray-700 font-bold' : ''}`}><SquarePlus /> Створити тест</Link>
                   <Link href="/dashboard/manage-tests" className={`py-1 px-2  flex items-center gap-2 rounded hover:bg-gray-700 transition-colors ${pathname === '/dashboard/manage-tests' ? 'bg-gray-700 font-bold' : ''}`}><Layers /> Керування тестами</Link>
-                  <Link href="/dashboard/manage-groups" className={`py-1 px-2  flex items-center gap-2 rounded hover:bg-gray-700 transition-colors ${pathname === '/dashboard/manage-groups' ? 'bg-gray-700 font-bold' : ''}`}><Users /> Керування групами</Link>
+                  <Link href="/dashboard/manage-groups" className={`py-1 px-2  flex items-center gap-2 rounded hover:bg-gray-700 transition-colors ${pathname === '/dashboard/manage-groups' ? 'bg-gray-700 font-bold' : ''}`}><LayoutDashboard  /> Керування групами</Link>
                 </div>
               )}
             </div>

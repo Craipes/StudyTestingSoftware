@@ -104,7 +104,7 @@ const ManageStudentsModal: React.FC<ManageStudentsModalProps> = ({ groupId, onCl
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh] max-w-[580px] sm:max-w-[600px] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Керування студентами</DialogTitle>
           <DialogDescription>Додавайте або видаляйте студентів з цієї групи.</DialogDescription>

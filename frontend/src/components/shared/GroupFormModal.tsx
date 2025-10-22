@@ -65,7 +65,7 @@ const GroupFormModal: React.FC<GroupFormModalProps> = ({ group, onClose, onSucce
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className='max-w-[600px]'>
         <DialogHeader>
           <DialogTitle>{group ? 'Редагувати групу' : 'Створити нову групу'}</DialogTitle>
         </DialogHeader>

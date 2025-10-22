@@ -97,7 +97,7 @@ const ManageTestsModal: React.FC<ManageTestsModalProps> = ({ groupId, onClose })
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh] max-w-[850px] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Керування тестами для групи</DialogTitle>
           <DialogDescription>Призначайте або видаляйте тести для цієї групи.</DialogDescription>

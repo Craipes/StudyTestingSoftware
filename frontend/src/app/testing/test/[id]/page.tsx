@@ -203,7 +203,7 @@ const TestPage = () => {
     try {
       setSubmitting(true)
       await api.post(`/student/tests/session/${id}/submit`)
-      router.push('/dashboard')
+      router.push('/dashboard/results')
     } catch (err) {
       console.error('Error finishing test:', err)
     } finally {
