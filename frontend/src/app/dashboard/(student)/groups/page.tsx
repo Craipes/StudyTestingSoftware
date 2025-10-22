@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { ArrowLeft, Users, FileText, User, ChevronRight, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import Breadcrumbs from '@/components/shared/BreadCrumbs';
+import StudentsGroupsTestCard from '@/components/shared/StudentGroupsTestCard';
 
 
 interface UserInfo {
@@ -15,7 +16,7 @@ interface UserInfo {
   middleName: string;
 }
 
-interface GroupTestPreview {
+export interface GroupTestPreview {
   id: string;
   name: string;
   description: string;
@@ -137,34 +138,10 @@ const RenderGroupDetails = ({
           Тести групи
         </h2>
         <div className="space-y-4">
-          {group.tests.length > 0 ? group.tests.map(test => (
-            <div key={test.id} className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow">
-              <div className="flex flex-col sm:flex-row justify-between sm:items-start">
-                <div className='mb-4 sm:mb-0'>
-                  <h3 className="text-xl font-semibold dark:text-gray-100">{test.name}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{test.description}</p>
-                </div>
-                {test.isOpened ? (
-                  <Link href={`/testing/test/${test.id}`}
-                     className="px-4 py-2 text-center w-full sm:w-auto bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
-                    Почати
-                  </Link>
-                ) : (
-                   <span className="px-4 py-2 text-center w-full sm:w-auto bg-gray-400 text-white font-semibold rounded-lg cursor-not-allowed">
-                    Закрито
-                   </span>
-                )}
-              </div>
-              <div className="border-t dark:border-gray-700 mt-4 pt-4 text-sm text-gray-600 dark:text-gray-400 grid grid-cols-2 gap-2">
-                <p><strong>Питань:</strong> {test.questionsCount}</p>
-                <p><strong>Тривалість:</strong> {test.durationInMinutes} хв.</p>
-                <p><strong>Спроби:</strong> {test.usedAttemptsCount} / {test.attemptsLimit === 0 ? 'Необмежено' : test.attemptsLimit}</p>
-                {test.hasCloseTime && (
-                   <p className="text-red-500"><strong>Закриється:</strong> {new Date(test.closeAt).toLocaleString()}</p>
-                )}
-              </div>
-            </div>
-          )) : (
+          {group.tests.length > 0 ? 
+          (group.tests.map(test => (
+            <StudentsGroupsTestCard key={test.id} test={test} />
+          ))) : (
             <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow text-center">
               <BookOpen size={48} className="mx-auto text-gray-400 mb-4" />
               <p className="text-gray-500 dark:text-gray-400">У цій групі ще немає доступних тестів.</p>
