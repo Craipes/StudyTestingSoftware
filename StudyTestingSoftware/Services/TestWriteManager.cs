@@ -7,12 +7,14 @@ public class TestWriteManager
     private readonly AppDbContext dbContext;
     private readonly TestReadManager testReadManager;
     private readonly TestSessionManager testSessionManager;
+    private readonly ILogger<TestWriteManager> logger;
 
-    public TestWriteManager(AppDbContext dbContext, TestReadManager testReadManager, TestSessionManager testSessionManager)
+    public TestWriteManager(AppDbContext dbContext, TestReadManager testReadManager, TestSessionManager testSessionManager, ILogger<TestWriteManager> logger)
     {
         this.dbContext = dbContext;
         this.testReadManager = testReadManager;
         this.testSessionManager = testSessionManager;
+        this.logger = logger;
     }
 
     public async Task DeleteTestAsync(Guid id)
@@ -188,9 +190,15 @@ public class TestWriteManager
 
         UpdateTestMaxScore(test);
 
-        await dbContext.SaveChangesAsync();
-
-        await testSessionManager.UpdateScoreForTestSessionsAsync(test);
+        try
+        {
+            await dbContext.SaveChangesAsync();
+            await testSessionManager.UpdateScoreForTestSessionsAsync(test);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error occurred while saving test changes.");
+        }
 
         return result;
     }

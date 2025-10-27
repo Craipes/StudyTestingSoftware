@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace StudyTestingSoftware.Controllers;
 
@@ -21,9 +22,9 @@ public class UserController : Controller
     [HttpGet("info")]
     public async Task<ActionResult<FullUserInfoDTO>> GetInfo([FromQuery] Guid? userId)
     {
-        var user = userId == null 
-            ? await customUserManager.GetInfoAsync(User)
-            : await customUserManager.GetInfoAsync(userId.Value);
+        var user = userId == null || User.FindFirstValue(ClaimTypes.NameIdentifier) == userId.ToString()
+            ? await customUserManager.GetInfoAsync(User, true)
+            : await customUserManager.GetInfoAsync(userId.Value, false);
 
         if (user == null)
         {

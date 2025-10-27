@@ -11,9 +11,9 @@ public class TestSessionManager
     private readonly UserManager<AppUser> userManager;
     private readonly TestReadManager testReadManager;
     private readonly CustomUserManager customUserManager;
-    private readonly UserExperienceManager userExperienceManager;
+    private readonly UserEarningsManager userExperienceManager;
 
-    public TestSessionManager(AppDbContext dbContext, UserManager<AppUser> userManager, TestReadManager testReadManager, CustomUserManager customUserManager, UserExperienceManager userExperienceManager)
+    public TestSessionManager(AppDbContext dbContext, UserManager<AppUser> userManager, TestReadManager testReadManager, CustomUserManager customUserManager, UserEarningsManager userExperienceManager)
     {
         this.dbContext = dbContext;
         this.userManager = userManager;
@@ -635,7 +635,7 @@ public class TestSessionManager
 
         sessions ??= [];
 
-        var userInfo = await customUserManager.GetInfoAsync(userId);
+        var userInfo = await customUserManager.GetInfoAsync(userId, false);
 
         if (userInfo == null)
         {
@@ -645,7 +645,7 @@ public class TestSessionManager
         return new TeacherTestUserSessionsDTO(
             userInfo,
             testMaxScore,
-            sessions.Max(s => s.Score),
+            sessions.Count > 0 ? sessions.Max(s => s.Score) : 0,
             sessions);
     }
 

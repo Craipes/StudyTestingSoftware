@@ -10,5 +10,6 @@ public record FullUserInfoDTO
     double Experience,
     double RequiredExperience,
     bool IsTeacher, 
-    bool IsStudent
+    bool IsStudent,
+    int Coins
 ) : ShortUserInfoDTO(Id, FirstName, LastName, MiddleName, Level, Experience, RequiredExperience);
