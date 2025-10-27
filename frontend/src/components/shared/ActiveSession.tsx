@@ -21,7 +21,6 @@ const ActiveSession = () => {
         async function fetchActiveTestSession() {
           try {
             const response = await getActiveTestSession();
-            console.log(response);
             setActiveSession(response);
           } catch (err) {
                 handleApiError(err, 'Помилка при отриманні активної сесії.');
@@ -44,11 +43,12 @@ const ActiveSession = () => {
 
 
   return (
-    <div>
+    <div>{loading && (
+      <p className="text-gray-600 dark:text-gray-300 mt-4">Перевірка активної сесії...</p>
+    )}
         {activeSession ? (
             <div className="sm:flex flex-row sm:justify-between p-4 bg-white shadow-md rounded-lg dark:bg-gray-800 mt-4">
         <div className="sm:mb-0 mb-2">
-          <p className="text-gray-600 dark:text-gray-300 mt-4">Перевірка активної сесії...</p>
           <div>
             <h2 className="text-xl font-bold text-gray-800 dark:text-white mt-2">
               Активна сесія: {activeSession.testName}
