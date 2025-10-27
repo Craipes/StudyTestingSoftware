@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System.Security.Claims;
 
 namespace StudyTestingSoftware.Services;
@@ -16,7 +15,7 @@ public class CustomUserManager
         this.userManager = userManager;
     }
 
-    public async Task<FullUserInfoDTO?> GetInfoAsync(ClaimsPrincipal principal)
+    public async Task<FullUserInfoDTO?> GetInfoAsync(ClaimsPrincipal principal, bool includeCoins)
     {
         var user = await userManager.GetUserAsync(principal);
 
@@ -25,20 +24,20 @@ public class CustomUserManager
             return null;
         }
 
-        return await GetInfoAsync(user);
+        return await GetInfoAsync(user, includeCoins);
     }
 
-    public async Task<FullUserInfoDTO?> GetInfoAsync(Guid userId)
+    public async Task<FullUserInfoDTO?> GetInfoAsync(Guid userId, bool includeCoins)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null)
         {
             return null;
         }
-        return await GetInfoAsync(user);
+        return await GetInfoAsync(user, includeCoins);
     }
 
-    private async Task<FullUserInfoDTO> GetInfoAsync(AppUser user)
+    private async Task<FullUserInfoDTO> GetInfoAsync(AppUser user, bool includeCoins)
     {
         var roles = await userManager.GetRolesAsync(user);
         var userDTO = new FullUserInfoDTO(
@@ -50,7 +49,8 @@ public class CustomUserManager
             user.Experience,
             user.RequiredExperience,
             roles.Contains(AppRolesConstants.TeacherRole),
-            roles.Contains(AppRolesConstants.StudentRole)
+            roles.Contains(AppRolesConstants.StudentRole),
+            includeCoins ? user.Coins : 0
         );
         return userDTO;
     }
@@ -66,7 +66,7 @@ public class CustomUserManager
         {
             return null;
         }
-        return await GetInfoAsync(owner);
+        return await GetInfoAsync(owner, false);
     }
 
     public async Task<List<FullUserInfoDTO>> GetUsersInfoInGroupAsync(Guid groupId)
@@ -79,7 +79,7 @@ public class CustomUserManager
         var usersInfo = new List<FullUserInfoDTO>();
         foreach (var user in users)
         {
-            var userInfo = await GetInfoAsync(user);
+            var userInfo = await GetInfoAsync(user, false);
             usersInfo.Add(userInfo);
         }
         return usersInfo;

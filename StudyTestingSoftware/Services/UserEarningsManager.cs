@@ -2,35 +2,45 @@
 
 namespace StudyTestingSoftware.Services;
 
-public class UserExperienceManager
+public class UserEarningsManager
 {
     private readonly AppDbContext dbContext;
 
-    public UserExperienceManager(AppDbContext dbContext)
+    public UserEarningsManager(AppDbContext dbContext)
     {
         this.dbContext = dbContext;
     }
 
     public async Task ProcessTestSessionCompletedAsync(TestSession session)
     {
-        double experienceDelta = await GetTestSessionCompletionDeltaExperienceAsync(session);
-        await ProcessExperienceAsync(session.UserId, experienceDelta);
+        await ProcessTestOperation(session, false);
     }
 
     public async Task ProcessTestSessionDeletedAsync(TestSession session)
     {
-        double experienceDelta = await GetTestSessionCompletionDeltaExperienceAsync(session);
-        await ProcessExperienceAsync(session.UserId, -experienceDelta);
+        await ProcessTestOperation(session, true);
     }
 
-    private async Task ProcessExperienceAsync(Guid userId, double experience)
+    private async Task ProcessTestOperation(TestSession session, bool wasDeleted)
+    {
+        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == session.UserId);
+        if (user == null) return;
+
+        var (experienceDelta, coinsDelta) = await GetTestSessionCompletionDeltasAsync(session);
+        if (wasDeleted)
+        {
+            experienceDelta = -experienceDelta;
+            coinsDelta = -coinsDelta;
+        }
+        ProcessExperienceInMemory(user, experienceDelta);
+        ProcessCoinsInMemory(user, coinsDelta);
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    private static void ProcessExperienceInMemory(AppUser user, double experience)
     {
         if (experience == 0d) return;
-
-        var user = await dbContext.Users
-            .FirstOrDefaultAsync(u => u.Id ==  userId);
-
-        if (user == null) return;
 
         user.Experience += experience;
 
@@ -41,16 +51,21 @@ public class UserExperienceManager
             user.Level++;
             user.RequiredExperience = GetRequiredExperience(user.Level);
         }
-
-        await dbContext.SaveChangesAsync();
     }
 
-    public double GetRequiredExperience(int level)
+    private static void ProcessCoinsInMemory(AppUser user, int coins)
+    {
+        if (coins == 0) return;
+
+        user.Coins = Math.Max(0, user.Coins + coins);
+    }
+
+    public static double GetRequiredExperience(int level)
     {
         return 30 * Math.Pow(level, 1.25d);
     }
 
-    private async Task<double> GetTestSessionCompletionDeltaExperienceAsync(TestSession session)
+    private async Task<(double experienceDelta, int coinsDelta)> GetTestSessionCompletionDeltasAsync(TestSession session)
     {
         var testInfo = await dbContext.Tests
             .AsNoTracking()
@@ -59,6 +74,7 @@ public class UserExperienceManager
                 t.Id,
                 t.MaxScore,
                 t.MaxExperience,
+                t.MaxCoins,
                 MaxUserScore =
                     dbContext.TestSessions
                         .Where(ts => ts.TestId == t.Id
@@ -70,11 +86,12 @@ public class UserExperienceManager
             })
             .FirstOrDefaultAsync(t => t.Id == session.TestId);
 
-        if (testInfo == null) return 0d;
-        if (session.Score <= testInfo.MaxUserScore) return 0d;
+        if (testInfo == null) return (0d, 0);
+        if (session.Score <= testInfo.MaxUserScore) return (0d, 0);
 
         double completionDelta = (session.Score - testInfo.MaxUserScore) / testInfo.MaxScore;
         double experience = completionDelta * testInfo.MaxExperience;
-        return experience;
+        int coins = (int)(completionDelta * testInfo.MaxCoins);
+        return (experience, coins);
     }
 }

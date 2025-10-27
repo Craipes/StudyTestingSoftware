@@ -8,6 +8,7 @@ public record TeacherTestDTO
     [MinLength(1), MaxLength(128)] string Name,
     [MaxLength(4096)] string? Description,
     [Range(0, 100000)] int MaxExperience,
+    [Range(0, 100000)] int MaxCoins,
     TestAccessMode AccessMode,
     int DurationInMinutes,
     int AttemptsLimit,
@@ -26,6 +27,7 @@ public record TeacherTestDTO
         test.Name = Name;
         test.Description = Description;
         test.MaxExperience = MaxExperience;
+        test.MaxCoins = MaxCoins;
         test.AccessMode = AccessMode;
         test.DurationInMinutes = DurationInMinutes;
         test.AttemptsLimit = AttemptsLimit;
@@ -50,6 +52,7 @@ public record TeacherTestDTO
             test.Name,
             test.Description,
             test.MaxExperience,
+            test.MaxCoins,
             test.AccessMode,
             test.DurationInMinutes,
             test.AttemptsLimit,
