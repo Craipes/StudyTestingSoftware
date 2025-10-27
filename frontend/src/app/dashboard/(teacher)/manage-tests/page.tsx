@@ -405,7 +405,7 @@ const ManageTestsPage = () => {
 
       {/* Основне модальне вікно для списків */}
       <Dialog open={isSessionsModalOpen} onOpenChange={handleCloseModal}>
-        <DialogContent className="w-11/12 max-w-4xl">
+        <DialogContent className="w-11/12 max-w-4xl max-h-11/12 overflow-y-auto">
           <DialogHeader className='mb-4'>
             <DialogTitle>
               {selectedUserSessions
@@ -441,7 +441,7 @@ const ManageTestsPage = () => {
                           <tr key={session.id}>
                             <td className="px-6 py-4 whitespace-nowrap">{convertUtcStringToKyiv(session.startedAt)}</td>
                             <td className="px-6 py-4 whitespace-nowrap">{session.finishedAt ? convertUtcStringToKyiv(session.finishedAt) : '---'}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">{session.score.toFixed(2)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">{session.score.toFixed(1)}</td>
                             <td className="px-6 py-4 whitespace-nowrap">{session.isCompleted ? 'Завершено' : 'В процесі'}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-right">
                               <button onClick={() => handleSessionDetails(session.id)} className="px-3 py-1 text-sm  text-blue-500 rounded-full hover:bg-blue-100 dark:hover:bg-gray-700" title='Переглянути деталі сесії'>

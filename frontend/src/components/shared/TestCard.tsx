@@ -54,7 +54,11 @@ export const TestCard = ({ test }: { test: AvailableTestItem }) => {
       <p className="text-gray-600 dark:text-gray-400 mb-2">{test.description}</p>
       
       <div className="text-sm space-y-1">
-        <p>⏳ Тривалість: {test.durationInMinutes} хв.</p>
+        {test.durationInMinutes === 0 ? (
+          <p>⏳ Час тесту: Без обмежень</p>
+        ) : (
+          <p>⏳ Тривалість: {test.durationInMinutes} хв.</p>
+        )}
         <p>🔢 Питань: {test.questionsCount}</p>
         <p>🛡️ Спроб: {test.attemptsLimit === 0 ? 'Безлімітно' : test.attemptsLimit}</p>
         {test.hasCloseTime && (

@@ -49,3 +49,20 @@ export const createTestSession = async (testId:string): Promise<{sessionId:strin
   const response=await api.post<{sessionId:string}>(`/student/tests/start/${testId}`);
   return response.data;
 }
+
+//Get current test session if exists
+export const getActiveTestSession = async ():Promise<{
+  id:string;
+  testName:string;
+  startedAt:string;
+  autoFinishAt:string;
+  durationInMinutes:number;
+}>  => {
+  const response=await api.get('/student/tests/active-sessions');
+  return response.data[0];
+}
+
+//Submit test session
+export const submitTestSession = async (sessionId:string):Promise<void> => {
+  await api.post(`/student/tests/session/${sessionId}/submit`);
+}

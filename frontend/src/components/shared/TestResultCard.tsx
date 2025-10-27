@@ -15,7 +15,7 @@ export const TestResultCard = ({ sessionResult }: { sessionResult: CompletedTest
       </div>
 
       <div className="text-sm space-y-1 mt-2">
-        <p>🏆 Результат: {sessionResult.score.toFixed(1)} з {sessionResult.maxScore}</p>
+        <p>🏆 Результат: {sessionResult.score.toFixed(1)} з {sessionResult.maxScore.toFixed(1)}</p>
       </div>
     </div>
   );
