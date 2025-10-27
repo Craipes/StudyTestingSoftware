@@ -85,6 +85,7 @@ builder.Services.AddScoped<TestSessionManager>();
 builder.Services.AddScoped<GroupManager>();
 builder.Services.AddScoped<CustomUserManager>();
 builder.Services.AddScoped<UserEarningsManager>();
+builder.Services.AddScoped<CustomizationManager>();
 
 builder.Services.AddScoped<TestSessionManager>();
 builder.Services.AddHostedService<TestSessionAutoFinalizer>();

@@ -6,7 +6,7 @@ public class CustomizationItem : BaseEntity
 {
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public CustomizationType CustomizationType { get; set; }
+    public CustomizationType Type { get; set; }
     public string ImageUrl { get; set; } = string.Empty;
     public bool UnlockedByDefault { get; set; }
     public bool UnlockedByLevelUp { get; set; }

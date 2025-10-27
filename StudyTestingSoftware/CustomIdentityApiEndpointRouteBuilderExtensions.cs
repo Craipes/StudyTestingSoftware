@@ -57,6 +57,7 @@ public static class CustomIdentityApiEndpointRouteBuilderExtensions
         {
             var userManager = sp.GetRequiredService<UserManager<AppUser>>();
             var userExperienceManager = sp.GetRequiredService<UserEarningsManager>();
+            var customizationManager = sp.GetRequiredService<CustomizationManager>();
 
             if (!userManager.SupportsUserEmail)
             {
@@ -135,6 +136,8 @@ public static class CustomIdentityApiEndpointRouteBuilderExtensions
             {
                 return CreateValidationProblem(result);
             }
+
+            await customizationManager.GrantDefaultCustomizationItems(user);
 
             await SendConfirmationEmailAsync(user, userManager, context, email);
             return TypedResults.Ok();

@@ -8,6 +8,7 @@ global using StudyTestingSoftware.ProblemsDefinitions;
 global using StudyTestingSoftware.Models;
 global using StudyTestingSoftware.Models.Tests;
 global using StudyTestingSoftware.Models.TestSessions;
+global using StudyTestingSoftware.Models.Customization;
 
 global using StudyTestingSoftware.DTO;
 global using StudyTestingSoftware.DTO.TeacherTest;

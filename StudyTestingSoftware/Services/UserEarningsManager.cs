@@ -5,10 +5,12 @@ namespace StudyTestingSoftware.Services;
 public class UserEarningsManager
 {
     private readonly AppDbContext dbContext;
+    private readonly CustomizationManager customizationManager;
 
-    public UserEarningsManager(AppDbContext dbContext)
+    public UserEarningsManager(AppDbContext dbContext, CustomizationManager customizationManager)
     {
         this.dbContext = dbContext;
+        this.customizationManager = customizationManager;
     }
 
     public async Task ProcessTestSessionCompletedAsync(TestSession session)
@@ -32,13 +34,13 @@ public class UserEarningsManager
             experienceDelta = -experienceDelta;
             coinsDelta = -coinsDelta;
         }
-        ProcessExperienceInMemory(user, experienceDelta);
+        await ProcessExperienceInMemory(user, experienceDelta);
         ProcessCoinsInMemory(user, coinsDelta);
 
         await dbContext.SaveChangesAsync();
     }
 
-    private static void ProcessExperienceInMemory(AppUser user, double experience)
+    private async Task ProcessExperienceInMemory(AppUser user, double experience)
     {
         if (experience == 0d) return;
 
@@ -50,6 +52,7 @@ public class UserEarningsManager
             user.Experience -= user.RequiredExperience;
             user.Level++;
             user.RequiredExperience = GetRequiredExperience(user.Level);
+            await customizationManager.GrantCustomizationItemsOnLevelUp(user, user.Level, false);
         }
     }
 
