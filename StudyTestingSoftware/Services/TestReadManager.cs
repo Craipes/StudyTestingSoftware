@@ -142,6 +142,9 @@ public class TestReadManager
                     u.Level,
                     u.Experience,
                     u.RequiredExperience,
+                    AvatarUrl = u.ActiveAvatar == null ? null : u.ActiveAvatar.ImageUrl,
+                    AvatarFrameUrl = u.ActiveAvatarFrame == null ? null : u.ActiveAvatarFrame.ImageUrl,
+                    BackgroundUrl = u.ActiveBackground == null ? null : u.ActiveBackground.ImageUrl,
                     g.AttemptsCount,
                     g.BestScore,
                     g.LastAttemptAt
@@ -153,7 +156,8 @@ public class TestReadManager
             .Skip(pageSize * pageNumber)
             .Take(pageSize)
             .Select(x => new TeacherTestUserPreviewDTO(
-                new ShortUserInfoDTO(x.UserId, x.FirstName, x.LastName, x.MiddleName, x.Level, x.Experience, x.RequiredExperience),
+                new ShortUserInfoDTO(x.UserId, x.FirstName, x.LastName, x.MiddleName, x.Level, x.Experience, x.RequiredExperience,
+                    x.AvatarUrl, x.AvatarFrameUrl, x.BackgroundUrl),
                 x.AttemptsCount,
                 x.BestScore,
                 x.LastAttemptAt

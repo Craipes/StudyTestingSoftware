@@ -8,5 +8,8 @@ public record ShortUserInfoDTO
     string? MiddleName,
     int Level,
     double Experience,
-    double RequiredExperience
+    double RequiredExperience,
+    string? AvatarUrl,
+    string? AvatarFrameUrl,
+    string? BackgroundUrl
 );

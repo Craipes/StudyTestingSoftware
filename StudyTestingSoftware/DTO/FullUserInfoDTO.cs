@@ -9,7 +9,10 @@ public record FullUserInfoDTO
     int Level,
     double Experience,
     double RequiredExperience,
+    string? AvatarUrl,
+    string? AvatarFrameUrl,
+    string? BackgroundUrl,
     bool IsTeacher, 
     bool IsStudent,
     int Coins
-) : ShortUserInfoDTO(Id, FirstName, LastName, MiddleName, Level, Experience, RequiredExperience);
+) : ShortUserInfoDTO(Id, FirstName, LastName, MiddleName, Level, Experience, RequiredExperience, AvatarUrl, AvatarFrameUrl, BackgroundUrl);

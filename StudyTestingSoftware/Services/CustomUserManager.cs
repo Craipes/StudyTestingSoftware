@@ -17,7 +17,13 @@ public class CustomUserManager
 
     public async Task<FullUserInfoDTO?> GetInfoAsync(ClaimsPrincipal principal, bool includeCoins)
     {
-        var user = await userManager.GetUserAsync(principal);
+        if (!Guid.TryParse(userManager.GetUserId(principal), out var id)) return null;
+
+        var user = await dbContext.Users
+            .Include(u => u.ActiveAvatar)
+            .Include(u => u.ActiveAvatarFrame)
+            .Include(u => u.ActiveBackground)
+            .FirstOrDefaultAsync(u => u.Id == id);
 
         if (user == null)
         {
@@ -29,7 +35,12 @@ public class CustomUserManager
 
     public async Task<FullUserInfoDTO?> GetInfoAsync(Guid userId, bool includeCoins)
     {
-        var user = await userManager.FindByIdAsync(userId.ToString());
+        var user = await dbContext.Users
+            .Include(u => u.ActiveAvatar)
+            .Include(u => u.ActiveAvatarFrame)
+            .Include(u => u.ActiveBackground)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
         if (user == null)
         {
             return null;
@@ -48,6 +59,9 @@ public class CustomUserManager
             user.Level,
             user.Experience,
             user.RequiredExperience,
+            user.ActiveAvatar?.ImageUrl,
+            user.ActiveAvatarFrame?.ImageUrl,
+            user.ActiveBackground?.ImageUrl,
             roles.Contains(AppRolesConstants.TeacherRole),
             roles.Contains(AppRolesConstants.StudentRole),
             includeCoins ? user.Coins : 0
@@ -57,10 +71,11 @@ public class CustomUserManager
 
     public async Task<FullUserInfoDTO?> GetGroupOwnerInfoAsync(Guid groupId)
     {
-        var owner = await dbContext.StudentGroups
-            .Where(g => g.Id == groupId)
-            .Select(g => g.Owner)
-            .FirstOrDefaultAsync();
+        var owner = await dbContext.Users
+            .Include(u => u.ActiveAvatar)
+            .Include(u => u.ActiveAvatarFrame)
+            .Include(u => u.ActiveBackground)
+            .FirstOrDefaultAsync(u => u.OwnedStudentGroups.Any(g => g.Id == groupId));
 
         if (owner == null)
         {
@@ -74,6 +89,9 @@ public class CustomUserManager
         var users = await dbContext.StudentGroups
             .Where(g => g.Id == groupId)
             .SelectMany(g => g.Students)
+            .Include(u => u.ActiveAvatar)
+            .Include(u => u.ActiveAvatarFrame)
+            .Include(u => u.ActiveBackground)
             .ToListAsync();
 
         var usersInfo = new List<FullUserInfoDTO>();
