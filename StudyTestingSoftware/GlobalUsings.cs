@@ -15,6 +15,7 @@ global using StudyTestingSoftware.DTO.TeacherTest;
 global using StudyTestingSoftware.DTO.StudentTest;
 global using StudyTestingSoftware.DTO.TeacherGroup;
 global using StudyTestingSoftware.DTO.StudentGroup;
+global using StudyTestingSoftware.DTO.Customization;
 
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
