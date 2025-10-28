@@ -27,15 +27,15 @@ public class CustomizationController : ControllerBase
         return marketItems;
     }
 
-    [HttpPost("purchase/{itemId:guid}")]
-    public async Task<ActionResult> PurchaseCustomizationItem(Guid itemId)
+    [HttpPost("purchase/{itemCodeId}")]
+    public async Task<ActionResult> PurchaseCustomizationItem(string itemCodeId)
     {
         var user = await userManager.GetUserAsync(User);
         if (user == null)
         {
             return Unauthorized();
         }
-        var success = await customizationManager.PurchaseCustomizationItem(user, itemId);
+        var success = await customizationManager.PurchaseCustomizationItem(user, itemCodeId);
         if (!success)
         {
             return BadRequest("Purchase failed.");
@@ -43,15 +43,15 @@ public class CustomizationController : ControllerBase
         return Ok();
     }
 
-    [HttpPost("equip/{itemId:guid}")]
-    public async Task<ActionResult> EquipCustomizationItem(Guid itemId)
+    [HttpPost("equip/{itemCodeId}")]
+    public async Task<ActionResult> EquipCustomizationItem(string itemCodeId)
     {
         var user = await userManager.GetUserAsync(User);
         if (user == null)
         {
             return Unauthorized();
         }
-        await customizationManager.EquipCustomizationItem(user, itemId);
+        await customizationManager.EquipCustomizationItem(user, itemCodeId);
         return Ok();
     }
 }

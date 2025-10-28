@@ -17,11 +17,11 @@ public class AppUser : IdentityUser<Guid>
     public int Coins { get; set; }
 
     // Customization
-    public Guid? ActiveAvatarId { get; set; }
+    public string? ActiveAvatarCodeId { get; set; }
     public CustomizationItem? ActiveAvatar { get; set; }
-    public Guid? ActiveAvatarFrameId { get; set; }
+    public string? ActiveAvatarFrameCodeId { get; set; }
     public CustomizationItem? ActiveAvatarFrame { get; set; }
-    public Guid? ActiveBackgroundId { get; set; }
+    public string? ActiveBackgroundCodeId { get; set; }
     public CustomizationItem? ActiveBackground { get; set; }
 
     public List<Test> AuthoredTests { get; set; } = [];

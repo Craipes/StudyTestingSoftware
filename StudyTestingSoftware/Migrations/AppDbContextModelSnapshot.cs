@@ -192,14 +192,14 @@ namespace StudyTestingSoftware.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("ActiveAvatarFrameId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("ActiveAvatarCodeId")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<Guid?>("ActiveAvatarId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("ActiveAvatarFrameCodeId")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<Guid?>("ActiveBackgroundId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("ActiveBackgroundCodeId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Coins")
                         .HasColumnType("int");
@@ -273,11 +273,11 @@ namespace StudyTestingSoftware.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ActiveAvatarFrameId");
+                    b.HasIndex("ActiveAvatarCodeId");
 
-                    b.HasIndex("ActiveAvatarId");
+                    b.HasIndex("ActiveAvatarFrameCodeId");
 
-                    b.HasIndex("ActiveBackgroundId");
+                    b.HasIndex("ActiveBackgroundCodeId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -292,9 +292,8 @@ namespace StudyTestingSoftware.Migrations
 
             modelBuilder.Entity("StudyTestingSoftware.Models.Customization.CustomizationItem", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("CodeId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -323,7 +322,7 @@ namespace StudyTestingSoftware.Migrations
                     b.Property<bool>("UnlockedByLevelUp")
                         .HasColumnType("bit");
 
-                    b.HasKey("Id");
+                    b.HasKey("CodeId");
 
                     b.ToTable("CustomizationItems");
                 });
@@ -333,15 +332,15 @@ namespace StudyTestingSoftware.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CustomizationItemId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("CustomizationItemCodeId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("AcquiredAt")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("UserId", "CustomizationItemId");
+                    b.HasKey("UserId", "CustomizationItemCodeId");
 
-                    b.HasIndex("CustomizationItemId");
+                    b.HasIndex("CustomizationItemCodeId");
 
                     b.ToTable("UserCustomizationItems");
                 });
@@ -728,19 +727,19 @@ namespace StudyTestingSoftware.Migrations
 
             modelBuilder.Entity("StudyTestingSoftware.Models.AppUser", b =>
                 {
-                    b.HasOne("StudyTestingSoftware.Models.Customization.CustomizationItem", "ActiveAvatarFrame")
-                        .WithMany()
-                        .HasForeignKey("ActiveAvatarFrameId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.HasOne("StudyTestingSoftware.Models.Customization.CustomizationItem", "ActiveAvatar")
                         .WithMany()
-                        .HasForeignKey("ActiveAvatarId")
+                        .HasForeignKey("ActiveAvatarCodeId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("StudyTestingSoftware.Models.Customization.CustomizationItem", "ActiveAvatarFrame")
+                        .WithMany()
+                        .HasForeignKey("ActiveAvatarFrameCodeId")
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("StudyTestingSoftware.Models.Customization.CustomizationItem", "ActiveBackground")
                         .WithMany()
-                        .HasForeignKey("ActiveBackgroundId")
+                        .HasForeignKey("ActiveBackgroundCodeId")
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("ActiveAvatar");
@@ -754,7 +753,7 @@ namespace StudyTestingSoftware.Migrations
                 {
                     b.HasOne("StudyTestingSoftware.Models.Customization.CustomizationItem", "CustomizationItem")
                         .WithMany()
-                        .HasForeignKey("CustomizationItemId")
+                        .HasForeignKey("CustomizationItemCodeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

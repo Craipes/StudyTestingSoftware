@@ -22,4 +22,8 @@
     <ProjectReference Include="..\AResult\AResultLib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\avatars\" />
+  </ItemGroup>
+
 </Project>

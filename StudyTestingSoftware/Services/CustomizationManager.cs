@@ -16,8 +16,11 @@ public class CustomizationManager
         return await dbContext.CustomizationItems
             .AsNoTracking()
             .OrderBy(item => item.Type)
+            .ThenByDescending(item => item.UnlockedByDefault)
+            .ThenBy(item => item.UnlockedByLevelUp)
             .ThenBy(item => item.Price)
             .Select(item => new CustomizationItemMarketDTO(
+                item.CodeId,
                 item.Name,
                 item.Description,
                 item.Type,
@@ -26,25 +29,26 @@ public class CustomizationManager
                 item.UnlockedByLevelUp,
                 item.Price,
                 item.LevelRequired,
-                dbContext.UserCustomizationItems.Any(uci => uci.UserId == userId && uci.CustomizationItemId == item.Id)
+                dbContext.UserCustomizationItems.Any(uci => uci.UserId == userId && uci.CustomizationItemCodeId == item.CodeId)
             ))
             .ToListAsync();
     }
 
-    public async Task<bool> PurchaseCustomizationItem(AppUser user, Guid itemId)
+    public async Task<bool> PurchaseCustomizationItem(AppUser user, string itemCodeId)
     {
-      var item = await dbContext.CustomizationItems.FindAsync(itemId);
+      var item = await dbContext.CustomizationItems.FindAsync(itemCodeId);
         if (item == null) return false;
         if (item.UnlockedByDefault || item.UnlockedByLevelUp) return false;
         var alreadyOwned = await dbContext.UserCustomizationItems
-            .AnyAsync(uci => uci.UserId == user.Id && uci.CustomizationItemId == itemId);
+            .AnyAsync(uci => uci.UserId == user.Id && uci.CustomizationItemCodeId == itemCodeId);
         if (alreadyOwned) return false;
         if (user.Coins < item.Price) return false;
         user.Coins -= item.Price;
         var userItem = new UserCustomizationItem
         {
             User = user,
-            CustomizationItem = item
+            CustomizationItem = item,
+            CustomizationItemCodeId = item.CodeId,
         };
         dbContext.UserCustomizationItems.Add(userItem);
         CheckUserForEmptyCustomizationInMemory(user, userItem);
@@ -52,22 +56,22 @@ public class CustomizationManager
         return true;
     }
 
-    public async Task EquipCustomizationItem(AppUser user, Guid itemId)
+    public async Task EquipCustomizationItem(AppUser user, string itemCodeId)
     {
         var userItem = await dbContext.UserCustomizationItems
             .Include(uci => uci.CustomizationItem)
-            .FirstOrDefaultAsync(uci => uci.UserId == user.Id && uci.CustomizationItemId == itemId);
+            .FirstOrDefaultAsync(uci => uci.UserId == user.Id && uci.CustomizationItemCodeId == itemCodeId);
         if (userItem == null) return;
         switch (userItem.CustomizationItem.Type)
         {
             case CustomizationType.Avatar:
-                user.ActiveAvatarId = itemId;
+                user.ActiveAvatarCodeId = itemCodeId;
                 break;
             case CustomizationType.AvatarFrame:
-                user.ActiveAvatarFrameId = itemId;
+                user.ActiveAvatarFrameCodeId = itemCodeId;
                 break;
             case CustomizationType.Background:
-                user.ActiveBackgroundId = itemId;
+                user.ActiveBackgroundCodeId = itemCodeId;
                 break;
         }
         await dbContext.SaveChangesAsync();
@@ -86,7 +90,8 @@ public class CustomizationManager
             var userItem = new UserCustomizationItem
             {
                 User = user,
-                CustomizationItem = item
+                CustomizationItem = item,
+                CustomizationItemCodeId = item.CodeId
             };
             dbContext.UserCustomizationItems.Add(userItem);
             CheckUserForEmptyCustomizationInMemory(user, userItem);
@@ -94,13 +99,13 @@ public class CustomizationManager
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task GrantCustomizationItemToAllUsersIfPossible(CustomizationItem item)
+    public async Task GrantCustomizationItemToAllUsersIfPossible(CustomizationItem item, bool saveChanges)
     {
         if (!item.UnlockedByDefault && !item.UnlockedByLevelUp && item.Price > 0) return;
 
         var usersToGrant = await dbContext.Users
             .Where(u => !item.UnlockedByLevelUp || u.Level >= item.LevelRequired)
-            .Where(u => !dbContext.UserCustomizationItems.Any(uci => uci.UserId == u.Id && uci.CustomizationItemId == item.Id))
+            .Where(u => !dbContext.UserCustomizationItems.Any(uci => uci.UserId == u.Id && uci.CustomizationItemCodeId == item.CodeId))
             .ToListAsync();
 
         foreach (var user in usersToGrant)
@@ -108,12 +113,13 @@ public class CustomizationManager
             var userItem = new UserCustomizationItem
             {
                 User = user,
-                CustomizationItem = item
+                CustomizationItem = item,
+                CustomizationItemCodeId = item.CodeId
             };
             dbContext.UserCustomizationItems.Add(userItem);
             CheckUserForEmptyCustomizationInMemory(user, userItem);
         }
-        await dbContext.SaveChangesAsync();
+        if (saveChanges) await dbContext.SaveChangesAsync();
     }
 
     public async Task GrantCustomizationItemsOnLevelUp(AppUser user, int level, bool saveChanges)
@@ -126,7 +132,8 @@ public class CustomizationManager
             var userItem = new UserCustomizationItem
             {
                 User = user,
-                CustomizationItem = item
+                CustomizationItem = item,
+                CustomizationItemCodeId = item.CodeId
             };
             dbContext.UserCustomizationItems.Add(userItem);
             CheckUserForEmptyCustomizationInMemory(user, userItem);
@@ -136,17 +143,17 @@ public class CustomizationManager
 
     private static void CheckUserForEmptyCustomizationInMemory(AppUser user, UserCustomizationItem item)
     {
-        if (item.CustomizationItem.Type == CustomizationType.Avatar && user.ActiveAvatarId == null)
+        if (item.CustomizationItem.Type == CustomizationType.Avatar && user.ActiveAvatarCodeId == null)
         {
-            user.ActiveAvatarId = item.CustomizationItemId;
+            user.ActiveAvatarCodeId = item.CustomizationItemCodeId;
         }
-        else if (item.CustomizationItem.Type == CustomizationType.AvatarFrame && user.ActiveAvatarFrameId == null)
+        else if (item.CustomizationItem.Type == CustomizationType.AvatarFrame && user.ActiveAvatarFrameCodeId == null)
         {
-            user.ActiveAvatarFrameId = item.CustomizationItemId;
+            user.ActiveAvatarFrameCodeId = item.CustomizationItemCodeId;
         }
-        else if (item.CustomizationItem.Type == CustomizationType.Background && user.ActiveBackgroundId == null)
+        else if (item.CustomizationItem.Type == CustomizationType.Background && user.ActiveBackgroundCodeId == null)
         {
-            user.ActiveBackgroundId = item.CustomizationItemId;
+            user.ActiveBackgroundCodeId = item.CustomizationItemCodeId;
         }
     }
 }

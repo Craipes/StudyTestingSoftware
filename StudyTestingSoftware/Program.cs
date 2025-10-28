@@ -123,6 +123,7 @@ app.MapGet("/find-user", async (UserManager<AppUser> userManager, string email) 
 });
 
 app.MapControllers();
+app.MapStaticAssets();
 
 using (var scope = app.Services.CreateScope())
 {

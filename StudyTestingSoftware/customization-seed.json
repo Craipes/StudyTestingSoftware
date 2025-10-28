@@ -1,0 +1,68 @@
+﻿[
+  {
+    "CodeId": "avatar_default",
+    "Name": "Стандартний",
+    "Description": "Стандартний аватар",
+    "Type": 1,
+    "ImageUrl": "/avatars/default.jpg",
+    "UnlockedByDefault": true,
+    "UnlockedByLevelUp": false,
+    "Price": 0,
+    "LevelRequired": 0
+  },
+  {
+    "CodeId": "avatar_advanced",
+    "Name": "Крутий",
+    "Description": "Крутий аватар",
+    "Type": 1,
+    "ImageUrl": "/avatars/advanced.png",
+    "UnlockedByDefault": false,
+    "UnlockedByLevelUp": false,
+    "Price": 50,
+    "LevelRequired": 0
+  },
+  {
+    "CodeId": "frame_default",
+    "Name": "Стандартний",
+    "Description": "Стандартний фрейм",
+    "Type": 2,
+    "ImageUrl": "/frames/default.jpg",
+    "UnlockedByDefault": true,
+    "UnlockedByLevelUp": false,
+    "Price": 0,
+    "LevelRequired": 0
+  },
+  {
+    "CodeId": "frame_advanced",
+    "Name": "Крутий",
+    "Description": "Крутий фрейм",
+    "Type": 2,
+    "ImageUrl": "/frames/advanced.png",
+    "UnlockedByDefault": false,
+    "UnlockedByLevelUp": true,
+    "Price": 0,
+    "LevelRequired": 3
+  },
+  {
+    "CodeId": "background_default",
+    "Name": "Стандартний",
+    "Description": "Стандартний фон",
+    "Type": 3,
+    "ImageUrl": "/backgrounds/default.jpg",
+    "UnlockedByDefault": true,
+    "UnlockedByLevelUp": false,
+    "Price": 0,
+    "LevelRequired": 0
+  },
+  {
+    "CodeId": "background_advanced",
+    "Name": "Крутий",
+    "Description": "Крутий фон",
+    "Type": 3,
+    "ImageUrl": "/backgrounds/advanced.png",
+    "UnlockedByDefault": false,
+    "UnlockedByLevelUp": false,
+    "Price": 25,
+    "LevelRequired": 0
+  }
+]

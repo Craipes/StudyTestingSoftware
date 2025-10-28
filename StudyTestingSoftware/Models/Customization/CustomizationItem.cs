@@ -2,8 +2,9 @@
 
 namespace StudyTestingSoftware.Models.Customization;
 
-public class CustomizationItem : BaseEntity
+public class CustomizationItem
 {
+    [Key] public required string CodeId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public CustomizationType Type { get; set; }

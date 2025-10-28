@@ -39,23 +39,23 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
             // Customization
             entity.HasOne(au => au.ActiveAvatar)
                 .WithMany()
-                .HasForeignKey(au => au.ActiveAvatarId)
+                .HasForeignKey(au => au.ActiveAvatarCodeId)
                 .OnDelete(DeleteBehavior.SetNull);
 
             entity.HasOne(au => au.ActiveAvatarFrame)
                 .WithMany()
-                .HasForeignKey(au => au.ActiveAvatarFrameId)
+                .HasForeignKey(au => au.ActiveAvatarFrameCodeId)
                 .OnDelete(DeleteBehavior.SetNull);
 
             entity.HasOne(au => au.ActiveBackground)
                 .WithMany()
-                .HasForeignKey(au => au.ActiveBackgroundId)
+                .HasForeignKey(au => au.ActiveBackgroundCodeId)
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
         builder.Entity<UserCustomizationItem>(entity =>
         {
-            entity.HasKey(e => new { e.UserId, e.CustomizationItemId });
+            entity.HasKey(e => new { e.UserId, e.CustomizationItemCodeId });
 
             entity.HasOne(uci => uci.User)
                 .WithMany(u => u.OwnedCustomizationItems)
@@ -64,7 +64,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
 
             entity.HasOne(uci => uci.CustomizationItem)
                 .WithMany() // Explicitly define the relationship
-                .HasForeignKey(uci => uci.CustomizationItemId)
+                .HasForeignKey(uci => uci.CustomizationItemCodeId)
                 .OnDelete(DeleteBehavior.Cascade); // Let's try Cascade here and change the other side.
         });
 
@@ -73,17 +73,17 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         {
             entity.HasMany<AppUser>()
                 .WithOne(au => au.ActiveAvatar)
-                .HasForeignKey(au => au.ActiveAvatarId)
+                .HasForeignKey(au => au.ActiveAvatarCodeId)
                 .OnDelete(DeleteBehavior.NoAction); // Change to NoAction
 
             entity.HasMany<AppUser>()
                 .WithOne(au => au.ActiveAvatarFrame)
-                .HasForeignKey(au => au.ActiveAvatarFrameId)
+                .HasForeignKey(au => au.ActiveAvatarFrameCodeId)
                 .OnDelete(DeleteBehavior.NoAction); // Change to NoAction
 
             entity.HasMany<AppUser>()
                 .WithOne(au => au.ActiveBackground)
-                .HasForeignKey(au => au.ActiveBackgroundId)
+                .HasForeignKey(au => au.ActiveBackgroundCodeId)
                 .OnDelete(DeleteBehavior.NoAction); // Change to NoAction
         });
 

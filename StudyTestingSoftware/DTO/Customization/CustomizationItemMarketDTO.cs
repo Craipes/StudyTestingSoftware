@@ -2,6 +2,7 @@
 
 public record CustomizationItemMarketDTO
 (
+    string CodeId,
     string Name,
     string Description,
     CustomizationType Type,
