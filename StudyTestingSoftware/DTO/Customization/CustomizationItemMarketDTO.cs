@@ -11,5 +11,6 @@ public record CustomizationItemMarketDTO
     bool UnlockedByLevelUp,
     int Price,
     int LevelRequired,
-    bool IsOwned
+    bool IsOwned,
+    bool IsEquipped
 );

@@ -13,6 +13,8 @@ public class CustomizationManager
 
     public async Task<List<CustomizationItemMarketDTO>> GetMarketForUser(Guid userId)
     {
+        var user = await dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null) return [];
         return await dbContext.CustomizationItems
             .AsNoTracking()
             .OrderBy(item => item.Type)
@@ -29,14 +31,15 @@ public class CustomizationManager
                 item.UnlockedByLevelUp,
                 item.Price,
                 item.LevelRequired,
-                dbContext.UserCustomizationItems.Any(uci => uci.UserId == userId && uci.CustomizationItemCodeId == item.CodeId)
+                dbContext.UserCustomizationItems.Any(uci => uci.UserId == userId && uci.CustomizationItemCodeId == item.CodeId),
+                item.CodeId == user.ActiveAvatarCodeId || item.CodeId == user.ActiveAvatarFrameCodeId || item.CodeId == user.ActiveBackgroundCodeId
             ))
             .ToListAsync();
     }
 
     public async Task<bool> PurchaseCustomizationItem(AppUser user, string itemCodeId)
     {
-      var item = await dbContext.CustomizationItems.FindAsync(itemCodeId);
+        var item = await dbContext.CustomizationItems.FindAsync(itemCodeId);
         if (item == null) return false;
         if (item.UnlockedByDefault || item.UnlockedByLevelUp) return false;
         var alreadyOwned = await dbContext.UserCustomizationItems
