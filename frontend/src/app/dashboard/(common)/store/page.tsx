@@ -31,7 +31,6 @@ interface MarketItem {
   levelRequired: number;
   isOwned: boolean;
   isEquipped?: boolean;
-  isEquipped_local?: boolean; 
 }
 
 interface MarketItemCardProps {
@@ -74,7 +73,7 @@ const MarketItemCard = ({ item, onPurchase, onEquip }: MarketItemCardProps) => {
   };
 
   const renderButton = () => {
-    if (item.isEquipped_local || item.isEquipped) {
+    if (item.isEquipped===true) {
       return (
         <button
           disabled
@@ -86,7 +85,7 @@ const MarketItemCard = ({ item, onPurchase, onEquip }: MarketItemCardProps) => {
       );
     }
 
-    if (item.isOwned) {
+    else if (item.isOwned) {
       return (
         <button
           onClick={handleEquip}
@@ -153,26 +152,15 @@ const MarketPage = () => {
     { name: 'Дашборд', href: '/dashboard' },
     { name: 'Крамниця' }
   ];
-  
-  // TODO: Вам потрібно звідкись отримати `equippedItems` користувача
-  // Наприклад, з `useUser()` хука або з іншого API запиту.
-  // Поки що, для прикладу, захардкодимо:
-  const MOCK_EQUIPPED_CODES = {
-    [CustomizationItemType.Avatar]: 'default-avatar-code',
-    [CustomizationItemType.AvatarFrame]: 'default-frame-code',
-    [CustomizationItemType.Background]: 'default-bg-code',
-  }
 
   useEffect(() => {
     const fetchMarket = async () => {
       try {
         setLoading(true);
         const response = await api.get('/customization/market');
-        console.log('Market response:', response);
-
+        
         const processedItems = response.data.map((item: MarketItem) => ({
           ...item,
-          isEquipped_local: MOCK_EQUIPPED_CODES[item.type] === item.codeId
         }));
         
         setItems(processedItems);
@@ -200,7 +188,7 @@ const MarketPage = () => {
     setItems(currentItems =>
       currentItems.map(item => {
         if (item.type === type) {
-          return { ...item, isEquipped_local: item.codeId === codeId };
+          return { ...item, isEquipped: item.codeId === codeId };
         }
         return item;
       })
@@ -255,7 +243,7 @@ const MarketPage = () => {
         {avatars.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {avatars.map((item, index) => (
-              <RevealWrapper key={item.codeId} delay={index * 50} origin='top'>
+              <RevealWrapper key={item.codeId} delay={index * 50} origin='top' reset={true}>
               <MarketItemCard 
                 key={item.codeId} 
                 item={item}
@@ -277,7 +265,7 @@ const MarketPage = () => {
         {frames.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {frames.map((item, index) => (
-              <RevealWrapper key={item.codeId} delay={index * 50} origin='top'>
+              <RevealWrapper key={item.codeId} delay={index * 50} origin='top' reset={true}>
                 <MarketItemCard
                   key={item.codeId}
                   item={item}
@@ -299,7 +287,7 @@ const MarketPage = () => {
         {backgrounds.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {backgrounds.map((item, index) => (
-              <RevealWrapper key={item.codeId} delay={index * 50} origin='top'>
+              <RevealWrapper key={item.codeId} delay={index * 50} origin='top' reset={true}>
                 <MarketItemCard
                   key={item.codeId}
                   item={item}
