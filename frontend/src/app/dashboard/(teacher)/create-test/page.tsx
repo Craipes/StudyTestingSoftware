@@ -13,6 +13,7 @@ import Breadcrumbs from '@/components/shared/BreadCrumbs';
 import Link from 'next/link';
 import { AccessMode, QuestionType } from '@/types';
 import { handleApiError } from '@/utils/handle-api-errors';
+import { RevealWrapper } from 'next-reveal';
 
   const breadcrumbItems = [
     { name: 'Дашборд', href: '/dashboard' },
@@ -68,6 +69,7 @@ const CreateTestFormSchema = z.object({
     hasCloseTime: z.boolean().optional(),
     closeAt: z.string().optional(),
     questions: z.array(QuestionSchema),
+    maxCoins:z.number().int().optional(),
 });
 
 type CreateTestFormValues = z.infer<typeof CreateTestFormSchema>;
@@ -292,6 +294,7 @@ export default function CreateTestPage() {
             name: '',
             description: '',
             maxExperience: 0,
+            maxCoins: 0,
             accessMode: AccessMode.Private,
             durationInMinutes: 0,
             shuffleQuestions: true,
@@ -376,7 +379,7 @@ export default function CreateTestPage() {
         <div className="flex-1 pt-6 sm:p-8">
             <div className='flex-row sm:flex justify-between items-center mb-6'>
                 <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-4 sm:mb-0">
-                Створити новий тест
+                Створити тест
                 <Breadcrumbs items={breadcrumbItems} />
                 </h1>
             <Link
@@ -387,6 +390,7 @@ export default function CreateTestPage() {
             </Link>
             </div>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <RevealWrapper delay={100} duration={500} origin="top" distance="20px" reset={true}>
                 <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg space-y-4">
                     <h2 className="text-xl font-semibold">Загальні параметри</h2>
                     <div>
@@ -410,6 +414,10 @@ export default function CreateTestPage() {
                         <div>
                             <label className="block text-sm font-medium">Макс. досвід</label>
                             <input type="number" {...form.register('maxExperience', { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium">Макс. монет</label>
+                            <input type="number" {...form.register('maxCoins', { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
                         </div>
                         <div>
                             <label className="block text-sm font-medium">Доступ</label>
@@ -451,9 +459,11 @@ export default function CreateTestPage() {
 
                     </div>
                 </div>
+                </RevealWrapper>
 
                 <div className="space-y-6">
                     {fields.map((field, index) => (
+                        <RevealWrapper key={field.id} delay={index * 40} duration={500} origin="top" distance="20px" reset={true}>
                         <div key={field.id} className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg relative">
                             <h3 className="font-semibold text-lg mb-4">Запитання #{index + 1}</h3>
                             <button
@@ -664,6 +674,7 @@ export default function CreateTestPage() {
                                 )}
                             </div>
                         </div>
+                        </RevealWrapper>
                     ))}
                 </div>
 

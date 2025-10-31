@@ -12,6 +12,7 @@ import Breadcrumbs from '@/components/shared/BreadCrumbs';
 import Link from 'next/link';
 import { AccessMode, ChoiceOptionSchema, EditTestFormSchema, QuestionColumnSchema, QuestionRowSchema, QuestionSchema, QuestionType } from '@/types/edit-test-types-schemas';
 import { handleApiError } from '@/utils/handle-api-errors';
+import { RevealWrapper } from 'next-reveal';
 
 
 type EditTestFormValues = z.infer<typeof EditTestFormSchema>;
@@ -408,6 +409,7 @@ export default function EditTestPage() {
             </div>
             <FormProvider {...methods}>
                 <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
+                    <RevealWrapper delay={100} duration={500} origin="top" distance="20px" reset={true}>
                     <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg space-y-4">
                         <h2 className="text-xl font-semibold">Загальні параметри</h2>
                         <div>
@@ -431,6 +433,10 @@ export default function EditTestPage() {
                             <div>
                                 <label className="block text-sm font-medium">Макс. досвід</label>
                                 <input type="number" {...methods.register('maxExperience', { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium">Макс. монет</label>
+                                <input type="number" {...methods.register('maxCoins', { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium">Доступ</label>
@@ -472,9 +478,11 @@ export default function EditTestPage() {
                             {methods.formState.errors.closeAt && <p className="text-red-500 text-sm">{methods.formState.errors.closeAt.message}</p>}
                         </div>
                     </div>
+                    </RevealWrapper>
 
                     <div className="space-y-6">
                         {fields.map((field, index) => (
+                            <RevealWrapper key={field.id} delay={index * 40} duration={500} origin="top" distance="20px" reset={true}>
                             <div key={field.id} className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg relative">
                                 <h3 className="font-semibold text-lg mb-4">Запитання #{index + 1}</h3>
                                 <button
@@ -725,6 +733,7 @@ export default function EditTestPage() {
                                     )}
                                 </div>
                             </div>
+                            </RevealWrapper>
                         ))}
                     </div>
 

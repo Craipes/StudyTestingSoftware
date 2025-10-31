@@ -7,6 +7,7 @@ import { fetchCompletedTestSessions } from '@/lib/api';
 import Breadcrumbs from '@/components/shared/BreadCrumbs';
 import Link from 'next/link';
 import { TestResultCard } from '@/components/shared/TestResultCard';
+import { RevealWrapper } from 'next-reveal';
 
 const PAGE_SIZE = 10;
 
@@ -74,8 +75,10 @@ export default function StudentTestsPage() {
           </div>
         ):(
               <div className="grid gap-6 md:grid-cols-2">
-                {data.items.map((test) => (
-                  <TestResultCard key={test.id} sessionResult={test} />
+                {data.items.map((test,index) => (
+                  <RevealWrapper key={test.id} delay={index*40} duration={500} origin="top" distance="20px" reset={true}>
+                    <TestResultCard key={test.id} sessionResult={test} />
+                  </RevealWrapper>
                 ))}
               </div>
         )}

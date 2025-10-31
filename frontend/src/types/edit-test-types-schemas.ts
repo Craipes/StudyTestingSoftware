@@ -68,5 +68,6 @@ export const EditTestFormSchema = z.object({
     isOpened: z.boolean().optional(),
     hasCloseTime: z.boolean().optional(),
     closeAt: z.string().optional().nullable(),
+    maxCoins: z.number().int().min(0).optional(),
     questions: z.array(QuestionSchema),
 });

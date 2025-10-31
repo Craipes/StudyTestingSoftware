@@ -8,8 +8,7 @@ import { Loader } from 'lucide-react';
 import { Sidebar } from '@/components/shared/SideBar';
 import { getActiveTestSession, getUser } from '@/lib/api';
 import ThemeSwitcher from '@/components/shared/ThemeSwitcher';
-import { handleApiError } from '@/utils/handle-api-errors';
-import { set } from 'zod';
+
 
 interface UserInfo {
   firstName: string;
@@ -19,6 +18,7 @@ interface UserInfo {
   level:number;
   experience:number;
   requiredExperience:number;
+  coins:number;
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -64,7 +64,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 }, 3000);
               }
             } catch (err) {
-              handleApiError(err, 'Помилка при отриманні активної сесії.');
             } finally {
               setLoadingActiveSession(false);
             }

@@ -7,6 +7,7 @@ import { ArrowLeft, Users, FileText, User, ChevronRight, BookOpen } from 'lucide
 import Link from 'next/link';
 import Breadcrumbs from '@/components/shared/BreadCrumbs';
 import StudentsGroupsTestCard from '@/components/shared/StudentGroupsTestCard';
+import { RevealWrapper } from 'next-reveal';
 
 
 interface UserInfo {
@@ -76,7 +77,8 @@ const RenderGroupList = ({
       <p className="text-gray-600 dark:text-gray-400">Вас ще не додали до жодної групи.</p>
     ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {groups.map(group => (
+        {groups.map((group,index) => (
+          <RevealWrapper key={group.id} delay={index*40} duration={500} origin="top" distance="20px" reset={true}>
           <div 
             key={group.id} 
             className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow"
@@ -98,6 +100,7 @@ const RenderGroupList = ({
               <ChevronRight size={24} className="text-gray-400" />
             </div>
           </div>
+          </RevealWrapper>
         ))}
       </div>
     )}
@@ -119,6 +122,7 @@ const RenderGroupDetails = ({
     </button>
     
     {/* Загальна інформація про групу */}
+    <RevealWrapper delay={100} duration={500} origin="top" distance="20px" reset={true}>
     <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md mb-8">
       <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">{group.name}</h1>
       <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">{group.description}</p>
@@ -128,6 +132,7 @@ const RenderGroupDetails = ({
         <span className="dark:text-gray-100">{group.owner.lastName} {group.owner.firstName} {group.owner.middleName}</span>
       </div>
     </div>
+    </RevealWrapper>
 
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       
@@ -139,8 +144,10 @@ const RenderGroupDetails = ({
         </h2>
         <div className="space-y-4">
           {group.tests.length > 0 ? 
-          (group.tests.map(test => (
-            <StudentsGroupsTestCard key={test.id} test={test} />
+          (group.tests.map((test,index) => (
+            <RevealWrapper key={test.id} delay={index*100} duration={500} origin="top" distance="20px" reset={true}>
+              <StudentsGroupsTestCard key={test.id} test={test} />
+            </RevealWrapper>
           ))) : (
             <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow text-center">
               <BookOpen size={48} className="mx-auto text-gray-400 mb-4" />
@@ -157,14 +164,16 @@ const RenderGroupDetails = ({
           Учасники
         </h2>
         <ul className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow divide-y dark:divide-gray-700 max-h-96 overflow-y-auto">
-          {group.students.map(student => (
-            <li key={student.id} className="py-3 flex items-center gap-3">
-              {/* аватар-заглушка */}
-              <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center font-bold text-gray-600 dark:text-gray-400">
-                {student.firstName[0]}{student.lastName[0]}
-              </div>
-              <span className='dark:text-gray-100'>{student.lastName} {student.firstName}</span>
-            </li>
+          {group.students.map((student,index) => (
+            <RevealWrapper key={student.id} delay={index*100} duration={500} origin="top" distance="20px" reset={true}>
+              <li className="py-3 flex items-center gap-3">
+                {/* аватар-заглушка */}
+                <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center font-bold text-gray-600 dark:text-gray-400">
+                  {student.firstName[0]}{student.lastName[0]}
+                </div>
+                <span className='dark:text-gray-100'>{student.lastName} {student.firstName}</span>
+              </li>
+            </RevealWrapper>
           ))}
         </ul>
       </div>

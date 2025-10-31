@@ -17,6 +17,7 @@ export const getUser = async (): Promise<{
   level:number;
   experience:number;
   requiredExperience:number;
+  coins:number;
 }> => {
   const response = await api.get('/user/info');
   return response.data;

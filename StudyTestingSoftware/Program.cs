@@ -109,6 +109,8 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseStaticFiles();
+
 app.MapGroup("auth")
     .MapCustomIdentityApi();
 

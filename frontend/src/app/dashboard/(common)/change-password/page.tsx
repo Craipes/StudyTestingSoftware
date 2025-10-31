@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import { handleApiError } from '@/utils/handle-api-errors';
+import { RevealWrapper } from 'next-reveal';
 
 export default function ChangePasswordPage() {
   const [loading, setLoading] = useState(false);
@@ -49,11 +50,13 @@ export default function ChangePasswordPage() {
   };
 
   return (
+    <RevealWrapper delay={100} duration={500} origin="top" distance="20px" reset={true}>
     <div className="flex-1 sm:p-8 flex items-center justify-center">
       <div className="w-full max-w-md bg-white dark:bg-slate-950 mt-[20vh] p-8 rounded-lg shadow-lg">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 text-center">Зміна пароля</h1>
         <ChangePasswordForm onSubmit={handleChangePassword} loading={loading} error={error} />
       </div>
     </div>
+    </RevealWrapper>
   );
 }
