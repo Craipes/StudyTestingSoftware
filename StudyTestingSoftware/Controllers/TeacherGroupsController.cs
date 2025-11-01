@@ -10,13 +10,15 @@ public class TeacherGroupsController : Controller
 {
     private readonly UserManager<AppUser> userManager;
     private readonly GroupManager groupManager;
-    private readonly TestManager testManager;
+    private readonly TestReadManager testReadManager;
+    private readonly CustomUserManager customUserManager;
 
-    public TeacherGroupsController(UserManager<AppUser> userManager, GroupManager groupManager, TestManager testManager)
+    public TeacherGroupsController(UserManager<AppUser> userManager, GroupManager groupManager, TestReadManager testReadManager, CustomUserManager customUserManager)
     {
         this.userManager = userManager;
         this.groupManager = groupManager;
-        this.testManager = testManager;
+        this.testReadManager = testReadManager;
+        this.customUserManager = customUserManager;
     }
 
     [HttpGet("list-ids")]
@@ -157,7 +159,7 @@ public class TeacherGroupsController : Controller
         {
             if (string.IsNullOrWhiteSpace(userEmail))
             {
-                return BadRequest("User email must be provided when useEmail is true.");
+                return this.ToActionResult(AResult.Failure(AProblem.Validation(GeneralErrors.EmailRequired)));
             }
             return await groupManager.AddUserToGroupByEmailAsync(groupId, userEmail);
         }
@@ -165,7 +167,7 @@ public class TeacherGroupsController : Controller
         {
             if (userId == null || userId == Guid.Empty)
             {
-                return BadRequest("User ID must be provided when useEmail is false.");
+                return this.ToActionResult(AResult.Failure(AProblem.Validation(GeneralErrors.IdRequired)));
             }
             return await groupManager.AddUserToGroupByIdAsync(groupId, userId.Value);
         }
@@ -193,7 +195,7 @@ public class TeacherGroupsController : Controller
         {
             if (string.IsNullOrWhiteSpace(userEmail))
             {
-                return BadRequest("User email must be provided when useEmail is true.");
+                return this.ToActionResult(AResult.Failure(AProblem.Validation(GeneralErrors.EmailRequired)));
             }
             return await groupManager.RemoveUserFromGroupByEmailAsync(groupId, userEmail);
         }
@@ -201,7 +203,7 @@ public class TeacherGroupsController : Controller
         {
             if (userId == null || userId == Guid.Empty)
             {
-                return BadRequest("User ID must be provided when useEmail is false.");
+                return this.ToActionResult(AResult.Failure(AProblem.Validation(GeneralErrors.IdRequired)));
             }
             return await groupManager.RemoveUserFromGroupByIdAsync(groupId, userId.Value);
         }
@@ -225,7 +227,7 @@ public class TeacherGroupsController : Controller
             return Forbid();
         }
 
-        var test = await testManager.LoadTestDefinitionAsync(testId);
+        var test = await testReadManager.LoadTestDefinitionAsync(testId);
         if (test == null)
         {
             return NotFound();
@@ -256,7 +258,7 @@ public class TeacherGroupsController : Controller
             return Forbid();
         }
 
-        var test = await testManager.LoadTestDefinitionAsync(testId);
+        var test = await testReadManager.LoadTestDefinitionAsync(testId);
         if (test == null)
         {
             return NotFound();
@@ -267,5 +269,48 @@ public class TeacherGroupsController : Controller
         }
 
         return await groupManager.RemoveTestFromGroupAsync(groupId, testId);
+    }
+
+    [HttpGet("list-tests/{groupId:guid}")]
+    public async Task<ActionResult<List<TeacherTestPreviewDTO>>> ListGroupTests([FromRoute] Guid groupId)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        var group = await groupManager.GetGroupByIdAsync(groupId);
+        if (group == null)
+        {
+            return NotFound();
+        }
+        if (group.OwnerId != user.Id)
+        {
+            return Forbid();
+        }
+        var tests = await testReadManager.ListTeacherTestPreviewsByGroupAsync(groupId, user.Id);
+        return tests;
+    }
+
+    [HttpGet("list-students/{groupId:guid}")]
+    public async Task<ActionResult<List<FullUserInfoDTO>>> ListGroupStudents([FromRoute] Guid groupId)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        var group = await groupManager.GetGroupByIdAsync(groupId);
+        if (group == null)
+        {
+            return NotFound();
+        }
+        if (group.OwnerId != user.Id)
+        {
+            return Forbid();
+        }
+
+        var students = await customUserManager.GetUsersInfoInGroupAsync(groupId);
+        return Ok(students);
     }
 }

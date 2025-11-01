@@ -3,19 +3,33 @@
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import Image from 'next/image';
 
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 
-import { Lock,SquarePlus,Layers,NotebookPen,BookOpen,DoorOpen,Menu,X  } from 'lucide-react';
+import { Lock,SquarePlus,Layers,NotebookPen,BookOpen,DoorOpen,Menu, Users, LayoutDashboard, ShoppingBag, BadgeEuro   } from 'lucide-react';
+import { RevealWrapper } from 'next-reveal';
 
-
+const BACKEND_API=process.env.NEXT_PUBLIC_API_URL
 
 interface UserInfo {
   firstName: string;
   lastName: string;
   isTeacher: boolean;
   isStudent: boolean;
+  level:number;
+  avatarUrl?:string;
+  backgroundUrl?:string;
+  avatarFrameUrl?:string;
+  experience:number;
+  requiredExperience:number;
+  coins:number;
 }
 
 interface SidebarProps {
@@ -60,32 +74,104 @@ export function Sidebar({ userInfo }: SidebarProps) {
 
   return (
     <>
-    {  !isSidebarOpen && (
-      <button
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="cursor-pointer fixed top-4 left-4 z-50 md:hidden p-2 rounded-md bg-gray-800 text-white dark:bg-slate-950"
-      >
-         <Menu size={24} />
-      </button>
-    )}
+      {  !isSidebarOpen && (
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="cursor-pointer fixed top-4 left-4 z-50 xl:hidden p-2 rounded-md bg-gray-800 text-white dark:bg-slate-950"
+        >
+          <Menu size={24} />
+        </button>
+      )}
 
       {isSidebarOpen && (
         <div 
           onClick={() => setIsSidebarOpen(false)} 
-          className="fixed inset-0  bg-opacity-100 z-30 md:hidden"
+          className="fixed inset-0  bg-opacity-100 z-30 xl:hidden"
         />
       )}
 
-    <aside className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out w-[60%] md:w-70 bg-gray-800 dark:bg-slate-950 text-white p-4 flex flex-col justify-between z-40`}>
-      <div>
+    <aside className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} xl:relative xl:translate-x-0 transition-transform duration-300 ease-in-out w-[70%] md:w-[40%] xl:w-80 bg-gray-800 dark:bg-slate-950 text-white flex flex-col justify-between z-40`}>
+      <div className=''>
         {/* Блок з інформацією про користувача */}
-        <div className="flex flex-col items-center border-b border-gray-700 pb-4 mb-4">
-          <p className="font-bold text-xl">{userInfo?.firstName} {userInfo?.lastName}</p>
-          <p className="text-sm text-gray-400 mt-1">{getRoles()}</p>
-        </div>
+          <RevealWrapper delay={100} origin='left' duration={500}>
+            <div
+              className='relative border-b border-gray-700 pb-4 mb-4 bg-cover bg-center'
+              style={{
+                backgroundImage: userInfo?.backgroundUrl
+                  ? `url(${BACKEND_API}${userInfo.backgroundUrl})`
+                  : 'none',
+              }}
+            >
+              {/* Опціональний оверлей для кращої читабельності тексту поверх фону */}
+              {userInfo?.backgroundUrl && (
+                <div className='absolute inset-0 bg-black/40 z-0' />
+              )}
+
+              <div className='relative z-10 flex flex-row gap-4 justify-center items-center px-4 pt-2'>
+                
+                {/* Блок Аватара та Рамки */}
+                {userInfo?.avatarUrl && (
+                  <div className='relative w-20 h-20 my-auto flex justify-center items-center rounded-full'>
+                    {/* Аватар */}
+                    <Image
+                      unoptimized={true}
+                      src={`${BACKEND_API}${userInfo.avatarUrl}`}
+                      alt={`${userInfo.firstName} ${userInfo.lastName} avatar`}
+                      width={64}
+                      height={64}
+                      style={{ objectFit: 'cover' }}
+                      className='rounded-full'
+                    />
+                    {/* Рамка (якщо є) */}
+                    {userInfo?.avatarFrameUrl && (
+                      <Image
+                        unoptimized={true}
+                        src={`${BACKEND_API}${userInfo.avatarFrameUrl}`}
+                        alt='Avatar Frame'
+                        fill
+                        className='absolute inset-0 z-10'
+                      />
+                    )}
+                  </div>
+                )}
+
+                {/* Інформація про користувача (Ім'я, Ролі) */}
+                <div className='flex flex-col items-center'>
+                  <p className='font-bold text-xl'>
+                    {userInfo?.firstName} {userInfo?.lastName}
+                  </p>
+                  <p className='text-sm text-gray-400 mt-1'>{getRoles()}</p>
+                </div>
+
+                {/* Рівень */}
+                <div className='my-auto'>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <span className='rounded-full border-2 border-green-500 px-4 py-2'>
+                        {userInfo?.level || 0}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        {userInfo?.experience.toFixed(0) || 0} /{' '}
+                        {userInfo?.requiredExperience.toFixed(0) || 0} до наступного рівня
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+
+                {/* Монети */}
+                <div className='flex items-center'>
+                  <BadgeEuro color='#f1a903' className='mr-1' />
+                  <span>{userInfo?.coins.toFixed(0) || 0}</span>
+                </div>
+              </div>
+            </div>
+          </RevealWrapper>
 
         {/* Навігаційне меню */}
-        <nav className="flex-1 space-y-2">
+        <RevealWrapper delay={100} origin='left' duration={500}>
+        <nav className="flex-1 space-y-2 px-4">
           {/* Меню "Студент" */}
           {userInfo?.isStudent && (
             <div>
@@ -100,6 +186,7 @@ export function Sidebar({ userInfo }: SidebarProps) {
                 <div className="flex flex-col pl-6 mt-1 space-y-1">
                   <Link href="/dashboard/tests" className={`py-1 px-2  flex items-center gap-2 rounded hover:bg-gray-700 transition-colors ${pathname === '/dashboard/tests' ? 'bg-gray-700 font-bold' : ''}`}><BookOpen /> Переглянути тести</Link>
                   <Link href="/dashboard/results" className={`py-1 px-2  flex items-center gap-2 rounded hover:bg-gray-700 transition-colors ${pathname === '/dashboard/results' ? 'bg-gray-700 font-bold' : ''}`}><NotebookPen /> Мої результати</Link>
+                  <Link href="/dashboard/groups" className={`py-1 px-2  flex items-center gap-2 rounded hover:bg-gray-700 transition-colors ${pathname === '/dashboard/groups' ? 'bg-gray-700 font-bold' : ''}`}><Users /> Мої групи</Link>
                 </div>
               )}
             </div>
@@ -119,30 +206,32 @@ export function Sidebar({ userInfo }: SidebarProps) {
                 <div className="flex flex-col pl-6 mt-1 space-y-1">
                   <Link href="/dashboard/create-test" className={`py-1 px-2  flex items-center gap-2 rounded hover:bg-gray-700 transition-colors ${pathname === '/dashboard/create-test' ? 'bg-gray-700 font-bold' : ''}`}><SquarePlus /> Створити тест</Link>
                   <Link href="/dashboard/manage-tests" className={`py-1 px-2  flex items-center gap-2 rounded hover:bg-gray-700 transition-colors ${pathname === '/dashboard/manage-tests' ? 'bg-gray-700 font-bold' : ''}`}><Layers /> Керування тестами</Link>
+                  <Link href="/dashboard/manage-groups" className={`py-1 px-2  flex items-center gap-2 rounded hover:bg-gray-700 transition-colors ${pathname === '/dashboard/manage-groups' ? 'bg-gray-700 font-bold' : ''}`}><LayoutDashboard  /> Керування групами</Link>
                 </div>
               )}
             </div>
           )}
 
-          {/* Меню "Профіль" */}
+          {/* Меню "Загальне" */}
           <div>
             <button
               onClick={() => toggleMenu('profile')}
               className="w-full text-left py-2 px-4 rounded hover:bg-gray-700 transition-colors flex items-center justify-between"
             >
-              <span>Профіль</span>
+              <span>Загальне</span>
               <span className={`transform transition-transform duration-200 ${openMenus.profile ? 'rotate-90' : 'rotate-0'}`}>&gt;</span>
             </button>
             {openMenus.profile && (
               <div className="flex flex-col pl-6 mt-1 space-y-1">
                 <Link href="/dashboard/change-password" className={`py-1 px-2 flex items-center gap-2 rounded hover:bg-gray-700 transition-colors ${pathname === '/dashboard/change-password' ? 'bg-gray-700 font-bold' : ''}`}><Lock /> Змінити пароль</Link>
+                <Link href="/dashboard/store" className={`py-1 px-2 flex items-center gap-2 rounded hover:bg-gray-700 transition-colors ${pathname === '/dashboard/store' ? 'bg-gray-700 font-bold' : ''}`}><ShoppingBag />Крамниця</Link>
               </div>
             )}
           </div>
 
             <div className='border-b border-gray-700 pb-4 mb-4'/>
           
-           {/* Кнопка "Вийти" */}
+            {/* Кнопка "Вийти" */}
             <button
                 onClick={handleLogout}
                 className="w-full text-left py-2 px-4 cursor-pointer rounded hover:bg-gray-700 font-bold"
@@ -151,6 +240,7 @@ export function Sidebar({ userInfo }: SidebarProps) {
                 Вийти
             </button>
         </nav>
+        </RevealWrapper>
       </div>
     </aside>
     </>

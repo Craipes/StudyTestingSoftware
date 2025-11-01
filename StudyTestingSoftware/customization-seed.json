@@ -1,0 +1,167 @@
+﻿[
+  {
+    "CodeId": "avatar_default",
+    "Name": "Стандартний",
+    "Description": "Стандартний аватар",
+    "Type": 1,
+    "ImageUrl": "/avatars/default.jpg",
+    "UnlockedByDefault": true,
+    "UnlockedByLevelUp": false,
+    "Price": 0,
+    "LevelRequired": 0
+  },
+  {
+    "CodeId": "avatar_advanced",
+    "Name": "Крутий",
+    "Description": "Крутий аватар",
+    "Type": 1,
+    "ImageUrl": "/avatars/advanced.png",
+    "UnlockedByDefault": false,
+    "UnlockedByLevelUp": false,
+    "Price": 50,
+    "LevelRequired": 0
+  },
+  {
+    "CodeId": "avatar_doom",
+    "Name": "Doom: Dark ages",
+    "Description": "Автар з культової гри Doom: Dark ages",
+    "Type": 1,
+    "ImageUrl": "/avatars/doom_avatar.png",
+    "UnlockedByDefault": true,
+    "UnlockedByLevelUp": false,
+    "Price": 0,
+    "LevelRequired": 0
+  },
+  {
+    "CodeId": "avatar_ghost_of_tsushima",
+    "Name": "GHOST OF TSUSHIMA",
+    "Description": "Автар з культової гри GHOST OF TSUSHIMA",
+    "Type": 1,
+    "ImageUrl": "/avatars/ghost_of_tsushima.png",
+    "UnlockedByDefault": false,
+    "UnlockedByLevelUp": true,
+    "Price": 0,
+    "LevelRequired": 15
+  },
+   {
+    "CodeId": "avatar_the_evil_within",
+    "Name": "THE EVIL WITHIN",
+    "Description": "Автар з культової гри The Evil Within",
+    "Type": 1,
+    "ImageUrl": "/avatars/the_evil_within.png",
+    "UnlockedByDefault": false,
+    "UnlockedByLevelUp": false,
+    "Price": 25,
+    "LevelRequired": 0
+  },
+  {
+    "CodeId": "frame_default",
+    "Name": "Стандартний",
+    "Description": "Стандартний фрейм",
+    "Type": 2,
+    "ImageUrl": "/frames/default.jpg",
+    "UnlockedByDefault": true,
+    "UnlockedByLevelUp": false,
+    "Price": 0,
+    "LevelRequired": 0
+  },
+  {
+    "CodeId": "frame_advanced",
+    "Name": "Крутий",
+    "Description": "Крутий фрейм",
+    "Type": 2,
+    "ImageUrl": "/frames/advanced.png",
+    "UnlockedByDefault": false,
+    "UnlockedByLevelUp": true,
+    "Price": 0,
+    "LevelRequired": 3
+  },
+  {
+    "CodeId": "background_default",
+    "Name": "Стандартний",
+    "Description": "Стандартний фон",
+    "Type": 3,
+    "ImageUrl": "/backgrounds/default.jpg",
+    "UnlockedByDefault": true,
+    "UnlockedByLevelUp": false,
+    "Price": 0,
+    "LevelRequired": 0
+  },
+  {
+    "CodeId": "background_advanced",
+    "Name": "Крутий",
+    "Description": "Крутий фон",
+    "Type": 3,
+    "ImageUrl": "/backgrounds/advanced.png",
+    "UnlockedByDefault": false,
+    "UnlockedByLevelUp": false,
+    "Price": 25,
+    "LevelRequired": 0
+  },
+  {
+    "CodeId": "background_doom",
+    "Name": "Doom: Dark ages",
+    "Description": "Фон з культової гри Doom: Dark ages",
+    "Type": 3,
+    "ImageUrl": "/backgrounds/doom.png",
+    "UnlockedByDefault": false,
+    "UnlockedByLevelUp": false,
+    "Price": 25,
+    "LevelRequired": 0
+  },
+  {
+    "CodeId": "background_ghost_of_tsushima",
+    "Name": "GHOST OF TSUSHIMA",
+    "Description": "Фон з культової гри GHOST OF TSUSHIMA",
+    "Type": 3,
+    "ImageUrl": "/backgrounds/ghost.png",
+    "UnlockedByDefault": false,
+    "UnlockedByLevelUp": true,
+    "Price": 0,
+    "LevelRequired": 1
+  },
+  {
+    "CodeId": "background_assassins_creed",
+    "Name": "Asssassin's Creed",
+    "Description": "Фон з культової гри Assassin's Creed",
+    "Type": 3,
+    "ImageUrl": "/backgrounds/assassin.png",
+    "UnlockedByDefault": false,
+    "UnlockedByLevelUp": false,
+    "Price": 15,
+    "LevelRequired": 0
+  },  
+    {
+    "CodeId": "background_warrior",
+    "Name": "Warrior",
+    "Description": "Фон для справжнього тестового воїна",
+    "Type": 3,
+    "ImageUrl": "/backgrounds/warrior.png",
+    "UnlockedByDefault": false,
+    "UnlockedByLevelUp": true,
+    "Price": 0,
+    "LevelRequired": 9
+  },  
+    {
+    "CodeId": "background_japan",
+    "Name": "Japan",
+    "Description": "Пейзаж Японії",
+    "Type": 3,
+    "ImageUrl": "/backgrounds/japan.png",
+    "UnlockedByDefault": true,
+    "UnlockedByLevelUp": false,
+    "Price": 0,
+    "LevelRequired": 0
+  },  
+    {
+    "CodeId": "background_battlefield",
+    "Name": "Battlefield",
+    "Description": "Фон з культової гри Battlefield",
+    "Type": 3,
+    "ImageUrl": "/backgrounds/battlefield.png",
+    "UnlockedByDefault": false,
+    "UnlockedByLevelUp": false,
+    "Price": 8,
+    "LevelRequired": 0
+  }
+]

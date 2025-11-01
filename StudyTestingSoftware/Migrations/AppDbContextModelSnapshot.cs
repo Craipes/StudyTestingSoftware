@@ -192,6 +192,15 @@ namespace StudyTestingSoftware.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("ActiveAvatarCodeId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ActiveAvatarFrameCodeId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ActiveBackgroundCodeId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<int>("Coins")
                         .HasColumnType("int");
 
@@ -209,8 +218,8 @@ namespace StudyTestingSoftware.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<int>("Experience")
-                        .HasColumnType("int");
+                    b.Property<double>("Experience")
+                        .HasColumnType("float");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -249,6 +258,9 @@ namespace StudyTestingSoftware.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<double>("RequiredExperience")
+                        .HasColumnType("float");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -261,6 +273,12 @@ namespace StudyTestingSoftware.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ActiveAvatarCodeId");
+
+                    b.HasIndex("ActiveAvatarFrameCodeId");
+
+                    b.HasIndex("ActiveBackgroundCodeId");
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -270,6 +288,61 @@ namespace StudyTestingSoftware.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("StudyTestingSoftware.Models.Customization.CustomizationItem", b =>
+                {
+                    b.Property<string>("CodeId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("LevelRequired")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Price")
+                        .HasColumnType("int");
+
+                    b.Property<byte>("Type")
+                        .HasColumnType("tinyint");
+
+                    b.Property<bool>("UnlockedByDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("UnlockedByLevelUp")
+                        .HasColumnType("bit");
+
+                    b.HasKey("CodeId");
+
+                    b.ToTable("CustomizationItems");
+                });
+
+            modelBuilder.Entity("StudyTestingSoftware.Models.Customization.UserCustomizationItem", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CustomizationItemCodeId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("AcquiredAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("UserId", "CustomizationItemCodeId");
+
+                    b.HasIndex("CustomizationItemCodeId");
+
+                    b.ToTable("UserCustomizationItems");
                 });
 
             modelBuilder.Entity("StudyTestingSoftware.Models.StudentGroup", b =>
@@ -312,6 +385,9 @@ namespace StudyTestingSoftware.Migrations
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("bit");
 
+                    b.Property<int>("RandomSeed")
+                        .HasColumnType("int");
+
                     b.Property<double>("Score")
                         .HasColumnType("float");
 
@@ -329,6 +405,8 @@ namespace StudyTestingSoftware.Migrations
                     b.HasIndex("TestId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("IsCompleted", "AutoFinishAt");
 
                     b.ToTable("TestSessions");
                 });
@@ -536,6 +614,9 @@ namespace StudyTestingSoftware.Migrations
                     b.Property<bool>("IsPublished")
                         .HasColumnType("bit");
 
+                    b.Property<int>("MaxCoins")
+                        .HasColumnType("int");
+
                     b.Property<int>("MaxExperience")
                         .HasColumnType("int");
 
@@ -644,6 +725,49 @@ namespace StudyTestingSoftware.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("StudyTestingSoftware.Models.AppUser", b =>
+                {
+                    b.HasOne("StudyTestingSoftware.Models.Customization.CustomizationItem", "ActiveAvatar")
+                        .WithMany()
+                        .HasForeignKey("ActiveAvatarCodeId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("StudyTestingSoftware.Models.Customization.CustomizationItem", "ActiveAvatarFrame")
+                        .WithMany()
+                        .HasForeignKey("ActiveAvatarFrameCodeId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("StudyTestingSoftware.Models.Customization.CustomizationItem", "ActiveBackground")
+                        .WithMany()
+                        .HasForeignKey("ActiveBackgroundCodeId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("ActiveAvatar");
+
+                    b.Navigation("ActiveAvatarFrame");
+
+                    b.Navigation("ActiveBackground");
+                });
+
+            modelBuilder.Entity("StudyTestingSoftware.Models.Customization.UserCustomizationItem", b =>
+                {
+                    b.HasOne("StudyTestingSoftware.Models.Customization.CustomizationItem", "CustomizationItem")
+                        .WithMany()
+                        .HasForeignKey("CustomizationItemCodeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("StudyTestingSoftware.Models.AppUser", "User")
+                        .WithMany("OwnedCustomizationItems")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CustomizationItem");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("StudyTestingSoftware.Models.StudentGroup", b =>
                 {
                     b.HasOne("StudyTestingSoftware.Models.AppUser", "Owner")
@@ -657,7 +781,7 @@ namespace StudyTestingSoftware.Migrations
             modelBuilder.Entity("StudyTestingSoftware.Models.TestSessions.TestSession", b =>
                 {
                     b.HasOne("StudyTestingSoftware.Models.Tests.Test", "Test")
-                        .WithMany()
+                        .WithMany("TestSessions")
                         .HasForeignKey("TestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -694,7 +818,7 @@ namespace StudyTestingSoftware.Migrations
                         .HasForeignKey("SelectedMatrixRowId");
 
                     b.HasOne("StudyTestingSoftware.Models.TestSessions.TestSession", "TestSession")
-                        .WithMany()
+                        .WithMany("UserAnswers")
                         .HasForeignKey("TestSessionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -776,9 +900,16 @@ namespace StudyTestingSoftware.Migrations
                 {
                     b.Navigation("AuthoredTests");
 
+                    b.Navigation("OwnedCustomizationItems");
+
                     b.Navigation("OwnedStudentGroups");
 
                     b.Navigation("TestSessions");
+                });
+
+            modelBuilder.Entity("StudyTestingSoftware.Models.TestSessions.TestSession", b =>
+                {
+                    b.Navigation("UserAnswers");
                 });
 
             modelBuilder.Entity("StudyTestingSoftware.Models.Tests.Question", b =>
@@ -793,6 +924,8 @@ namespace StudyTestingSoftware.Migrations
             modelBuilder.Entity("StudyTestingSoftware.Models.Tests.Test", b =>
                 {
                     b.Navigation("Questions");
+
+                    b.Navigation("TestSessions");
                 });
 #pragma warning restore 612, 618
         }

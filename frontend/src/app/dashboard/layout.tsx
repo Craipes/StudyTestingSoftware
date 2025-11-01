@@ -3,17 +3,22 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import { Loader } from 'lucide-react';
 import { Sidebar } from '@/components/shared/SideBar';
-import { getUser } from '@/lib/api';
+import { getActiveTestSession, getUser } from '@/lib/api';
 import ThemeSwitcher from '@/components/shared/ThemeSwitcher';
+
 
 interface UserInfo {
   firstName: string;
   lastName: string;
   isTeacher: boolean;
   isStudent: boolean;
+  level:number;
+  experience:number;
+  requiredExperience:number;
+  coins:number;
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -37,6 +42,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
     fetchUserInfo();
   }, [router]);
+
+      const [activeSession,setActiveSession]=useState<null | {
+          id:string;
+          testName:string;
+          startedAt:string;
+          autoFinishAt:string;
+          durationInMinutes:number;
+        }>(null);
+        const [loadingActiveSession,setLoadingActiveSession]=useState(true);
+      
+        useEffect(() => {
+          async function fetchActiveTestSession() {
+            try {
+              const response = await getActiveTestSession();
+              setActiveSession(response);
+              if(response!==null && response.id){
+                toast.error('У вас вже є активна тестова сесія. Ви будете перенаправлені на панель керування.');  
+                setTimeout(() => {
+                  router.push('/dashboard');
+                }, 3000);
+              }
+            } catch (err) {
+            } finally {
+              setLoadingActiveSession(false);
+            }
+          }
+          fetchActiveTestSession();
+        }, []);
 
   if (loading) {
     return (

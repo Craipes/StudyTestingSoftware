@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using StudyTestingSoftware.DTO.TeacherTest;
 
 namespace StudyTestingSoftware.Controllers;
 
@@ -9,12 +8,16 @@ namespace StudyTestingSoftware.Controllers;
 public class TeacherTestsController : Controller
 {
     private readonly UserManager<AppUser> userManager;
-    private readonly TestManager testManagement;
+    private readonly TestReadManager testReadManager;
+    private readonly TestWriteManager testWriteManager;
+    private readonly TestSessionManager testSessionManager;
 
-    public TeacherTestsController(UserManager<AppUser> userManager, TestManager testManagement)
+    public TeacherTestsController(UserManager<AppUser> userManager, TestReadManager testReadManager, TestWriteManager testWriteManager, TestSessionManager testSessionManager)
     {
         this.userManager = userManager;
-        this.testManagement = testManagement;
+        this.testReadManager = testReadManager;
+        this.testWriteManager = testWriteManager;
+        this.testSessionManager = testSessionManager;
     }
 
     [HttpGet("list-ids")]
@@ -26,7 +29,7 @@ public class TeacherTestsController : Controller
             return Unauthorized();
         }
 
-        var testIds = await testManagement.ListTestIdsByAuthorAsync(user.Id);
+        var testIds = await testReadManager.ListTestIdsByAuthorAsync(user.Id);
 
         return testIds;
     }
@@ -40,7 +43,7 @@ public class TeacherTestsController : Controller
             return Unauthorized();
         }
 
-        var testsPreviews = await testManagement.ListTestPreviewsByAuthorAsync(user.Id);
+        var testsPreviews = await testReadManager.ListTeacherTestPreviewsByAuthorAsync(user.Id);
         return testsPreviews;
     }
 
@@ -53,15 +56,10 @@ public class TeacherTestsController : Controller
             return Unauthorized();
         }
 
-        (var test, var testValidation) = await testManagement.TryToCreateTestAsync(data, user);
-        ModelState.Merge(testValidation);
+        var result = (await testWriteManager.TryToCreateTestAsync(data, user))
+            .Map(r => r.Id);
 
-        if (!ModelState.IsValid || test == null)
-        {
-            return BadRequest(ModelState);
-        }
-
-        return Ok(test.Id);
+        return this.ToActionResult(result);
     }
 
     [HttpGet("edit/{id:guid}")]
@@ -73,7 +71,7 @@ public class TeacherTestsController : Controller
             return Unauthorized();
         }
 
-        var test = await testManagement.LoadTestAsync(id, false);
+        var test = await testReadManager.LoadTestAsync(id, false);
 
         if (test == null)
         {
@@ -85,7 +83,7 @@ public class TeacherTestsController : Controller
     }
 
     [HttpPut("edit/{id:guid}")]
-    public async Task<ActionResult<Guid>> EditTest([FromRoute] Guid id, [FromBody] TeacherTestDTO data)
+    public async Task<ActionResult<Guid?>> EditTest([FromRoute] Guid id, [FromBody] TeacherTestDTO data)
     {
         var user = await userManager.GetUserAsync(User);
         if (user == null)
@@ -93,7 +91,7 @@ public class TeacherTestsController : Controller
             return Unauthorized();
         }
 
-        var test = await testManagement.LoadTestDefinitionAsync(id);
+        var test = await testReadManager.LoadTestDefinitionAsync(id);
         if (test == null)
         {
             return NotFound();
@@ -104,13 +102,10 @@ public class TeacherTestsController : Controller
             return Forbid();
         }
 
-        var testValidation = await testManagement.TryToUpdateTestAsync(data, id);
-        ModelState.Merge(testValidation);
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-        return Ok(test.Id);
+        var result = (await testWriteManager.TryToUpdateTestAsync(data, id))
+            .Map(r => r?.Id);
+
+        return this.ToActionResult(result);
     }
 
     [HttpDelete("delete/{id:guid}")]
@@ -121,7 +116,7 @@ public class TeacherTestsController : Controller
         {
             return Unauthorized();
         }
-        var test = await testManagement.LoadTestDefinitionAsync(id);
+        var test = await testReadManager.LoadTestDefinitionAsync(id);
         if (test == null)
         {
             return NotFound();
@@ -131,7 +126,77 @@ public class TeacherTestsController : Controller
             return Forbid();
         }
 
-        await testManagement.DeleteTestAsync(id);
+        await testWriteManager.DeleteTestAsync(id);
         return Ok();
+    }
+
+    [HttpGet("view/{id:guid}")]
+    public async Task<ActionResult<TeacherPaginatedTestViewDTO>> ViewTest([FromRoute] Guid id, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var testDTO = await testReadManager.LoadTestViewForTeacherAsync(id, user.Id, pageSize, page);
+
+        if (testDTO == null)
+        {
+            return NotFound();
+        }
+
+        return testDTO;
+    }
+
+    [HttpGet("view/{testId:guid}/{userId:guid}")]
+    public async Task<ActionResult<TeacherTestUserSessionsDTO>> ViewTestForStudent([FromRoute] Guid testId, [FromRoute] Guid userId)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        var testDTO = await testSessionManager.LoadUserSessionsAsync(user, testId, userId);
+        if (testDTO == null)
+        {
+            return NotFound();
+        }
+        return testDTO;
+    }
+
+    [HttpGet("view-session/{sessionId:guid}")]
+    public async Task<ActionResult<TeacherTestSessionDTO>> ViewTestSession([FromRoute] Guid sessionId)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var dto = await testSessionManager.LoadSessionForTeacherAsync(user, sessionId);
+        if (dto == null)
+        {
+            return NotFound();
+        }
+
+        return dto;
+    }
+
+    [HttpDelete("delete-session/{sessionId:guid}")]
+    public async Task<ActionResult> DeleteTestSession([FromRoute] Guid sessionId)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        if (await testSessionManager.DeleteUserSessionAsync(sessionId, user))
+        {
+            return NoContent();
+        }
+
+        return NotFound();
     }
 }

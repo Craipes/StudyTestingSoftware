@@ -7,6 +7,7 @@ public class Test : BaseEntity
     [MinLength(1), MaxLength(128)] public string Name { get; set; } = string.Empty;
     [MaxLength(4096)] public string? Description { get; set; }
     [Range(0, 100000)] public int MaxExperience { get; set; }
+    [Range(0, 100000)] public int MaxCoins { get; set; }
     public TestAccessMode AccessMode { get; set; } = TestAccessMode.Private;
     [Range(0, 360)] public int DurationInMinutes { get; set; } = 0; // 0 means no time limit
     [Range(0, int.MaxValue)] public int AttemptsLimit { get; set; } = 0; // 0 means unlimited attempts
@@ -29,4 +30,5 @@ public class Test : BaseEntity
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public List<StudentGroup> OpenedToGroups { get; set; } = [];
+    public List<TestSession> TestSessions { get; set; } = [];
 }

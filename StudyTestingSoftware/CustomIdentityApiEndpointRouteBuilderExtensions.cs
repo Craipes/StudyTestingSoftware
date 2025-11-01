@@ -56,6 +56,8 @@ public static class CustomIdentityApiEndpointRouteBuilderExtensions
             ([FromBody] RegisterRequestDTO registration, HttpContext context, [FromServices] IServiceProvider sp) =>
         {
             var userManager = sp.GetRequiredService<UserManager<AppUser>>();
+            var userExperienceManager = sp.GetRequiredService<UserEarningsManager>();
+            var customizationManager = sp.GetRequiredService<CustomizationManager>();
 
             if (!userManager.SupportsUserEmail)
             {
@@ -105,7 +107,10 @@ public static class CustomIdentityApiEndpointRouteBuilderExtensions
             {
                 FirstName = registration.FirstName,
                 LastName = registration.LastName,
-                MiddleName = registration.MiddleName
+                MiddleName = registration.MiddleName,
+                Level = 1,
+                Experience = 0,
+                RequiredExperience = UserEarningsManager.GetRequiredExperience(1),
             };
 
             await userStore.SetUserNameAsync(user, email, CancellationToken.None);
@@ -131,6 +136,8 @@ public static class CustomIdentityApiEndpointRouteBuilderExtensions
             {
                 return CreateValidationProblem(result);
             }
+
+            await customizationManager.GrantDefaultCustomizationItems(user);
 
             await SendConfirmationEmailAsync(user, userManager, context, email);
             return TypedResults.Ok();

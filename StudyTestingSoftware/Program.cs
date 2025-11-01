@@ -78,8 +78,17 @@ builder.Services.AddAuthentication(options =>
 })
     .AddBearerToken(IdentityConstants.BearerScheme);
 
-builder.Services.AddScoped<TestManager>();
+builder.Services.AddScoped<TestReadManager>();
+builder.Services.AddScoped<TestWriteManager>();
+builder.Services.AddScoped<TestSessionManager>();
+
 builder.Services.AddScoped<GroupManager>();
+builder.Services.AddScoped<CustomUserManager>();
+builder.Services.AddScoped<UserEarningsManager>();
+builder.Services.AddScoped<CustomizationManager>();
+
+builder.Services.AddScoped<TestSessionManager>();
+builder.Services.AddHostedService<TestSessionAutoFinalizer>();
 
 var app = builder.Build();
 
@@ -100,10 +109,23 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseStaticFiles();
+
 app.MapGroup("auth")
     .MapCustomIdentityApi();
 
+app.MapGet("/find-user", async (UserManager<AppUser> userManager, string email) =>
+{
+    var user = await userManager.FindByEmailAsync(email);
+    if (user == null)
+    {
+        return Results.NotFound();
+    }
+    return Results.Ok(new { user.Id, user.UserName, user.Email });
+});
+
 app.MapControllers();
+app.MapStaticAssets();
 
 using (var scope = app.Services.CreateScope())
 {

@@ -8,7 +8,7 @@ public record QuestionTeacherDTO
     Guid? Id,
     string Text,
     int Order,
-    [Range(0, 100)] int Points,
+    [Range(1, 100)] int Points,
     QuestionType QuestionType,
 
     // Slider

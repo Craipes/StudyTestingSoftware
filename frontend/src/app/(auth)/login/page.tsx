@@ -8,7 +8,9 @@ import toast from 'react-hot-toast';
 import { AuthTokens } from '@/types';
 import { LoginForm } from '@/components/shared/LoginForm';
 import Link from 'next/link';
-import FloatingShapesBackground from '@/components/shared/FloatingShapesBackground';
+import { handleApiError } from '@/utils/handle-api-errors';
+import { RevealWrapper } from 'next-reveal';
+
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,27 +36,26 @@ export default function LoginPage() {
       toast.success('Успішний вхід!');
       router.push('/dashboard');
     } catch (err: any) {
-      if (axios.isAxiosError(err) && err.response) {
-        setError('Невірний email або пароль.');
-      } else {
-        setError('Сталася невідома помилка.');
-      }
-      console.error(err);
+        handleApiError(err, 'Помилка при вході.');
     }
   };
 
   return (
-    <main className="flex -z-10 relative items-center justify-center min-h-screen bg-gray-100 dark:bg-slate-900 p-4">
-      <div className=" relative z-10 w-full max-w-md dark:bg-slate-950 bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-gray-200 mb-6">Вхід</h2>
-        <LoginForm onSubmit={handleLogin} error={error} />
-        <p className="mt-4 text-center text-gray-600 dark:text-gray-300">
-          Немає акаунту?{' '}
-          <Link href="/register" className="text-blue-500 hover:text-blue-600 font-medium">
-            Зареєструватися
-          </Link>
-        </p>
+    <main>
+      <RevealWrapper delay={200} duration={1000} origin="top" distance="20px" reset={true}>
+      <div className="flex -z-10 relative items-center justify-center min-h-screen bg-gray-100 dark:bg-slate-900 p-4">      
+        <div className=" relative z-10 w-full max-w-md dark:bg-slate-950 bg-white p-8 rounded-lg shadow-lg">
+          <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-gray-200 mb-6">Вхід</h2>
+          <LoginForm onSubmit={handleLogin} error={error} />
+          <p className="mt-4 text-center text-gray-600 dark:text-gray-300">
+            Немає акаунту?{' '}
+            <Link href="/register" className="text-blue-500 hover:text-blue-600 font-medium">
+              Зареєструватися
+            </Link>
+          </p>
+        </div>
       </div>
+      </RevealWrapper>
     </main>
   );
 }
