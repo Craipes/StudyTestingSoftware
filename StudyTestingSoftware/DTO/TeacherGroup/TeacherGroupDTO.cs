@@ -1,8 +1,10 @@
-﻿namespace StudyTestingSoftware.DTO.TeacherGroup;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace StudyTestingSoftware.DTO.TeacherGroup;
 
 public record TeacherGroupDTO
 (
     Guid? Id,
-    string Name,
-    string? Description
+    [MinLength(1), MaxLength(128)] string Name,
+    [MaxLength(4096)] string? Description
 );
