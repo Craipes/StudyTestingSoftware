@@ -15,29 +15,13 @@ import toast from 'react-hot-toast';
 
 import { Lock,SquarePlus,Layers,NotebookPen,BookOpen,DoorOpen,Menu, Users, LayoutDashboard, ShoppingBag, BadgeEuro   } from 'lucide-react';
 import { RevealWrapper } from 'next-reveal';
+import { useUser } from '@/app/dashboard/layout';
 
 const BACKEND_API=process.env.NEXT_PUBLIC_API_URL
 
-interface UserInfo {
-  firstName: string;
-  lastName: string;
-  isTeacher: boolean;
-  isStudent: boolean;
-  level:number;
-  avatarUrl?:string;
-  backgroundUrl?:string;
-  avatarFrameUrl?:string;
-  experience:number;
-  requiredExperience:number;
-  coins:number;
-}
-
-interface SidebarProps {
-  userInfo: UserInfo | null;
-}
-
-export function Sidebar({ userInfo }: SidebarProps) {
+export function Sidebar() {
   const router = useRouter();
+  const { userInfo, isLoading } = useUser();
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({

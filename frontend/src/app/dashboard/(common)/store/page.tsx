@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useUser } from '../../layout';
 import api from '@/lib/axios'; 
 import toast from 'react-hot-toast';
 import { ShoppingCart, Check, CheckCheck, Lock } from 'lucide-react';
@@ -41,6 +42,7 @@ interface MarketItemCardProps {
 
 const MarketItemCard = ({ item, onPurchase, onEquip }: MarketItemCardProps) => {
   const [isBusy, setIsBusy] = useState(false);
+  const { refetchUserInfo } = useUser();
 
   const handlePurchase = async () => {
     setIsBusy(true);
@@ -48,6 +50,7 @@ const MarketItemCard = ({ item, onPurchase, onEquip }: MarketItemCardProps) => {
       await api.post(`/customization/purchase/${item.codeId}`);
       toast.success(`Предмет "${item.name}" успішно куплено!`);
       onPurchase(item.codeId); 
+      refetchUserInfo();
     } catch (err:any) {
       if(err.response && err.response.status === 400) {
         toast.error(err.response.data.message || 'Недостатньо монет.');
@@ -63,6 +66,7 @@ const MarketItemCard = ({ item, onPurchase, onEquip }: MarketItemCardProps) => {
       await api.post(`/customization/equip/${item.codeId}`);
       toast.success(`Предмет "${item.name}" обрано!`);
       onEquip(item.codeId, item.type);
+      refetchUserInfo();
     } catch (err:any) {
       if(err.response.status === 400) {
         toast.error(err.response.data.message || 'Не вдалося обрати предмет.');

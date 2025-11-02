@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState,useCallback, useContext,createContext } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { Loader } from 'lucide-react';
 import { Sidebar } from '@/components/shared/SideBar';
 import { getActiveTestSession, getUser } from '@/lib/api';
@@ -16,9 +16,28 @@ interface UserInfo {
   isTeacher: boolean;
   isStudent: boolean;
   level:number;
+  avatarUrl?:string;
+  backgroundUrl?:string;
+  avatarFrameUrl?:string;
   experience:number;
   requiredExperience:number;
   coins:number;
+}
+
+interface UserContextType {
+  userInfo: UserInfo | null;
+  isLoading: boolean;
+  refetchUserInfo: () => void; 
+}
+
+const UserContext = createContext<UserContextType | undefined>(undefined);
+
+export const useUser = () => {
+  const context = useContext(UserContext);
+  if (context === undefined) {
+    throw new Error('useUser must be used within a DashboardLayout');
+  }
+  return context;
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -26,22 +45,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    async function fetchUserInfo() {
-      try {
-        const data = await getUser();
-        setUserInfo(data);
-      } catch (err) {
-        toast.error('Сесія застаріла. Будь ласка, увійдіть знову.');
-        Cookies.remove('accessToken');
-        Cookies.remove('refreshToken');
-        router.push('/login');
-      } finally {
-        setLoading(false);
-      }
+const fetchUserInfo = useCallback(async () => {
+    try {
+      const data = await getUser();
+      setUserInfo(data);
+    } catch (err) {
+      toast.error('Сесія застаріла. Будь ласка, увійдіть знову.');
+      Cookies.remove('accessToken');
+      Cookies.remove('refreshToken');
+      router.push('/login');
+    } finally {
+      if (loading) setLoading(false);
     }
+  }, [router, loading]);
+
+
+  useEffect(() => {
     fetchUserInfo();
-  }, [router]);
+  }, [fetchUserInfo]); 
 
       const [activeSession,setActiveSession]=useState<null | {
           id:string;
@@ -79,9 +100,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
+  const contextValue = {
+    userInfo,
+    isLoading: loading,
+    refetchUserInfo: fetchUserInfo, 
+  };
+
   return (
+    <UserContext.Provider value={contextValue}>
     <div className="flex w-full min-h-screen bg-gray-100 dark:bg-slate-900">
-      <Sidebar userInfo={userInfo} />
+      <Sidebar/>
       <div className='fixed top-5 right-5 z-50'>
             <ThemeSwitcher/>
       </div>
@@ -89,5 +117,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {children}
       </main>
     </div>
+    </UserContext.Provider>
   );
 }
