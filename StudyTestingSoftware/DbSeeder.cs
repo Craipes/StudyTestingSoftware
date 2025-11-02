@@ -43,6 +43,37 @@ public static class DbSeeder
             PropertyNameCaseInsensitive = true
         });
 
+        var existingItems = await context.CustomizationItems.ToListAsync();
+        foreach (var existingItem in existingItems)
+        {
+            if (customizationItems == null || !customizationItems.Any(c => c.CodeId == existingItem.CodeId))
+            {
+                // Set active customization items to null for users who have them equipped
+                switch (existingItem.Type)
+                {
+                    case CustomizationType.Avatar:
+                        await context.Users
+                            .Where(u => u.ActiveAvatarCodeId == existingItem.CodeId)
+                            .ExecuteUpdateAsync(s => s.SetProperty(u => u.ActiveAvatarCodeId, (string?)null));
+                        break;
+                    case CustomizationType.AvatarFrame:
+                        await context.Users
+                            .Where(u => u.ActiveAvatarFrameCodeId == existingItem.CodeId)
+                            .ExecuteUpdateAsync(s => s.SetProperty(u => u.ActiveAvatarFrameCodeId, (string?)null));
+                        break;
+                    case CustomizationType.Background:
+                        await context.Users
+                            .Where(u => u.ActiveBackgroundCodeId == existingItem.CodeId)
+                            .ExecuteUpdateAsync(s => s.SetProperty(u => u.ActiveBackgroundCodeId, (string?)null));
+                        break;
+                }
+
+                await context.UserCustomizationItems.Where(uci => uci.CustomizationItemCodeId == existingItem.CodeId).ExecuteDeleteAsync();
+
+                context.CustomizationItems.Remove(existingItem);
+            }
+        }
+
         if (customizationItems == null) return;
 
         foreach (var item in customizationItems)
