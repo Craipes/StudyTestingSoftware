@@ -56,11 +56,11 @@ const QuestionSchema = z.object({
 });
 
 const CreateTestFormSchema = z.object({
-    name: z.string().min(1, 'Назва тесту не може бути порожньою.'),
-    description: z.string().optional(),
-    maxExperience: z.number().int().min(0),
+    name: z.string().min(1, 'Назва тесту не може бути порожньою.').max(128, 'Назва тесту не може перевищувати 128 символів.'),
+    description: z.string().max(4096, 'Опис тесту не може перевищувати 4096 символів.').optional(),
+    maxExperience: z.number().int().min(0).max(100000, 'Максимальний досвід не може перевищувати 100000.'),
     accessMode: z.nativeEnum(AccessMode),
-    durationInMinutes: z.number().int().min(0),
+    durationInMinutes: z.number().int().min(0).max(360, 'Тривалість не може перевищувати 360 хвилин.'),
     shuffleQuestions: z.boolean(),
     shuffleAnswers:z.boolean(),
     attemptsLimit:z.number().int(),
@@ -401,23 +401,28 @@ export default function CreateTestPage() {
                     <div>
                         <label className="block text-sm font-medium">Опис</label>
                         <textarea {...form.register('description')} className="w-full mt-1 p-2 border rounded" rows={3}></textarea>
+                        {form.formState.errors.description && <p className="text-red-500 text-sm">{form.formState.errors.description.message}</p>}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label className="block text-sm font-medium">Тривалість (хв) (0 - без обмежень)</label>
                             <input type="number" {...form.register('durationInMinutes', { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                            {form.formState.errors.durationInMinutes && <p className="text-red-500 text-sm">{form.formState.errors.durationInMinutes.message}</p>}
                         </div>
                         <div>
                             <label className="block text-sm font-medium">Кількість спроб (0 - без обмежень)</label>
                             <input type="number" {...form.register('attemptsLimit', { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                            {form.formState.errors.attemptsLimit && <p className="text-red-500 text-sm">{form.formState.errors.attemptsLimit.message}</p>}
                         </div>
                         <div>
                             <label className="block text-sm font-medium">Макс. досвід</label>
                             <input type="number" {...form.register('maxExperience', { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                            {form.formState.errors.maxExperience && <p className="text-red-500 text-sm">{form.formState.errors.maxExperience.message}</p>}
                         </div>
                         <div>
                             <label className="block text-sm font-medium">Макс. монет</label>
                             <input type="number" {...form.register('maxCoins', { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                            {form.formState.errors.maxCoins && <p className="text-red-500 text-sm">{form.formState.errors.maxCoins.message}</p>}
                         </div>
                         <div>
                             <label className="block text-sm font-medium">Доступ</label>
@@ -482,52 +487,6 @@ export default function CreateTestPage() {
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {/*<div>
-                                        <label className="block text-sm font-medium">Тип запитання</label>
-                                        <select
-                                            {...form.register(`questions.${index}.questionType`, { valueAsNumber: true })}
-                                            onChange={(e) => {
-                                                const newType = parseInt(e.target.value) as QuestionValues['questionType'];
-                                                const updatedQuestion: Partial<QuestionValues> = {
-                                                    ...form.getValues().questions[index],
-                                                    questionType: newType,
-                                                    // Скидаємо всі специфічні поля
-                                                    choiceOptions: undefined,
-                                                    questionRows: undefined,
-                                                    questionColumns: undefined,
-                                                    minNumberValue: undefined,
-                                                    maxNumberValue: undefined,
-                                                    numberValueStep: undefined,
-                                                    targetNumberValue: undefined,
-                                                    targetBoolValue: undefined,
-                                                };
-
-                                                if (newType === QuestionType.SingleChoice || newType === QuestionType.MultipleChoice) {
-                                                    updatedQuestion.choiceOptions = [{ text: '', isCorrect: true, order: 0 }];
-                                                } else if (newType === QuestionType.YesNo) {
-                                                    updatedQuestion.targetBoolValue = false; // Початкове значення
-                                                } else if (newType === QuestionType.Slider) {
-                                                    updatedQuestion.minNumberValue = 0;
-                                                    updatedQuestion.maxNumberValue = 10;
-                                                    updatedQuestion.numberValueStep = 1;
-                                                    updatedQuestion.targetNumberValue = 0;
-                                                } else if (newType === QuestionType.Ordering || newType === QuestionType.TableSingleChoice) {
-                                                    updatedQuestion.questionRows = [{ text: '', order: 0, validColumnOrder: 0 }];
-                                                    updatedQuestion.questionColumns = [{ text: '', order: 0 }];
-                                                }
-
-                                                form.setValue(`questions.${index}`, updatedQuestion as QuestionValues);
-                                            }}
-                                            className="w-full mt-1 p-2 border rounded dark:bg-slate-800"
-                                        >
-                                            <option value={QuestionType.SingleChoice}>Вибір одного</option>
-                                            <option value={QuestionType.MultipleChoice}>Вибір кількох</option>
-                                            <option value={QuestionType.TableSingleChoice}>Сітка вибору</option>
-                                            <option value={QuestionType.Ordering}>Співставлення</option>
-                                            <option value={QuestionType.Slider}>Слайдер</option>
-                                            <option value={QuestionType.YesNo}>Так/Ні</option>
-                                        </select>
-                                    </div>*/}
                                     <div>
                                         <label className="block text-sm font-medium">Кількість балів (1-5)</label>
                                         <input type="number" {...form.register(`questions.${index}.points`, { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" min="1" max="5" />
@@ -573,18 +532,22 @@ export default function CreateTestPage() {
                                         <div>
                                             <label className="block text-sm font-medium">Мінімальне значення</label>
                                             <input type="number" {...form.register(`questions.${index}.minNumberValue`, { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                                            {form.formState.errors.questions?.[index]?.minNumberValue && <p className="text-red-500 text-sm">{form.formState.errors.questions[index]?.minNumberValue?.message}</p>}
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium">Максимальне значення</label>
                                             <input type="number" {...form.register(`questions.${index}.maxNumberValue`, { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                                            {form.formState.errors.questions?.[index]?.maxNumberValue && <p className="text-red-500 text-sm">{form.formState.errors.questions[index]?.maxNumberValue?.message}</p>}
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium">Крок</label>
                                             <input type="number" {...form.register(`questions.${index}.numberValueStep`, { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                                        {form.formState.errors.questions?.[index]?.numberValueStep && <p className="text-red-500 text-sm">{form.formState.errors.questions[index]?.numberValueStep?.message}</p>}
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium">Цільове значення</label>
                                             <input type="number" {...form.register(`questions.${index}.targetNumberValue`, { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                                            {form.formState.errors.questions?.[index]?.targetNumberValue && <p className="text-red-500 text-sm">{form.formState.errors.questions[index]?.targetNumberValue?.message}</p>}
                                         </div>
                                     </div>
                                 )}

@@ -420,23 +420,28 @@ export default function EditTestPage() {
                         <div>
                             <label className="block text-sm font-medium">Опис</label>
                             <textarea {...methods.register('description')} className="w-full mt-1 p-2 border rounded" rows={3}></textarea>
+                            {methods.formState.errors.description && <p className="text-red-500 text-sm">{methods.formState.errors.description.message}</p>}
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label className="block text-sm font-medium">Тривалість (хв) (0 - без обмежень)</label>
                                 <input type="number" {...methods.register('durationInMinutes', { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                                {methods.formState.errors.durationInMinutes && <p className="text-red-500 text-sm">{methods.formState.errors.durationInMinutes.message}</p>}
                             </div>
                             <div>
                                 <label className="block text-sm font-medium">Кількість спроб (0 - без обмежень)</label>
                                 <input type="number" {...methods.register('attemptsLimit', { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                                {methods.formState.errors.attemptsLimit && <p className="text-red-500 text-sm">{methods.formState.errors.attemptsLimit.message}</p>}
                             </div>
                             <div>
                                 <label className="block text-sm font-medium">Макс. досвід</label>
                                 <input type="number" {...methods.register('maxExperience', { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                                {methods.formState.errors.maxExperience && <p className="text-red-500 text-sm">{methods.formState.errors.maxExperience.message}</p>}
                             </div>
                             <div>
                                 <label className="block text-sm font-medium">Макс. монет</label>
                                 <input type="number" {...methods.register('maxCoins', { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                                {methods.formState.errors.maxCoins && <p className="text-red-500 text-sm">{methods.formState.errors.maxCoins.message}</p>}
                             </div>
                             <div>
                                 <label className="block text-sm font-medium">Доступ</label>
@@ -688,18 +693,22 @@ export default function EditTestPage() {
                                                 <div>
                                                     <label className="block text-sm font-medium">Мін. значення</label>
                                                     <input type="number" {...methods.register(`questions.${index}.minNumberValue`, { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                                                    {methods.formState.errors.questions?.[index]?.minNumberValue && <p className="text-red-500 text-sm">{methods.formState.errors.questions[index]?.minNumberValue?.message}</p>}
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-medium">Макс. значення</label>
                                                     <input type="number" {...methods.register(`questions.${index}.maxNumberValue`, { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                                                    {methods.formState.errors.questions?.[index]?.maxNumberValue && <p className="text-red-500 text-sm">{methods.formState.errors.questions[index]?.maxNumberValue?.message}</p>}
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-medium">Крок</label>
                                                     <input type="number" {...methods.register(`questions.${index}.numberValueStep`, { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                                                    {methods.formState.errors.questions?.[index]?.numberValueStep && <p className="text-red-500 text-sm">{methods.formState.errors.questions[index]?.numberValueStep?.message}</p>}
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-medium">Цільове значення</label>
                                                     <input type="number" {...methods.register(`questions.${index}.targetNumberValue`, { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
+                                                    {methods.formState.errors.questions?.[index]?.targetNumberValue && <p className="text-red-500 text-sm">{methods.formState.errors.questions[index]?.targetNumberValue?.message}</p>}
                                                 </div>
                                             </div>
                                         </div>

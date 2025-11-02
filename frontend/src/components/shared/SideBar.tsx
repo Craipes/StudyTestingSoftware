@@ -91,7 +91,7 @@ export function Sidebar() {
                 <div className='absolute inset-0 bg-black/40 z-0' />
               )}
 
-              <div className='relative z-10 flex flex-row gap-4 justify-center items-center px-4 pt-2'>
+              <div className='relative z-10 flex flex-row gap-4 justify-center items-center px-4 pt-4 mb-4'>
                 
                 {/* Блок Аватара та Рамки */}
                 {userInfo?.avatarUrl && (
@@ -141,13 +141,13 @@ export function Sidebar() {
                     </TooltipContent>
                   </Tooltip>
                 </div>
+              </div>
 
-                {/* Монети */}
-                <div className='flex items-center'>
+                 {/* Монети */}
+                <div className='flex items-center absolute z-11 bottom-2 left-8'>
                   <BadgeEuro color='#f1a903' className='mr-1' />
                   <span>{userInfo?.coins.toFixed(0) || 0}</span>
                 </div>
-              </div>
             </div>
           </RevealWrapper>
 
