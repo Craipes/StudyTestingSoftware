@@ -423,7 +423,7 @@ export default function EditTestPage() {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <label className="block text-sm font-medium">Тривалість (хв)</label>
+                                <label className="block text-sm font-medium">Тривалість (хв) (0 - без обмежень)</label>
                                 <input type="number" {...methods.register('durationInMinutes', { valueAsNumber: true })} className="w-full mt-1 p-2 border rounded" />
                             </div>
                             <div>

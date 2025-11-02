@@ -63,7 +63,7 @@ export const EditTestFormSchema = z.object({
     durationInMinutes: z.number().int().min(0),
     shuffleQuestions: z.boolean(),
     shuffleAnswers: z.boolean(),
-    attemptsLimit: z.number().int(),
+    attemptsLimit: z.number().int().min(0),
     isPublished: z.boolean(),
     isOpened: z.boolean().optional(),
     hasCloseTime: z.boolean().optional(),

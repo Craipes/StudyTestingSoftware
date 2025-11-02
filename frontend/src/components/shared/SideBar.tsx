@@ -95,19 +95,17 @@ export function Sidebar() {
                 
                 {/* Блок Аватара та Рамки */}
                 {userInfo?.avatarUrl && (
-                  <div className='relative w-20 h-20 my-auto flex justify-center items-center rounded-full'>
-                    {/* Аватар */}
+                <div className='relative w-14 h-14 my-auto flex justify-center items-center rounded-full flex-shrink-0'>
                     <Image
                       unoptimized={true}
                       src={`${BACKEND_API}${userInfo.avatarUrl}`}
                       alt={`${userInfo.firstName} ${userInfo.lastName} avatar`}
-                      width={64}
-                      height={64}
+                      width={42}
+                      height={42}
                       style={{ objectFit: 'cover' }}
                       className='rounded-full'
                     />
-                    {/* Рамка (якщо є) */}
-                    {userInfo?.avatarFrameUrl && (
+                    {userInfo.avatarFrameUrl && (
                       <Image
                         unoptimized={true}
                         src={`${BACKEND_API}${userInfo.avatarFrameUrl}`}
