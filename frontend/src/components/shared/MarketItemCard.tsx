@@ -7,6 +7,7 @@ import { Check, CheckCheck, Lock,ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import Image from "next/image";
+import Tilt from 'react-parallax-tilt';
 
 const BACKEND_API=process.env.NEXT_PUBLIC_API_URL
 
@@ -103,22 +104,26 @@ export const MarketItemCard = ({ item, onPurchase, onEquip }: MarketItemCardProp
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col">
-      <div className="relative w-full h-48 bg-gray-200 dark:bg-gray-700">
-        <Image
-          unoptimized={true}
-          src={BACKEND_API + item.imageUrl} 
-          alt={item.name}
-          layout="fill"
-          objectFit="cover"
-          className="transition-transform duration-300 group-hover:scale-105"
-        />
+    <Tilt 
+    transitionEasing="cubic-bezier(.03,.98,.52,.99)" 
+    glareEnable={true} glareBorderRadius="3" glarePosition="all" className="transition">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col">
+        <div className="relative w-full h-48 bg-gray-200 dark:bg-gray-700">
+          <Image
+            unoptimized={true}
+            src={BACKEND_API + item.imageUrl} 
+            alt={item.name}
+            layout="fill"
+            objectFit="cover"
+            className="transition-transform duration-300 group-hover:scale-105"
+          />
+        </div>
+        <div className="p-4 flex flex-col flex-grow">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{item.name}</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 flex-grow">{item.description}</p>
+          {renderButton()}
+        </div>
       </div>
-      <div className="p-4 flex flex-col flex-grow">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{item.name}</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400 flex-grow">{item.description}</p>
-        {renderButton()}
-      </div>
-    </div>
+    </Tilt>
   );
 };
