@@ -31,13 +31,15 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AutoSuggestInput } from './AutoSuggestInput';
 import { Label } from '../ui/label';
+import StudentCard from './StudentCard';
+import { UserInfo } from '@/app/dashboard/(student)/groups/page';
 
 
-interface Student {
+interface Student extends UserInfo {
   id: string;
   firstName: string;
   lastName: string;
-}
+} 
 
 interface ManageStudentsModalProps {
   groupId: string;
@@ -132,9 +134,9 @@ const ManageStudentsModal: React.FC<ManageStudentsModalProps> = ({ groupId, onCl
         ) : students.length > 0 ? (
           <div className="space-y-2">
             <h3 className="font-semibold text-gray-700 dark:text-gray-300">Студенти групи:</h3>
-            {students.map((student) => (
-              <div key={student.id} className="flex items-center justify-between p-3 border rounded-md dark:bg-input/30 ">
-                <span className="text-gray-900 dark:text-gray-100">{student.firstName} {student.lastName}</span>
+            {students.map((student, index) => (
+              <div key={student.id} className="flex items-center w-full justify-between p-3 border rounded-md dark:bg-input/30 ">
+                <StudentCard student={student} index={index} />
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="ghost" className="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-gray-700">

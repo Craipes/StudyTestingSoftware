@@ -409,7 +409,7 @@ export default function EditTestPage() {
             </div>
             <FormProvider {...methods}>
                 <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
-                    <RevealWrapper delay={100} duration={500} origin="top" distance="20px" reset={true}>
+                    <RevealWrapper delay={100} duration={500} origin="top" distance="20px" reset={false}>
                     <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg space-y-4">
                         <h2 className="text-xl font-semibold">Загальні параметри</h2>
                         <div>
@@ -487,7 +487,7 @@ export default function EditTestPage() {
 
                     <div className="space-y-6">
                         {fields.map((field, index) => (
-                            <RevealWrapper key={field.id} delay={index * 40} duration={500} origin="top" distance="20px" reset={true}>
+                            <RevealWrapper key={field.id} delay={index * 40} duration={500} origin="top" distance="20px" reset={false}>
                             <div key={field.id} className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg relative">
                                 <h3 className="font-semibold text-lg mb-4">Запитання #{index + 1}</h3>
                                 <button

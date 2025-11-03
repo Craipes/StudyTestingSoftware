@@ -50,7 +50,7 @@ export default function ChangePasswordPage() {
   };
 
   return (
-    <RevealWrapper delay={100} duration={500} origin="top" distance="20px" reset={true}>
+    <RevealWrapper delay={100} duration={500} origin="top" distance="20px" reset={false}>
     <div className="flex-1 sm:p-8 flex items-center justify-center">
       <div className="w-full max-w-md bg-white dark:bg-slate-950 mt-[20vh] p-8 rounded-lg shadow-lg">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 text-center">Зміна пароля</h1>

@@ -345,7 +345,7 @@ const ManageTestsPage = () => {
           {tests.length > 0 ? (
             <div className="space-y-4 sm:space-y-0 sm:grid-cols-2 sm:grid sm:gap-4">
               {tests.map((test, index) => (
-                <RevealWrapper key={test.id} delay={index * 40} duration={500} origin="top" distance="20px" reset={true}>
+                <RevealWrapper key={test.id} delay={index * 40} duration={500} origin="top" distance="20px" reset={false}>
                 <div key={test.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6 flex flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4">
                   <div className="flex-grow">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{test.name}</h2>

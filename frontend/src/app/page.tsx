@@ -8,7 +8,7 @@ import {RevealWrapper} from 'next-reveal';
 export default function HomePage() {
   return (
     <main>
-      <RevealWrapper delay={200} duration={1000} origin="top" distance="20px" reset={true}>
+      <RevealWrapper delay={200} duration={1000} origin="top" distance="20px" reset={false}>
       <div className="relative flex flex-col items-center justify-center min-h-screen bg-gray-100  dark:bg-slate-900 p-4 overflow-hidden">
         <FloatingShapesBackground />
         <div className="relative z-10 bg-white dark:bg-slate-950 p-8 rounded-lg shadow-lg text-center">

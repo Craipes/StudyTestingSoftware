@@ -60,7 +60,7 @@ export const TestCard = ({ test }: { test: AvailableTestItem }) => {
           <p>⏳ Тривалість: {test.durationInMinutes} хв.</p>
         )}
         <p>🔢 Питань: {test.questionsCount}</p>
-        <p>🛡️ Спроб: {test.attemptsLimit === 0 ? 'Безлімітно' : test.attemptsLimit}</p>
+        <p>🎯 Використано спроб: {test.usedAttemptsCount}/{test.attemptsLimit === 0 ? 'Безлімітно' : test.attemptsLimit}</p>
         {test.hasCloseTime && (
           <p className={isClosed ? 'text-red-500 font-medium' : 'text-green-600'}>
             📅 Доступний до:{" "}

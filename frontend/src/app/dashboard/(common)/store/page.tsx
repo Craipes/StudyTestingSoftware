@@ -130,9 +130,9 @@ const MarketPage = () => {
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4 border-b pb-2 dark:border-gray-700 dark:text-gray-100">Аватари</h2>
         {avatars.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {avatars.map((item, index) => (
-              <RevealWrapper key={item.codeId} delay={index * 50} origin='top' reset={true}>
+              <RevealWrapper key={item.codeId} delay={index * 50} origin='top' reset={false}>
               <MarketItemCard 
                 key={item.codeId} 
                 item={item}
@@ -152,9 +152,9 @@ const MarketPage = () => {
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4 border-b pb-2 dark:border-gray-700 dark:text-gray-100">Рамки для аватара</h2>
         {frames.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {frames.map((item, index) => (
-              <RevealWrapper key={item.codeId} delay={index * 50} origin='top' reset={true}>
+              <RevealWrapper key={item.codeId} delay={index * 50} origin='top' reset={false}>
                 <MarketItemCard
                   key={item.codeId}
                   item={item}
@@ -174,9 +174,9 @@ const MarketPage = () => {
       <section>
         <h2 className="text-2xl font-semibold mb-4 border-b pb-2 dark:border-gray-700 dark:text-gray-100">Фони профілю</h2>
         {backgrounds.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {backgrounds.map((item, index) => (
-              <RevealWrapper key={item.codeId} delay={index * 50} origin='top' reset={true}>
+              <RevealWrapper key={item.codeId} delay={index * 50} origin='top' reset={false}>
                 <MarketItemCard
                   key={item.codeId}
                   item={item}

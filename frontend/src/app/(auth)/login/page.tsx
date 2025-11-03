@@ -42,7 +42,7 @@ export default function LoginPage() {
 
   return (
     <main>
-      <RevealWrapper delay={200} duration={1000} origin="top" distance="20px" reset={true}>
+      <RevealWrapper delay={200} duration={1000} origin="top" distance="20px" reset={false}>
       <div className="flex -z-10 relative items-center justify-center min-h-screen bg-gray-100 dark:bg-slate-900 p-4">      
         <div className=" relative z-10 w-full max-w-md dark:bg-slate-950 bg-white p-8 rounded-lg shadow-lg">
           <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-gray-200 mb-6">Вхід</h2>

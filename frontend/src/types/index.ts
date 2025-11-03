@@ -52,6 +52,7 @@ export interface AvailableTestItem {
   questionsCount: number;
   durationInMinutes: number;
   attemptsLimit: number;
+  usedAttemptsCount: number;
 }
 
 export interface ResultTestItem {
