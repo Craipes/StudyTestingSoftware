@@ -83,7 +83,7 @@ public class TestReadManager
         return await query.FirstOrDefaultAsync();
     }
 
-    public async Task<TeacherPaginatedTestViewDTO?> LoadTestViewForTeacherAsync(Guid id, Guid authorId, int pageSize, int pageNumber)
+    public async Task<TeacherPaginatedTestViewDTO?> LoadTestViewForTeacherAsync(Guid id, Guid? groupId, Guid authorId, int pageSize, int pageNumber)
     {
         var meta = await dbContext.Tests
             .AsNoTracking()
@@ -110,9 +110,17 @@ public class TestReadManager
             return null;
         }
 
-        var groupedUserStats = dbContext.TestSessions
+        var testSessionsQuery = dbContext.TestSessions
             .AsNoTracking()
-            .Where(ts => ts.TestId == id)
+            .Where(ts => ts.TestId == id);
+
+        if (groupId.HasValue)
+        {
+            testSessionsQuery = testSessionsQuery
+                .Where(ts => ts.User.StudentGroups.Any(sg => sg.Id == groupId.Value));
+        }
+
+        var groupedUserStats = testSessionsQuery
             .GroupBy(ts => ts.UserId)
             .Select(g => new
             {

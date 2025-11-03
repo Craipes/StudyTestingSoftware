@@ -139,7 +139,26 @@ public class TeacherTestsController : Controller
             return Unauthorized();
         }
 
-        var testDTO = await testReadManager.LoadTestViewForTeacherAsync(id, user.Id, pageSize, page);
+        var testDTO = await testReadManager.LoadTestViewForTeacherAsync(id, null, user.Id, pageSize, page);
+
+        if (testDTO == null)
+        {
+            return NotFound();
+        }
+
+        return testDTO;
+    }
+
+    [HttpGet("view-group/{id:guid}/{groupId:guid}")]
+    public async Task<ActionResult<TeacherPaginatedTestViewDTO>> ViewTest([FromRoute] Guid id, [FromRoute] Guid groupId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var testDTO = await testReadManager.LoadTestViewForTeacherAsync(id, groupId, user.Id, pageSize, page);
 
         if (testDTO == null)
         {
