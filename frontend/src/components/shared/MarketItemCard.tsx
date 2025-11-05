@@ -107,7 +107,7 @@ export const MarketItemCard = ({ item, onPurchase, onEquip }: MarketItemCardProp
     <Tilt 
     tiltReverse={true}
     transitionEasing="cubic-bezier(.03,.98,.52,.99)" 
-    glareEnable={true} glareBorderRadius="3" glarePosition="all" className="transition">
+    glareEnable={true} glareBorderRadius="3" glarePosition="all" className="transition rounded-lg">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col">
         <div className="relative w-full h-48 bg-gray-200 dark:bg-gray-700">
           <Image
