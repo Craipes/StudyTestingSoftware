@@ -3,7 +3,7 @@
 import { CustomizationItemType, MarketItem } from "@/app/dashboard/(common)/store/page";
 import { useUser } from "@/app/dashboard/layout";
 import api from "@/lib/axios";
-import { Check, CheckCheck, Lock,ShoppingCart } from "lucide-react";
+import { BadgeEuro, Check, CheckCheck, Lock,ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import Image from "next/image";
@@ -97,8 +97,8 @@ export const MarketItemCard = ({ item, onPurchase, onEquip }: MarketItemCardProp
         disabled={isBusy}
         className="w-full mt-4 px-4 py-2 text-sm font-semibold rounded-lg bg-yellow-500 text-gray-900 hover:bg-yellow-600 disabled:bg-gray-400 flex items-center justify-center gap-2"
       >
-        <ShoppingCart size={18} />
         {isBusy ? 'Купуємо...' : `Купити за ${item.price}`}
+        <BadgeEuro size={18} className="ml-1" />
       </button>
     );
   };

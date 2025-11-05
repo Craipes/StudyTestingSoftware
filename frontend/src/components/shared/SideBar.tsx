@@ -13,7 +13,7 @@ import Image from 'next/image';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 
-import { Lock,SquarePlus,Layers,NotebookPen,BookOpen,DoorOpen,Menu, Users, LayoutDashboard, ShoppingBag, BadgeEuro   } from 'lucide-react';
+import { Coins,Lock,SquarePlus,Layers,NotebookPen,BookOpen,DoorOpen,Menu, Users, LayoutDashboard, ShoppingBag, BadgeEuro   } from 'lucide-react';
 import { RevealWrapper } from 'next-reveal';
 import { useUser } from '@/app/dashboard/layout';
 
