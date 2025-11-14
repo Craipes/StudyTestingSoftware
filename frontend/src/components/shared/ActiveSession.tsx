@@ -22,6 +22,7 @@ const ActiveSession = () => {
           try {
             const response = await getActiveTestSession();
             setActiveSession(response);
+            console.log('Active session data:', response);
           } catch (err) {
                 handleApiError(err, 'Помилка при отриманні активної сесії.');
           } finally {
@@ -60,7 +61,7 @@ const ActiveSession = () => {
               Завершення: {convertUtcStringToKyiv(activeSession.autoFinishAt)}
             </p>
             <p className="text-gray-600 dark:text-gray-300 mt-1">
-              Тривалість: {activeSession.durationInMinutes} хвилин
+              Тривалість: {activeSession.durationInMinutes === 0 ? 'Безлімітно' : activeSession.durationInMinutes} хвилин
             </p>
           </div>
       </div>

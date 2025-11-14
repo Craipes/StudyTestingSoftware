@@ -21,7 +21,17 @@ export default function RegisterPage() {
       toast.success('Реєстрація успішна! Тепер ви можете увійти.');
       router.push('/login');
     } catch (err: any) {
-        handleApiError(err, 'Помилка при реєстрації.');
+      if(err?.response.status === 400) {
+        setError('Користувач з такою електронною поштою вже існує.');
+        return;
+      } 
+      if(err?.response?.errors?.DuplicateUserName){
+        setError('Користувач з таким ім\'ям вже існує.');
+        return;
+      }
+      else{
+        handleApiError(err,'Реєстрація не вдалася. Спробуйте ще раз пізніше.');
+      }
     }
   };
 

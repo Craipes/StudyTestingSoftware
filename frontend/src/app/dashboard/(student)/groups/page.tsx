@@ -86,6 +86,8 @@ const RenderGroupList = ({
         {groups.map((group,index) => (
           <RevealWrapper key={group.id} delay={index*40} duration={500} origin="top" distance="20px" reset={false}>
           <div 
+          role='button'
+            onFocus={()=>{}}
             key={group.id} 
             className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => onSelect(group.id)}

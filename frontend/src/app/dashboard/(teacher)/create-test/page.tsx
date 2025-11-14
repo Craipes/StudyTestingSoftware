@@ -171,7 +171,7 @@ const TableEditor = ({
                             <div className='flex gap-2'>
                                 <select
                                 value={row.validColumnOrder}
-                                onChange={(e) => onUpdateCorrectColumn(index, parseInt(e.target.value))}
+                                onChange={(e) => onUpdateCorrectColumn(index, Number.parseInt(e.target.value))}
                                 className="px-2 mt-2 sm:mt-0 w-full sm:w-auto py-1 border rounded dark:bg-slate-800"
                             >
                                 <option value="">Оберіть відповідь</option>

@@ -36,7 +36,12 @@ export default function LoginPage() {
       toast.success('Успішний вхід!');
       router.push('/dashboard');
     } catch (err: any) {
-        handleApiError(err, 'Помилка при вході.');
+        if(err?.response.status === 401) {
+        setError('Некоректні дані.');
+        return;
+      } else{
+        handleApiError(err,'Авторизація не вдалася. Спробуйте ще раз пізніше.');
+      }
     }
   };
 
